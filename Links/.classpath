@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="jars/gs-algo-1.3/gs-algo-1.3-javadoc.jar"/>
+	<classpathentry kind="lib" path="jars/gs-algo-1.3/gs-algo-1.3-sources.jar"/>
+	<classpathentry kind="lib" path="jars/gs-algo-1.3/gs-algo-1.3.jar"/>
+	<classpathentry kind="lib" path="jars/gs-core-1.3-javadoc.jar"/>
+	<classpathentry kind="lib" path="jars/gs-core-1.3/gs-core-1.3-javadoc.jar"/>
+	<classpathentry kind="lib" path="jars/gs-core-1.3/gs-core-1.3-sources.jar"/>
+	<classpathentry kind="lib" path="jars/gs-core-1.3/gs-core-1.3.jar"/>
+	<classpathentry kind="lib" path="jars/gs-ui-1.3/gs-ui-1.3-javadoc.jar"/>
+	<classpathentry kind="lib" path="jars/gs-ui-1.3/gs-ui-1.3-sources.jar"/>
+	<classpathentry kind="lib" path="jars/gs-ui-1.3/gs-ui-1.3.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

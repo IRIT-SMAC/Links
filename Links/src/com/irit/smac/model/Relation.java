@@ -1,0 +1,56 @@
+package com.irit.smac.model;
+
+public class Relation {
+
+	private Agent A;
+	private Agent B;
+	private String name;
+	private String type;
+	private Snapshot s;
+
+	private boolean isDirectional;
+
+	public Relation(Agent a, Agent b,String name, String type, boolean directional, Snapshot s) {
+		A = a;
+		B = b;
+		this.name = name;
+		this.isDirectional = directional;
+		this.s = s;
+	}
+	
+	public String getName(){
+		return name;
+	}
+
+	public Agent getA() {
+		return A;
+	}
+
+	public Agent getB() {
+		return B;
+	}
+
+	public boolean equals(Relation obj) {
+		if (type.equals(getType())) {
+			if (A.equals(obj.getA()) && B.equals(obj.getB())) {
+				return true;
+			} else {
+				if (isDirectional) {
+					if (B.equals(obj.getA()) && A.equals(obj.getB())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public boolean isDirectional() {
+		return isDirectional;
+	}
+
+}
