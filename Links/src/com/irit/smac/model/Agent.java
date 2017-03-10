@@ -6,14 +6,16 @@ import java.util.HashMap;
 public class Agent {
 	
 	private String name;
-	private String type;
+	private String stype;
+	private String ctype;
 	private Snapshot s;
 	
 	private HashMap<String, ArrayList<Attribute>> attributes = new HashMap<String,ArrayList<Attribute>>();
 	
 	public Agent(String name, String type, Snapshot s){
 		this.name = name;
-		this.type = type;
+		this.stype = type;
+		this.ctype = type;
 		this.s = s;
 	}
 
@@ -22,7 +24,7 @@ public class Agent {
 	}
 
 	public String getType() {
-		return type;
+		return ctype;
 	}
 
 	public HashMap<String, ArrayList<Attribute>> getAttributes() {
@@ -34,7 +36,7 @@ public class Agent {
 	}
 
 	public boolean equals(Agent obj) {
-		return name.equals(obj.getName()) && type.equals(obj.getType());
+		return name.equals(obj.getName()) && stype.equals(obj.getType());
 	}
 
 	public Attribute getAttributesWithName(String name) {
@@ -46,6 +48,14 @@ public class Agent {
 			}
 		}
 		return null;
+	}
+
+	public void isTargeted(boolean b) {
+		if(b){
+			ctype = "Targeted";
+		}else{
+			ctype = stype;
+		}
 	}
 	
 	

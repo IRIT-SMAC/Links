@@ -4,8 +4,8 @@ import com.irit.smac.model.Attribute;
 
 public class AVT implements Attribute {
 	
-	private double delta;
-	private double cValue;
+	public double delta;
+	public double cValue;
 	
 	private String name;
 
@@ -33,7 +33,7 @@ public class AVT implements Attribute {
 	@Override
 	public String getTypeToDraw() {
 		// TODO Auto-generated method stub
-		return null;
+		return "AVT";
 	}
 
 }

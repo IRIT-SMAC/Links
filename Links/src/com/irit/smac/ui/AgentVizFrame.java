@@ -89,6 +89,8 @@ public class AgentVizFrame extends JFrame {
 	private String aname;
 	private JButton btnSynch;
 
+	private boolean isDrawing = false;
+
 	/**
 	 * Create the frame.
 	 */
@@ -99,6 +101,7 @@ public class AgentVizFrame extends JFrame {
 			@Override
 			public void windowClosed(WindowEvent arg0) {
 				links.unregisterObserver(me);
+				agent.isTargeted(false);
 			}
 		});
 		this.agent = a;
@@ -140,10 +143,16 @@ public class AgentVizFrame extends JFrame {
 		txtpnLook = new JTextPane();
 		attributeViewerPanel.add(txtpnLook, BorderLayout.CENTER);
 
-		btnNewButton = new JButton("Neighbouring");
+		btnNewButton = new JButton("Neighbouring:OFF");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				switchNeighAtt();
+				if (btnNewButton.getText().equals("Neighbouring:OFF")) {
+					isTargeted(true);
+					btnNewButton.setText("Neighbouring:ON");
+				} else {
+					isTargeted(false);
+					btnNewButton.setText("Neighbouring:OFF");
+				}
 			}
 		});
 
@@ -176,11 +185,17 @@ public class AgentVizFrame extends JFrame {
 		btnNewButton_1.setIcon(new ImageIcon(AgentVizFrame.class.getResource("/icons/look.png")));
 		toolBar.add(btnNewButton_1);
 
-		btnDraw = new JButton("Draw");
+		btnDraw = new JButton("Draw:OFF");
 		btnDraw.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource().equals(btnDraw)) {
-					draw();
+					if (isDrawing) {
+						isDrawing = !isDrawing;
+						btnDraw.setText("Draw:OFF");
+					} else {
+						draw();
+						btnDraw.setText("Draw:ON");
+					}
 				}
 			}
 		});
@@ -192,6 +207,11 @@ public class AgentVizFrame extends JFrame {
 		contentPane.add(lblBotTxt, BorderLayout.SOUTH);
 
 		initFrame();
+	}
+
+	protected void isTargeted(boolean b) {
+		agent.isTargeted(b);
+		links.getDisplayedGraph().refresh(agent.getName(), agent.getType());
 	}
 
 	protected void switchNeighAtt() {
@@ -280,13 +300,32 @@ public class AgentVizFrame extends JFrame {
 			a = snapCol.getAgent(this.aname, i);
 			if (a != null) {
 				for (String s : toDrawGraphic) {
-						if (a.getAttributesWithName(s).getTypeToDraw().equals("linear")) {
-							LxPlot.getChart(aname+ " linear",ChartType.LINE).add(s, i, (Double) a.getAttributesWithName(s).getValue());
+					System.out.println(s);
+					if (a.getAttributesWithName(s).getTypeToDraw().equals("linear")) {
+						LxPlot.getChart(aname + " linear", ChartType.LINE).add(s, i,
+								(Double) a.getAttributesWithName(s).getValue());
+					}
+					if (a.getAttributesWithName(s).getTypeToDraw().equals("bar")) {
+						LxPlot.getChart(aname + " bar", ChartType.BAR).add(s, i,
+								(Double) a.getAttributesWithName(s).getValue());
+					}
+					if (a.getAttributesWithName(s).getTypeToDraw().equals("AVRT")) {
+						Double tab[] = (Double[]) a.getAttributesWithName(s).getValue();
+						for (Double val : tab) {
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "LOWER", i, tab[0]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownLower", i,
+									tab[1] - tab[2]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownValue", i, tab[1]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownUpper", i,
+									tab[1] + tab[2]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpLower", i,
+									tab[3] - tab[4]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpValue", i, tab[3]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpUpper", i,
+									tab[3] + tab[4]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "UPPER", i, tab[5]);
 						}
-						if (a.getAttributesWithName(s).getTypeToDraw().equals("bar")) {
-							LxPlot.getChart(aname+" bar",ChartType.BAR).add(s, i, (Double) a.getAttributesWithName(s).getValue());
-						}
-					
+					}
 				}
 			}
 		}
@@ -324,8 +363,9 @@ public class AgentVizFrame extends JFrame {
 						for (Attribute a : agent.getAttributes().get(key)) {
 
 							toDraw += a.toString() + "\n";
-						
-							if (a.type().equals("double")) {
+
+							if (a.type().equals("double") || a.type().equals("AVRT")) {
+								System.out.println(a.toString());
 								String nameToDraw = a.toString().substring(a.toString().indexOf("[") + 1,
 										a.toString().indexOf("]"));
 								toDrawGraphic.add(nameToDraw);
@@ -356,6 +396,9 @@ public class AgentVizFrame extends JFrame {
 		if (isSynch) {
 			agent = snapCol.getAgent(aname, num);
 			drawLook();
+			if (isDrawing) {
+				draw();
+			}
 			setlblBotTxt("Agent name : " + aname + " on snapshot number : " + num);
 		}
 	}

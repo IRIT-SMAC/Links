@@ -11,7 +11,7 @@ import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
 import com.irit.smac.ui.LinksApplication;
 
-public class MainTest {
+public class Example {
 
 	/**
 	 * Launch the application.

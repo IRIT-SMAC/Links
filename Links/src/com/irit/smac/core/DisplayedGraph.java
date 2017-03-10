@@ -15,13 +15,14 @@ import com.irit.smac.model.SnapshotsCollection;
 public class DisplayedGraph {
 	private Graph graph;
 	private SnapshotsCollection snapColl;
+	private long currentSnapNumber;
 
 	public DisplayedGraph(SnapshotsCollection snapColl) {
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 		graph = new MultiGraph("embedded");
 		String s = DisplayedGraph.class.getResource("/graphStream.css").toString();
 		graph.addAttribute("ui.stylesheet", "url('" + s + "')");
-
+		currentSnapNumber = 0;
 		this.snapColl = snapColl;
 	}
 
@@ -30,6 +31,7 @@ public class DisplayedGraph {
 	}
 
 	public void loadGraph(long snapNumber) {
+		currentSnapNumber = snapNumber;
 		Snapshot s = snapColl.getSnaptshot(snapNumber);
 		;
 
@@ -88,5 +90,16 @@ public class DisplayedGraph {
 
 	public SnapshotsCollection getSnapCol() {
 		return snapColl;
+	}
+
+	public void refresh(String agent, String type) {
+		graph.getNode(agent).addAttribute("ui.class", type);
+		for (Edge e : graph.getNode(agent).getLeavingEdgeSet()) {
+			if (!type.equals("Targeted")) {
+				e.addAttribute("ui.class", this.snapColl.getSnaptshot(this.currentSnapNumber).getRelation(e.getId()).getType());
+			} else {
+				e.addAttribute("ui.class", "Targeted");
+			}
+		}
 	}
 }

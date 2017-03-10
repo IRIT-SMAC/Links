@@ -28,6 +28,14 @@ import com.irit.smac.model.SnapshotsCollection;
 import java.awt.SystemColor;
 import java.awt.Color;
 
+/**
+ * Links: A tool to visualize agents and their relations over time.
+ * 
+ * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
+ * @version 1.0
+ * @since 10/03/2017
+ *
+ */
 public class LinksApplication {
 
 	private JFrame frame;
@@ -55,22 +63,27 @@ public class LinksApplication {
 	private JLabel lblSynch;
 
 	/**
-	 * Create the application.
+	 * Creates the application and displays the associated JFrame.
 	 */
 	public LinksApplication() {
 		SnapshotsCollection snapCol = new SnapshotsCollection();
-		 graph = new DisplayedGraph(snapCol);
+		graph = new DisplayedGraph(snapCol);
 		snapCol.setLinksWindows(this);
 		initialize();
 		this.frame.setVisible(true);
 	}
-	
-	public SnapshotsCollection getSnapshotsCollection(){
+
+	/**
+	 * Get the snapshot collection.
+	 * 
+	 * @return The collection of snashots.
+	 */
+	public SnapshotsCollection getSnapshotsCollection() {
 		return graph.getSnapCol();
 	}
 
 	/**
-	 * Initialize the contents of the frame.
+	 * Initializes the contents of the frame.
 	 */
 	private void initialize() {
 		frame = new JFrame();
@@ -171,10 +184,20 @@ public class LinksApplication {
 		generateGraph();
 	}
 
+	/**
+	 * Not implemented.
+	 */
 	public void onPlayClick() {
-		//
+		// TODO
 	}
 
+	/**
+	 * Change the displayed graph to display the snapshot which number is passed
+	 * as parameter.
+	 * 
+	 * @param number
+	 *            The number of the snapshot to be displayed.
+	 */
 	public void switchToSnap(long number) {
 		graph.loadGraph(number);
 		setSnapNumber(number);
@@ -182,12 +205,17 @@ public class LinksApplication {
 		this.currentSnap = number;
 	}
 
+	/**
+	 * Set the Snapshot number label of the displayed graph.
+	 * 
+	 * @param text
+	 *            The text to display.
+	 */
 	public void setSnapNumber(long text) {
 		this.snapNumber.setText(":" + String.valueOf(text));
 	}
 
 	private void generateGraph() {
-
 		viewer = new Viewer(graph.getGraph(), Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
 		viewer.enableAutoLayout();
 		view = viewer.addDefaultView(false); // false indicates "no JFrame".
@@ -195,6 +223,11 @@ public class LinksApplication {
 		clicksPipe = new ClicksPipe(graph.getGraph(), viewer, this);
 	}
 
+	/**
+	 * Get the current snapshot number.
+	 * 
+	 * @return The current snapshot number.
+	 */
 	public long getCurrentSnapNumber() {
 		return this.currentSnap;
 	}
@@ -219,14 +252,30 @@ public class LinksApplication {
 		});
 	}
 
+	/**
+	 * Get the snapshots collection.
+	 * 
+	 * @return The snapshots collection.
+	 */
 	public SnapshotsCollection getSnapCol() {
 		return graph.getCurrentSnap();
 	}
 
+	/**
+	 * Get the displayed graph.
+	 * 
+	 * @return The displayed graph.
+	 */
 	public DisplayedGraph getDisplayedGraph() {
 		return graph;
 	}
 
+	/**
+	 * This methode is called to inform Links that a new snapshot is availabe.
+	 * 
+	 * @param maxNum
+	 *            The number of the new snapshot.
+	 */
 	public void newSnap(long maxNum) {
 		if (isSynch) {
 			switchToSnap(maxNum);
@@ -241,14 +290,32 @@ public class LinksApplication {
 		}
 	}
 
+	/**
+	 * Add a new observer to the Frame.
+	 * 
+	 * @param aviz
+	 *            The reference to the new observer.
+	 */
 	public void registerObserver(AgentVizFrame aviz) {
 		this.listAgent.add(aviz);
 	}
 
+	/**
+	 * Remove an observer.
+	 * 
+	 * @param me
+	 *            The reference of the observer to remove.
+	 */
 	public void unregisterObserver(AgentVizFrame me) {
 		listAgent.remove(me);
 	}
 
+	/**
+	 * Add a new snapshot to the collection.
+	 * 
+	 * @param s
+	 *            The snapshot to be added.
+	 */
 	public void addSnapshot(Snapshot s) {
 		graph.getSnapCol().addSnapshot(s);
 	}

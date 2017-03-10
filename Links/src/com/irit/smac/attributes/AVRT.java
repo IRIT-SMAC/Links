@@ -32,14 +32,23 @@ public class AVRT implements Attribute {
 
 	@Override
 	public Object getValue() {
-		// TODO Auto-generated method stub
-		return null;
+		Double tab [] = new Double[6];
+		tab[0] = lowerValue;
+		tab[1] = down.cValue;
+		tab[2] = down.delta;
+		tab[3] = up.cValue;
+		tab[4] = up.delta;
+		tab[5] = upperValue;
+		return tab;
+	}
+	
+	public String toString(){
+		return "["+name+"] AVRT";
 	}
 
 	@Override
 	public String getTypeToDraw() {
-		// TODO Auto-generated method stub
-		return null;
+		return "AVRT";
 	}
 
 }
