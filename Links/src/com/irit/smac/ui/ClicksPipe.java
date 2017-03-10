@@ -11,9 +11,9 @@ public class ClicksPipe extends Thread implements ViewerListener{
 	
 	private Graph graph;
 	private  Viewer viewer;
-	private LinksMainWindow links;
+	private LinksApplication links;
 	
-	public ClicksPipe(Graph graph, Viewer viewer, LinksMainWindow links) {
+	public ClicksPipe(Graph graph, Viewer viewer, LinksApplication links) {
 		this.graph = graph;
 		this.viewer = viewer;
 		this.links = links;

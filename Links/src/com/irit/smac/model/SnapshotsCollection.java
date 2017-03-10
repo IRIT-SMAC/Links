@@ -2,17 +2,17 @@ package com.irit.smac.model;
 
 import java.util.HashMap;
 
-import com.irit.smac.ui.LinksMainWindow;
+import com.irit.smac.ui.LinksApplication;
 
 public class SnapshotsCollection {
 
 	private long maxNum = 1;
 
-	private LinksMainWindow links;
+	private LinksApplication links;
 
 	HashMap<Long, Snapshot> collection = new HashMap<Long, Snapshot>();
 
-	public void setLinksWindows(LinksMainWindow links) {
+	public void setLinksWindows(LinksApplication links) {
 		this.links = links;
 	}
 

@@ -59,7 +59,7 @@ public class AgentVizFrame extends JFrame {
 
 	private SnapshotsCollection snapCol;
 
-	private LinksMainWindow links;
+	private LinksApplication links;
 
 	private JSplitPane splitPane;
 
@@ -92,7 +92,7 @@ public class AgentVizFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public AgentVizFrame(Agent a, SnapshotsCollection snapCol, LinksMainWindow links) {
+	public AgentVizFrame(Agent a, SnapshotsCollection snapCol, LinksApplication links) {
 		me = this;
 		aname = a.getName();
 		addWindowListener(new WindowAdapter() {

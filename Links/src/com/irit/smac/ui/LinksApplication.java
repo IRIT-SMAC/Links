@@ -23,11 +23,12 @@ import org.graphstream.ui.view.Viewer;
 
 import com.irit.smac.core.DisplayedGraph;
 import com.irit.smac.model.Agent;
+import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
 import java.awt.SystemColor;
 import java.awt.Color;
 
-public class LinksMainWindow {
+public class LinksApplication {
 
 	private JFrame frame;
 
@@ -56,10 +57,16 @@ public class LinksMainWindow {
 	/**
 	 * Create the application.
 	 */
-	public LinksMainWindow(DisplayedGraph dispGraph) {
-		graph = dispGraph;
+	public LinksApplication() {
+		SnapshotsCollection snapCol = new SnapshotsCollection();
+		 graph = new DisplayedGraph(snapCol);
+		snapCol.setLinksWindows(this);
 		initialize();
 		this.frame.setVisible(true);
+	}
+	
+	public SnapshotsCollection getSnapshotsCollection(){
+		return graph.getSnapCol();
 	}
 
 	/**
@@ -119,14 +126,14 @@ public class LinksMainWindow {
 				isSynch = !isSynch;
 			}
 		});
-		lblSynch.setIcon(new ImageIcon(LinksMainWindow.class.getResource("/icons/synchronization.png")));
+		lblSynch.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/synchronization.png")));
 		toolBar_1.add(lblSynch);
 		toolBar_1.add(lblPlay);
-		lblPlay.setIcon(new ImageIcon(LinksMainWindow.class.getResource("/icons/play.png")));
+		lblPlay.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/play.png")));
 
 		JLabel lblStop = new JLabel("");
 		lblStop.setEnabled(false);
-		lblStop.setIcon(new ImageIcon(LinksMainWindow.class.getResource("/icons/stop.png")));
+		lblStop.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/stop.png")));
 		toolBar_1.add(lblStop);
 
 		JLabel lblPrev = new JLabel("");
@@ -136,7 +143,7 @@ public class LinksMainWindow {
 				switchToSnap(Math.max(1, currentSnap - 1));
 			}
 		});
-		lblPrev.setIcon(new ImageIcon(LinksMainWindow.class.getResource("/icons/backL.png")));
+		lblPrev.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/backL.png")));
 		toolBar_1.add(lblPrev);
 
 		JLabel lblNext = new JLabel("");
@@ -146,7 +153,7 @@ public class LinksMainWindow {
 				switchToSnap(Math.min(currentSnap + 1, graph.getCurrentSnap().getMaxNum() - 1));
 			}
 		});
-		lblNext.setIcon(new ImageIcon(LinksMainWindow.class.getResource("/icons/nextR.png")));
+		lblNext.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/nextR.png")));
 		toolBar_1.add(lblNext);
 
 		JSlider slider = new JSlider();
@@ -240,5 +247,9 @@ public class LinksMainWindow {
 
 	public void unregisterObserver(AgentVizFrame me) {
 		listAgent.remove(me);
+	}
+
+	public void addSnapshot(Snapshot s) {
+		graph.getSnapCol().addSnapshot(s);
 	}
 }

@@ -17,6 +17,7 @@ public class DisplayedGraph {
 	private SnapshotsCollection snapColl;
 
 	public DisplayedGraph(SnapshotsCollection snapColl) {
+		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 		graph = new MultiGraph("embedded");
 		String s = DisplayedGraph.class.getResource("/graphStream.css").toString();
 		graph.addAttribute("ui.stylesheet", "url('" + s + "')");
@@ -82,6 +83,10 @@ public class DisplayedGraph {
 	}
 
 	public SnapshotsCollection getCurrentSnap() {
+		return snapColl;
+	}
+
+	public SnapshotsCollection getSnapCol() {
 		return snapColl;
 	}
 }
