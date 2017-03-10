@@ -28,4 +28,15 @@ public class StringAttribute implements Attribute {
 		return "["+name+"] String:= " + value;
 	}
 
+	@Override
+	public Object getValue() {
+		return value;
+	}
+
+	@Override
+	public String getTypeToDraw() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

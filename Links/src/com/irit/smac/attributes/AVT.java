@@ -24,4 +24,16 @@ public class AVT implements Attribute {
 		return "AVT";
 	}
 
+	@Override
+	public Object getValue() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getTypeToDraw() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

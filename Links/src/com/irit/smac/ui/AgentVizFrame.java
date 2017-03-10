@@ -31,6 +31,9 @@ import com.irit.smac.model.Attribute;
 import com.irit.smac.model.Relation;
 import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
+import com.lxprl.plot.LxPlot;
+import com.lxprl.plot.commons.ChartType;
+
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.JTextPane;
@@ -81,6 +84,7 @@ public class AgentVizFrame extends JFrame {
 	private AgentVizFrame me;
 
 	private ArrayList<String> toLook = new ArrayList<String>();
+	private ArrayList<String> toDrawGraphic = new ArrayList<String>();
 
 	private String aname;
 	private JButton btnSynch;
@@ -148,9 +152,9 @@ public class AgentVizFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				if (arg0.getSource().equals(btnSynch)) {
 					isSynch = !isSynch;
-					if(!isSynch){
+					if (!isSynch) {
 						btnSynch.setText("Synch: OFF");
-					}else{
+					} else {
 						btnSynch.setText("Synch: ON");
 					}
 				}
@@ -176,7 +180,7 @@ public class AgentVizFrame extends JFrame {
 		btnDraw.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource().equals(btnDraw)) {
-					System.out.println("Drawing " + treeListSlected);
+					draw();
 				}
 			}
 		});
@@ -270,6 +274,24 @@ public class AgentVizFrame extends JFrame {
 		splitPane.setLeftComponent(attributeTree);
 	}
 
+	public void draw() {
+		Agent a;
+		for (int i = 1; i < snapCol.getMaxNum(); i++) {
+			a = snapCol.getAgent(this.aname, i);
+			if (a != null) {
+				for (String s : toDrawGraphic) {
+						if (a.getAttributesWithName(s).getTypeToDraw().equals("linear")) {
+							LxPlot.getChart(aname+ " linear",ChartType.LINE).add(s, i, (Double) a.getAttributesWithName(s).getValue());
+						}
+						if (a.getAttributesWithName(s).getTypeToDraw().equals("bar")) {
+							LxPlot.getChart(aname+" bar",ChartType.BAR).add(s, i, (Double) a.getAttributesWithName(s).getValue());
+						}
+					
+				}
+			}
+		}
+	}
+
 	public void drawAttribute(String name) {
 		String s = "";
 		if (name.contains(">")) {
@@ -284,6 +306,7 @@ public class AgentVizFrame extends JFrame {
 	}
 
 	public void drawLook() {
+		toDrawGraphic = new ArrayList<String>();
 		if (agent == null) {
 			txtpnLook.setText("Warning : Agent do not exists in this snapshot");
 		} else {
@@ -299,7 +322,14 @@ public class AgentVizFrame extends JFrame {
 				if (toL.contains(">")) {
 					for (String key : agent.getAttributes().keySet()) {
 						for (Attribute a : agent.getAttributes().get(key)) {
+
 							toDraw += a.toString() + "\n";
+						
+							if (a.type().equals("double")) {
+								String nameToDraw = a.toString().substring(a.toString().indexOf("[") + 1,
+										a.toString().indexOf("]"));
+								toDrawGraphic.add(nameToDraw);
+							}
 						}
 					}
 				}
@@ -308,11 +338,12 @@ public class AgentVizFrame extends JFrame {
 					ArrayList<Attribute> list = agent.getAttributes().get(s);
 					for (Attribute a : list) {
 						toDraw += a.toString() + "\n";
+						toDrawGraphic.add(a.toString());
 					}
 				}
 				if (toL.contains(":=")) {
 					s = toL.substring(toL.indexOf("=") + 2, toL.length() - 1);
-
+					toDrawGraphic.add(s);
 					toDraw += agent.getAttributesWithName(toL.substring(1, toL.indexOf("=") - 2)) + "\n";
 				}
 			}

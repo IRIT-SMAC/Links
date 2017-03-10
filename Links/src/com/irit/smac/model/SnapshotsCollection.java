@@ -5,24 +5,24 @@ import java.util.HashMap;
 import com.irit.smac.ui.LinksMainWindow;
 
 public class SnapshotsCollection {
-	
-	private long maxNum=1;
-	
+
+	private long maxNum = 1;
+
 	private LinksMainWindow links;
 
-	HashMap<Long,Snapshot> collection = new HashMap<Long,Snapshot>();
+	HashMap<Long, Snapshot> collection = new HashMap<Long, Snapshot>();
 
-	public void setLinksWindows(LinksMainWindow links){
+	public void setLinksWindows(LinksMainWindow links) {
 		this.links = links;
 	}
-	
-	public void addSnapshot(Snapshot s){
+
+	public void addSnapshot(Snapshot s) {
 		collection.put(maxNum, s);
 		links.newSnap(maxNum);
 		maxNum++;
 	}
-	
-	public Snapshot getSnaptshot(long s){
+
+	public Snapshot getSnaptshot(long s) {
 		return collection.get(s);
 	}
 
@@ -31,10 +31,14 @@ public class SnapshotsCollection {
 	}
 
 	public Agent getAgent(String id, long snap) {
-		return collection.get(snap).getAgent(id);
+		if (collection.containsKey(snap)) {
+			return collection.get(snap).getAgent(id);
+		}
+		
+		return null;
 	}
-	
-	public long getMaxNum(){
+
+	public long getMaxNum() {
 		return maxNum;
 	}
 }

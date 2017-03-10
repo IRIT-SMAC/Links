@@ -34,6 +34,7 @@ public class Links {
 		
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		attributes.add(new DoubleAttribute("Age",24));
+		attributes.add(new DoubleAttribute("Bonbons",2.,"bar"));
 		attributes.add(new StringAttribute("Nom","Toto"));
 		s.getAgent("Toto").addAttribute("Charct", attributes);
 		
@@ -52,6 +53,7 @@ public class Links {
 		
 		attributes = new ArrayList<Attribute>();
 		attributes.add(new DoubleAttribute("Age",24));
+		attributes.add(new DoubleAttribute("Bonbons",2.,"bar"));
 		attributes.add(new StringAttribute("Nom","Toto"));
 		s2.getAgent("Toto").addAttribute("Charct", attributes);
 		
@@ -64,6 +66,8 @@ public class Links {
 
 		s2.addAgent("Luna", "Cat");
 		((DoubleAttribute) s2.getAgent("Toto").getAttributesWithName("Age")).value= 32;
+		((DoubleAttribute) s2.getAgent("Toto").getAttributesWithName("Bonbons")).value= 32;
+		
 		s2.addRelation("Luna", "Rufus", "LR", true, "seBattre");
 		s2.addRelation("Toto", "Luna", "LU", true, "seBattre");
 		snapCol.addSnapshot(s2);
