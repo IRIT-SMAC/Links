@@ -1,32 +1,43 @@
 package com.irit.smac.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
+import com.irit.smac.core.AutoPlayThread;
 import com.irit.smac.core.DisplayedGraph;
-import com.irit.smac.model.Agent;
 import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
-import java.awt.SystemColor;
-import java.awt.Color;
 
 /**
  * Links: A tool to visualize agents and their relations over time.
@@ -36,7 +47,7 @@ import java.awt.Color;
  * @since 10/03/2017
  *
  */
-public class LinksApplication {
+public class LinksApplication implements Serializable {
 
 	private JFrame frame;
 
@@ -62,12 +73,23 @@ public class LinksApplication {
 
 	private JLabel lblSynch;
 
+	private final String linkToCss;
+
+	private final AutoPlayThread autoPlayThread;
+
+	private JLabel lblStop;
+	private JTextField txtSpeed;
+	private JTextField txtFramerate;
+	private JFileChooser fc = new JFileChooser();
+
 	/**
 	 * Creates the application and displays the associated JFrame.
 	 */
-	public LinksApplication() {
+	public LinksApplication(String linkToCss) {
+		this.linkToCss = linkToCss;
+		autoPlayThread = new AutoPlayThread(this);
 		SnapshotsCollection snapCol = new SnapshotsCollection();
-		graph = new DisplayedGraph(snapCol);
+		graph = new DisplayedGraph(snapCol, linkToCss);
 		snapCol.setLinksWindows(this);
 		initialize();
 		this.frame.setVisible(true);
@@ -76,7 +98,7 @@ public class LinksApplication {
 	/**
 	 * Get the snapshot collection.
 	 * 
-	 * @return The collection of snashots.
+	 * @return The collection of snapshots.
 	 */
 	public SnapshotsCollection getSnapshotsCollection() {
 		return graph.getSnapCol();
@@ -100,6 +122,59 @@ public class LinksApplication {
 		mnFile.setBackground(Color.WHITE);
 		menuBar.add(mnFile);
 
+		JMenuItem mntmLoad = new JMenuItem("Load");
+		mntmLoad.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (arg0.getSource() == mntmLoad) {
+					int returnVal = fc.showSaveDialog(fc);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						File file = fc.getSelectedFile();
+						// This is where a real application would save the file.
+						// System.err.println("Saving: " + file.getName() +
+						// ".");
+						try {
+							FileInputStream fin = new FileInputStream(file.getAbsolutePath());
+							ObjectInputStream ois = new ObjectInputStream(fin);
+							graph.getSnapCol().setCollection((HashMap<Long, Snapshot>) ois.readObject());
+							switchToSnap(1);
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					} else {
+						// System.err.println("Save command cancelled by
+						// user.");
+					}
+				}
+			}
+		});
+		mnFile.add(mntmLoad);
+
+		JMenuItem mntmSave = new JMenuItem("Save");
+		mntmSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == mntmSave) {
+					int returnVal = fc.showSaveDialog(fc);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						File file = fc.getSelectedFile();
+						// This is where a real application would save the file.
+						// System.err.println("Saving: " + file.getName() +
+						// ".");
+						try {
+							FileOutputStream fout = new FileOutputStream(file.getAbsolutePath());
+							ObjectOutputStream oos = new ObjectOutputStream(fout);
+							oos.writeObject(graph.getSnapCol().getCollection());
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					} else {
+						// System.err.println("Save command cancelled by
+						// user.");
+					}
+				}
+			}
+		});
+		mnFile.add(mntmSave);
+
 		JMenu mnAbout = new JMenu("?");
 		mnAbout.setBackground(Color.WHITE);
 		menuBar.add(mnAbout);
@@ -119,7 +194,6 @@ public class LinksApplication {
 		panel.add(toolBar_1);
 
 		lblPlay = new JLabel("");
-		lblPlay.setEnabled(false);
 		lblPlay.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent arg0) {
 				if (arg0.getSource().equals(lblPlay))
@@ -144,7 +218,13 @@ public class LinksApplication {
 		toolBar_1.add(lblPlay);
 		lblPlay.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/play.png")));
 
-		JLabel lblStop = new JLabel("");
+		lblStop = new JLabel("");
+		lblStop.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				onPauseClick();
+			}
+		});
 		lblStop.setEnabled(false);
 		lblStop.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/stop.png")));
 		toolBar_1.add(lblStop);
@@ -153,7 +233,7 @@ public class LinksApplication {
 		lblPrev.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				switchToSnap(Math.max(1, currentSnap - 1));
+				switchToSnap(Math.max(1, currentSnap - Integer.valueOf(txtSpeed.getText())));
 			}
 		});
 		lblPrev.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/backL.png")));
@@ -163,16 +243,29 @@ public class LinksApplication {
 		lblNext.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				switchToSnap(Math.min(currentSnap + 1, graph.getCurrentSnap().getMaxNum() - 1));
+				switchToSnap(Math.min(currentSnap + Integer.valueOf(txtSpeed.getText()),
+						graph.getCurrentSnap().getMaxNum() - 1));
 			}
 		});
 		lblNext.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/nextR.png")));
 		toolBar_1.add(lblNext);
 
-		JSlider slider = new JSlider();
-		slider.setBackground(SystemColor.inactiveCaption);
-		slider.setPaintTicks(true);
-		toolBar_1.add(slider);
+		JLabel lblSpeed = new JLabel("Speed:");
+		toolBar_1.add(lblSpeed);
+
+		txtSpeed = new JTextField();
+		txtSpeed.setHorizontalAlignment(SwingConstants.LEFT);
+		txtSpeed.setText("250");
+		toolBar_1.add(txtSpeed);
+		txtSpeed.setColumns(10);
+
+		JLabel lblFrameRate = new JLabel("Frame Rate:");
+		toolBar_1.add(lblFrameRate);
+
+		txtFramerate = new JTextField();
+		txtFramerate.setText("1");
+		toolBar_1.add(txtFramerate);
+		txtFramerate.setColumns(10);
 
 		snapNumber = new JLabel("New label");
 		toolBar_1.add(snapNumber);
@@ -188,7 +281,17 @@ public class LinksApplication {
 	 * Not implemented.
 	 */
 	public void onPlayClick() {
-		// TODO
+		autoPlayThread.setActivated(true);
+		autoPlayThread.setFrameRateAndSpeed(Integer.valueOf(this.txtFramerate.getText()),
+				Integer.valueOf(this.txtSpeed.getText()));
+		this.lblPlay.setEnabled(false);
+		this.lblStop.setEnabled(true);
+	}
+
+	public void onPauseClick() {
+		autoPlayThread.setActivated(false);
+		this.lblPlay.setEnabled(true);
+		this.lblStop.setEnabled(false);
 	}
 
 	/**
@@ -212,7 +315,7 @@ public class LinksApplication {
 	 *            The text to display.
 	 */
 	public void setSnapNumber(long text) {
-		this.snapNumber.setText(":" + String.valueOf(text));
+		this.snapNumber.setText("Current Snap: " + text);
 	}
 
 	private void generateGraph() {
@@ -318,5 +421,9 @@ public class LinksApplication {
 	 */
 	public void addSnapshot(Snapshot s) {
 		graph.getSnapCol().addSnapshot(s);
+	}
+
+	public long getMaxSnapNumber() {
+		return graph.getSnapCol().getMaxNum();
 	}
 }

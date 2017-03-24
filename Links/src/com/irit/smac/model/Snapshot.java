@@ -1,5 +1,6 @@
 package com.irit.smac.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -10,7 +11,12 @@ import java.util.ArrayList;
  * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
  *
  */
-public class Snapshot {
+public class Snapshot implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1925330023989139722L;
 
 	/**
 	 * The agent list.

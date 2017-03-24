@@ -2,7 +2,14 @@ package com.irit.smac.attributes;
 
 import com.irit.smac.model.Attribute;
 
-public class StringAttribute implements Attribute {
+import scala.Serializable;
+
+public class StringAttribute implements Attribute,Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6726345506370602566L;
 
 	private String name;
 	

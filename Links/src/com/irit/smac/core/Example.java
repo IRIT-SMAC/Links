@@ -18,7 +18,7 @@ public class Example {
 	 */
 	public static void main(String[] args) {
 
-		LinksApplication links = new LinksApplication();
+		LinksApplication links = new LinksApplication(DisplayedGraph.class.getResource("/graphStream.css").toString());
 
 		Snapshot s = new Snapshot();
 
@@ -56,6 +56,7 @@ public class Example {
 		s2.addRelation("Toto", "Rufus", "TotoPossedeRufus", false, "possede");
 
 		s2.addAgent("Luna", "Cat");
+		s2.getAgent("Luna").addAttribute("Charct", attributes);
 		((DoubleAttribute) s2.getAgent("Toto").getAttributesWithName("Age")).value = 32;
 		((DoubleAttribute) s2.getAgent("Toto").getAttributesWithName("Bonbons")).value = 32;
 

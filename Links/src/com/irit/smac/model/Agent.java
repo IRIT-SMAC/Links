@@ -1,10 +1,15 @@
 package com.irit.smac.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Agent {
+public class Agent implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1498345709452103648L;
 	private String name;
 	private String stype;
 	private String ctype;

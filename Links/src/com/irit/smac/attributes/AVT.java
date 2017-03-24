@@ -1,8 +1,10 @@
 package com.irit.smac.attributes;
 
+import java.io.Serializable;
+
 import com.irit.smac.model.Attribute;
 
-public class AVT implements Attribute {
+public class AVT implements Attribute,Serializable {
 	
 	public double delta;
 	public double cValue;

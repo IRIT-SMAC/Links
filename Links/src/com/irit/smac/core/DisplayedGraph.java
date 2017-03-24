@@ -1,5 +1,6 @@
 package com.irit.smac.core;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.graphstream.graph.Edge;
@@ -12,16 +13,19 @@ import com.irit.smac.model.Relation;
 import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
 
-public class DisplayedGraph {
+public class DisplayedGraph implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7697345043271592254L;
 	private Graph graph;
 	private SnapshotsCollection snapColl;
 	private long currentSnapNumber;
 
-	public DisplayedGraph(SnapshotsCollection snapColl) {
+	public DisplayedGraph(SnapshotsCollection snapColl, String linkToCss) {
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 		graph = new MultiGraph("embedded");
-		String s = DisplayedGraph.class.getResource("/graphStream.css").toString();
-		graph.addAttribute("ui.stylesheet", "url('" + s + "')");
+		graph.addAttribute("ui.stylesheet", "url('" + linkToCss + "')");
 		currentSnapNumber = 0;
 		this.snapColl = snapColl;
 	}

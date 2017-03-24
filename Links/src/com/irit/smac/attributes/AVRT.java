@@ -1,8 +1,10 @@
 package com.irit.smac.attributes;
 
+import java.io.Serializable;
+
 import com.irit.smac.model.Attribute;
 
-public class AVRT implements Attribute {
+public class AVRT implements Attribute,Serializable {
 
 	public AVT up;
 	public AVT down;

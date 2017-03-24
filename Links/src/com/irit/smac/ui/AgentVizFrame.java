@@ -1,9 +1,10 @@
 package com.irit.smac.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -13,16 +14,18 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
 import com.irit.smac.core.DisplayedGraph;
@@ -31,14 +34,9 @@ import com.irit.smac.model.Attribute;
 import com.irit.smac.model.Relation;
 import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
-import com.lxprl.plot.LxPlot;
-import com.lxprl.plot.commons.ChartType;
 
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.JTextPane;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import fr.irit.smac.lxplot.LxPlot;
+import fr.irit.smac.lxplot.commons.ChartType;
 
 public class AgentVizFrame extends JFrame {
 
@@ -300,7 +298,6 @@ public class AgentVizFrame extends JFrame {
 			a = snapCol.getAgent(this.aname, i);
 			if (a != null) {
 				for (String s : toDrawGraphic) {
-					System.out.println(s);
 					if (a.getAttributesWithName(s).getTypeToDraw().equals("linear")) {
 						LxPlot.getChart(aname + " linear", ChartType.LINE).add(s, i,
 								(Double) a.getAttributesWithName(s).getValue());
@@ -365,7 +362,6 @@ public class AgentVizFrame extends JFrame {
 							toDraw += a.toString() + "\n";
 
 							if (a.type().equals("double") || a.type().equals("AVRT")) {
-								System.out.println(a.toString());
 								String nameToDraw = a.toString().substring(a.toString().indexOf("[") + 1,
 										a.toString().indexOf("]"));
 								toDrawGraphic.add(nameToDraw);

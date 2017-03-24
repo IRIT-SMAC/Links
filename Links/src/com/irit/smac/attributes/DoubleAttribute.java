@@ -1,8 +1,10 @@
 package com.irit.smac.attributes;
 
+import java.io.Serializable;
+
 import com.irit.smac.model.Attribute;
 
-public class DoubleAttribute implements Attribute {
+public class DoubleAttribute implements Attribute,Serializable {
 
 	private String name;
 

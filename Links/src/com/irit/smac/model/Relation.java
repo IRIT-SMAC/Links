@@ -1,7 +1,13 @@
 package com.irit.smac.model;
 
-public class Relation {
+import java.io.Serializable;
 
+public class Relation implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4939449662544024687L;
 	private Agent A;
 	private Agent B;
 	private String name;
