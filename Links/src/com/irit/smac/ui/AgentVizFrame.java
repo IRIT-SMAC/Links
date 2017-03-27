@@ -329,19 +329,6 @@ public class AgentVizFrame extends JFrame {
 		}
 	}
 
-	public void drawAttribute(String name) {
-		String s = "";
-		if (name.contains(">")) {
-
-		}
-		if (name.contains("@")) {
-
-		}
-		if (name.contains(":=")) {
-			s = name.substring(name.indexOf("=") + 2, name.length() - 1);
-		}
-	}
-
 	public void drawLook() {
 		toDrawGraphic = new ArrayList<String>();
 		if (agent == null) {
@@ -379,9 +366,9 @@ public class AgentVizFrame extends JFrame {
 					}
 				}
 				if (toL.contains(":=")) {
-					s = toL.substring(toL.indexOf("=") + 2, toL.length() - 1);
+					s = toL.substring(1, toL.indexOf(":") - 1);
 					toDrawGraphic.add(s);
-					toDraw += agent.getAttributesWithName(toL.substring(1, toL.indexOf("=") - 2)) + "\n";
+					toDraw += agent.getAttributesWithName(s) + "\n";
 				}
 			}
 			txtpnLook.setText(toDraw);

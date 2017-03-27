@@ -10,13 +10,12 @@ public class DoubleAttribute implements Attribute,Serializable {
 
 	public double value;
 
-	private String ttd;
+	private String ttd = "linear";
 
 	public DoubleAttribute(String name, double value) {
 		super();
 		this.name = name;
 		this.value = value;
-		ttd = "linear";
 	}
 
 	public DoubleAttribute(String string, Double i, String string2) {
