@@ -35,7 +35,6 @@ public class DisplayedGraph implements Serializable {
 	}
 
 	public void loadGraph(long snapNumber) {
-		System.err.println(snapNumber);
 		currentSnapNumber = snapNumber;
 		Snapshot s = snapColl.getSnaptshot(snapNumber);
 

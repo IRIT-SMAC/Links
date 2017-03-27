@@ -37,6 +37,9 @@ import com.irit.smac.model.SnapshotsCollection;
 
 import fr.irit.smac.lxplot.LxPlot;
 import fr.irit.smac.lxplot.commons.ChartType;
+import javax.swing.JFormattedTextField;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 public class AgentVizFrame extends JFrame {
 
@@ -70,6 +73,8 @@ public class AgentVizFrame extends JFrame {
 
 	private boolean neigh = false;
 
+	private long drawSizeLong = 100;
+
 	private Graph g;
 
 	private Viewer viewer;
@@ -88,6 +93,10 @@ public class AgentVizFrame extends JFrame {
 	private JButton btnSynch;
 
 	private boolean isDrawing = false;
+	private JFormattedTextField drawSize;
+	private JLabel lblDrawSize;
+
+	private long currentFrameNum;
 
 	/**
 	 * Create the frame.
@@ -110,7 +119,7 @@ public class AgentVizFrame extends JFrame {
 		setTitle(a.getName() + " Vizualization tool");
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 592, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -201,6 +210,20 @@ public class AgentVizFrame extends JFrame {
 		btnDraw.setIcon(new ImageIcon(AgentVizFrame.class.getResource("/icons/draw.png")));
 		toolBar.add(btnDraw);
 
+		lblDrawSize = new JLabel("Draw Size: ");
+		toolBar.add(lblDrawSize);
+
+		drawSize = new JFormattedTextField();
+		drawSize.addPropertyChangeListener(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent arg0) {
+				if (arg0.getSource().equals(drawSize)) {
+					drawSizeLong = Long.valueOf(drawSize.getText());
+				}
+			}
+		});
+		drawSize.setText("100");
+		toolBar.add(drawSize);
+
 		lblBotTxt = new JLabel("Agent name : Toto ");
 		lblBotTxt.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblBotTxt, BorderLayout.SOUTH);
@@ -248,7 +271,8 @@ public class AgentVizFrame extends JFrame {
 	}
 
 	private void initFrame() {
-		setlblBotTxt("Agent name : " + this.agent.getName() + " on snapshot number : " + links.getCurrentSnapNumber());
+		setlblBotTxt("Agent name : " + this.agent.getName() + " on snapshot number : " + links.getCurrentSnapNumber(),
+				links.getCurrentSnapNumber());
 
 		updateAttributeTreeList();
 
@@ -295,33 +319,43 @@ public class AgentVizFrame extends JFrame {
 
 	public void draw() {
 		Agent a;
-		for (int i = 1; i < snapCol.getMaxNum(); i++) {
+		long max = this.currentFrameNum;
+		if (drawSizeLong == 0) {
+			max = this.links.getMaxSnapNumber();
+		}
+		for (long i = Math.max(1, this.currentFrameNum - drawSizeLong); i < max; i++) {
+			long timei = i;
+			if (drawSizeLong != 0) {
+				timei = i % drawSizeLong;
+			}
 			a = snapCol.getAgent(this.aname, i);
 			if (a != null) {
 				for (String s : toDrawGraphic) {
 					if (a.getAttributesWithName(s).getTypeToDraw().equals("linear")) {
-						LxPlot.getChart(aname + " linear", ChartType.LINE).add(s, i,
+						LxPlot.getChart(aname + " linear", ChartType.LINE).add(s, timei,
 								(Double) a.getAttributesWithName(s).getValue());
 					}
 					if (a.getAttributesWithName(s).getTypeToDraw().equals("bar")) {
-						LxPlot.getChart(aname + " bar", ChartType.BAR).add(s, i,
+						LxPlot.getChart(aname + " bar", ChartType.BAR).add(s, timei,
 								(Double) a.getAttributesWithName(s).getValue());
 					}
 					if (a.getAttributesWithName(s).getTypeToDraw().equals("AVRT")) {
 						Double tab[] = (Double[]) a.getAttributesWithName(s).getValue();
 						for (Double val : tab) {
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "LOWER", i, tab[0]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownLower", i,
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "LOWER", timei, tab[0]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownLower", timei,
 									tab[1] - tab[2]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownValue", i, tab[1]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownUpper", i,
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownValue", timei,
+									tab[1]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownUpper", timei,
 									tab[1] + tab[2]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpLower", i,
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpLower", timei,
 									tab[3] - tab[4]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpValue", i, tab[3]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpUpper", i,
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpValue", timei,
+									tab[3]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpUpper", timei,
 									tab[3] + tab[4]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "UPPER", i, tab[5]);
+							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "UPPER", timei, tab[5]);
 						}
 					}
 				}
@@ -361,8 +395,8 @@ public class AgentVizFrame extends JFrame {
 					s = toL.substring(toL.indexOf("@") + 2, toL.length() - 1);
 					ArrayList<Attribute> list = agent.getAttributes().get(s);
 					for (Attribute a : list) {
+						toDrawGraphic.add(a.getName());
 						toDraw += a.toString() + "\n";
-						toDrawGraphic.add(a.toString());
 					}
 				}
 				if (toL.contains(":=")) {
@@ -383,11 +417,12 @@ public class AgentVizFrame extends JFrame {
 			if (isDrawing) {
 				draw();
 			}
-			setlblBotTxt("Agent name : " + aname + " on snapshot number : " + num);
+			setlblBotTxt("Agent name : " + aname + " on snapshot number : " + num, num);
 		}
 	}
 
-	public void setlblBotTxt(String txt) {
+	public void setlblBotTxt(String txt, long num) {
+		currentFrameNum = num;
 		lblBotTxt.setText(txt);
 	}
 

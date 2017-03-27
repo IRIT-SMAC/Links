@@ -1,8 +1,8 @@
 package com.irit.smac.attributes;
 
-import com.irit.smac.model.Attribute;
+import java.io.Serializable;
 
-import scala.Serializable;
+import com.irit.smac.model.Attribute;
 
 public class StringAttribute implements Attribute,Serializable {
 
@@ -42,8 +42,7 @@ public class StringAttribute implements Attribute,Serializable {
 
 	@Override
 	public String getTypeToDraw() {
-		// TODO Auto-generated method stub
-		return null;
+		return "String";
 	}
 
 }
