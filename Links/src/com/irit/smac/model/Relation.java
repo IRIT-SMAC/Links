@@ -22,6 +22,7 @@ public class Relation implements Serializable{
 		this.name = name;
 		this.isDirectional = directional;
 		this.s = s;
+		this.type = type;
 	}
 	
 	public String getName(){

@@ -13,7 +13,7 @@ import com.irit.smac.model.Relation;
 import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
 
-public class DisplayedGraph implements Serializable{
+public class DisplayedGraph implements Serializable {
 	/**
 	 * 
 	 */
@@ -35,9 +35,9 @@ public class DisplayedGraph implements Serializable{
 	}
 
 	public void loadGraph(long snapNumber) {
+		System.err.println(snapNumber);
 		currentSnapNumber = snapNumber;
 		Snapshot s = snapColl.getSnaptshot(snapNumber);
-		;
 
 		/* Retrait des noeuds */
 		Iterator<Node> it = graph.getNodeIterator();
@@ -59,10 +59,15 @@ public class DisplayedGraph implements Serializable{
 
 		/* Ajout des noeuds */
 		for (Agent a : s.getAgentsList()) {
-			if (graph.getNode(a.getName()) == null) {
+			Node n = graph.getNode(a.getName());
+			if (n == null) {
 				graph.addNode(a.getName());
 				graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
 				graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
+			} else {
+				if (!n.getAttribute("ui.class").equals(a.getType())) {
+					n.setAttribute("ui.class", a.getType());
+				}
 			}
 		}
 
@@ -71,6 +76,10 @@ public class DisplayedGraph implements Serializable{
 			if (graph.getEdge(r.getName()) == null) {
 				graph.addEdge(r.getName(), r.getA().getName(), r.getB().getName(), r.isDirectional());
 				graph.getEdge(r.getName()).addAttribute("ui.class", r.getType());
+			} else {
+				if (!graph.getEdge(r.getName()).getAttribute("ui.class").equals(r.getType())) {
+					graph.getEdge(r.getName()).setAttribute("ui.class", r.getType());
+				}
 			}
 		}
 	}
@@ -100,7 +109,8 @@ public class DisplayedGraph implements Serializable{
 		graph.getNode(agent).addAttribute("ui.class", type);
 		for (Edge e : graph.getNode(agent).getLeavingEdgeSet()) {
 			if (!type.equals("Targeted")) {
-				e.addAttribute("ui.class", this.snapColl.getSnaptshot(this.currentSnapNumber).getRelation(e.getId()).getType());
+				e.addAttribute("ui.class",
+						this.snapColl.getSnaptshot(this.currentSnapNumber).getRelation(e.getId()).getType());
 			} else {
 				e.addAttribute("ui.class", "Targeted");
 			}

@@ -243,8 +243,8 @@ public class LinksApplication implements Serializable {
 		lblNext.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				switchToSnap(Math.min(currentSnap + Integer.valueOf(txtSpeed.getText()),
-						graph.getCurrentSnap().getMaxNum() - 1));
+				switchToSnap(Math.max(Math.min(currentSnap + Integer.valueOf(txtSpeed.getText()),
+						graph.getCurrentSnap().getMaxNum() - 1),1));
 			}
 		});
 		lblNext.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/nextR.png")));

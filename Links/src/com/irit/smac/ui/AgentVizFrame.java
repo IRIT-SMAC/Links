@@ -191,6 +191,7 @@ public class AgentVizFrame extends JFrame {
 						isDrawing = !isDrawing;
 						btnDraw.setText("Draw:OFF");
 					} else {
+						isDrawing = !isDrawing;
 						draw();
 						btnDraw.setText("Draw:ON");
 					}

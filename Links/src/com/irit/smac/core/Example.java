@@ -18,7 +18,7 @@ public class Example {
 	 */
 	public static void main(String[] args) {
 
-		LinksApplication links = new LinksApplication(DisplayedGraph.class.getResource("/graphStream.css").toString());
+		LinksApplication links = new LinksApplication(Example.class.getResource("/graphStream.css").toString());
 
 		Snapshot s = new Snapshot();
 
