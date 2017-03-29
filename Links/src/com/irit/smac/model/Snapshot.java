@@ -64,11 +64,12 @@ public class Snapshot implements Serializable{
 	 * @param type
 	 *            The type of the agent (used to determine its css class).
 	 */
-	public void addAgent(String name, String type) {
+	public Agent addAgent(String name, String type) {
 		Agent a = new Agent(name, type, this);
 		if (!agentsList.contains(a)) {
 			agentsList.add(a);
 		}
+		return a;
 	}
 
 	/**
@@ -116,13 +117,17 @@ public class Snapshot implements Serializable{
 	 * @param type
 	 *            The type of the relation (used to determine its class in the
 	 *            css).
+	 * @return 
 	 */
-	public void addRelation(String A, String B, String name, boolean isDirectional, String type) {
+	public Relation addRelation(String A, String B, String name, boolean isDirectional, String type) {
 		if (containsAgent(A) && containsAgent(B)) {
 			Relation a = new Relation(getAgent(A), getAgent(B), name, type, isDirectional, this);
 			if (!agentsRelations.contains(a)) {
 				agentsRelations.add(a);
 			}
+			return a;
+		}else{
+			return null;
 		}
 	}
 

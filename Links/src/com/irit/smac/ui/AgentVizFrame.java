@@ -60,7 +60,7 @@ public class AgentVizFrame extends JFrame {
 
 	private SnapshotsCollection snapCol;
 
-	private LinksApplication links;
+	private LinksWindows links;
 
 	private JSplitPane splitPane;
 
@@ -101,7 +101,7 @@ public class AgentVizFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public AgentVizFrame(Agent a, SnapshotsCollection snapCol, LinksApplication links) {
+	public AgentVizFrame(Agent a, SnapshotsCollection snapCol, LinksWindows links) {
 		me = this;
 		aname = a.getName();
 		addWindowListener(new WindowAdapter() {
@@ -248,10 +248,6 @@ public class AgentVizFrame extends JFrame {
 	}
 
 	protected void switchToNeighGraph() {
-		g = createNeighGraph();
-		viewer = new Viewer(g, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-		viewer.enableAutoLayout();
-		viewer.addDefaultView(true);
 		updateRelationsTreeList();
 	}
 
@@ -277,28 +273,6 @@ public class AgentVizFrame extends JFrame {
 		updateAttributeTreeList();
 
 		setVisible(true);
-	}
-
-	public Graph createNeighGraph() {
-		Graph graph = new MultiGraph("embedded");
-		String s = DisplayedGraph.class.getResource("/neighbouring.css").toString();
-		graph.addAttribute("ui.stylesheet", "url('" + s + "')");
-
-		Snapshot snap = snapCol.getSnaptshot(snapNum);
-
-		for (Relation r : snap.getAgentsRelations()) {
-			if (r.getA().getName().equals(agent.getName()) || r.getB().getName().equals(agent.getName())) {
-				if (graph.getNode(r.getA().getName()) == null) {
-					graph.addNode(r.getA().getName());
-				}
-				if (graph.getNode(r.getB().getName()) == null) {
-					graph.addNode(r.getB().getName());
-				}
-				graph.addEdge(r.getName(), r.getA().getName(), r.getB().getName(), r.isDirectional());
-			}
-		}
-
-		return graph;
 	}
 
 	private void updateAttributeTreeList() {

@@ -45,7 +45,7 @@ public class AVRT implements Attribute,Serializable {
 	}
 	
 	public String toString(){
-		return "["+name+"] AVRT";
+		return "["+name+"] AVRT:= " +lowerValue + " | " + down.cValue + " | " + down.delta + " | " + up.cValue + " | " + up.delta + " | " + upperValue;
 	}
 
 	@Override

@@ -23,6 +23,7 @@ public class DisplayedGraph implements Serializable {
 	private long currentSnapNumber;
 
 	public DisplayedGraph(SnapshotsCollection snapColl, String linkToCss) {
+		System.out.println(linkToCss);
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 		graph = new MultiGraph("embedded");
 		graph.addAttribute("ui.stylesheet", "url('" + linkToCss + "')");
@@ -96,7 +97,7 @@ public class DisplayedGraph implements Serializable {
 		return this.snapColl.containsSnap(number);
 	}
 
-	public SnapshotsCollection getCurrentSnap() {
+	public SnapshotsCollection getSnap() {
 		return snapColl;
 	}
 
@@ -109,7 +110,7 @@ public class DisplayedGraph implements Serializable {
 		for (Edge e : graph.getNode(agent).getLeavingEdgeSet()) {
 			if (!type.equals("Targeted")) {
 				e.addAttribute("ui.class",
-						this.snapColl.getSnaptshot(this.currentSnapNumber).getRelation(e.getId()).getType());
+						this.snapColl.getCurrentSnap().getRelation(e.getId()).getType());
 			} else {
 				e.addAttribute("ui.class", "Targeted");
 			}

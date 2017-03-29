@@ -2,7 +2,7 @@ package com.irit.smac.core;
 
 import java.io.Serializable;
 
-import com.irit.smac.ui.LinksApplication;
+import com.irit.smac.ui.LinksWindows;
 
 public class AutoPlayThread extends Thread implements Serializable {
 
@@ -11,7 +11,7 @@ public class AutoPlayThread extends Thread implements Serializable {
 	 */
 	private static final long serialVersionUID = -9207211192530365228L;
 
-	private LinksApplication links;
+	private LinksWindows links;
 
 	private boolean isActivated = false;
 
@@ -19,7 +19,7 @@ public class AutoPlayThread extends Thread implements Serializable {
 
 	public int frameSpeed = 500;
 
-	public AutoPlayThread(LinksApplication linksApplication) {
+	public AutoPlayThread(LinksWindows linksApplication) {
 		this.links = linksApplication;
 		this.start();
 	}

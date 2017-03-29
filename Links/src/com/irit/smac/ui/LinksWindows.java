@@ -9,14 +9,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -36,18 +32,21 @@ import org.graphstream.ui.view.Viewer;
 
 import com.irit.smac.core.AutoPlayThread;
 import com.irit.smac.core.DisplayedGraph;
+import com.irit.smac.core.Links;
 import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
 
 /**
- * Links: A tool to visualize agents and their relations over time.
+ * LinksWindows: This class 
  * 
  * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
  * @version 1.0
  * @since 10/03/2017
  *
  */
-public class LinksApplication implements Serializable {
+public class LinksWindows implements Serializable {
+
+	public static String xpName;
 
 	private JFrame frame;
 
@@ -80,12 +79,18 @@ public class LinksApplication implements Serializable {
 	private JLabel lblStop;
 	private JTextField txtSpeed;
 	private JTextField txtFramerate;
+	private Links linksRef;
 	private JFileChooser fc = new JFileChooser();
 
 	/**
-	 * Creates the application and displays the associated JFrame.
+	 * Creates a new JFrame and start to display the experiment in parameter.
+	 * @param xpName The name of the experiment to display.
+	 * @param linkToCss The path to the CSS file.
+	 * @param links A reference to the main application.
 	 */
-	public LinksApplication(String linkToCss) {
+	public LinksWindows(String xpName, String linkToCss, Links links) {
+		linksRef = links;
+		this.xpName = xpName;
 		this.linkToCss = linkToCss;
 		autoPlayThread = new AutoPlayThread(this);
 		SnapshotsCollection snapCol = new SnapshotsCollection();
@@ -93,6 +98,10 @@ public class LinksApplication implements Serializable {
 		snapCol.setLinksWindows(this);
 		initialize();
 		this.frame.setVisible(true);
+		
+		if(snapCol.getSnaptshot(1)!=null){
+			switchToSnap(1);
+		}
 	}
 
 	/**
@@ -109,81 +118,18 @@ public class LinksApplication implements Serializable {
 	 */
 	private void initialize() {
 		frame = new JFrame();
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				linksRef.informClose();
+			}
+		});
 		frame.getContentPane().setBackground(SystemColor.inactiveCaption);
 		frame.setAutoRequestFocus(false);
 		frame.setBounds(200, 200, 900, 600);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Links : Vizualizing agents' life");
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBackground(Color.WHITE);
-		frame.setJMenuBar(menuBar);
-
-		JMenu mnFile = new JMenu("File");
-		mnFile.setBackground(Color.WHITE);
-		menuBar.add(mnFile);
-
-		JMenuItem mntmLoad = new JMenuItem("Load");
-		mntmLoad.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if (arg0.getSource() == mntmLoad) {
-					int returnVal = fc.showSaveDialog(fc);
-					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						File file = fc.getSelectedFile();
-						// This is where a real application would save the file.
-						// System.err.println("Saving: " + file.getName() +
-						// ".");
-						try {
-							FileInputStream fin = new FileInputStream(file.getAbsolutePath());
-							ObjectInputStream ois = new ObjectInputStream(fin);
-							graph.getSnapCol().setCollection((HashMap<Long, Snapshot>) ois.readObject());
-							switchToSnap(1);
-						} catch (Exception e1) {
-							e1.printStackTrace();
-						}
-					} else {
-						// System.err.println("Save command cancelled by
-						// user.");
-					}
-				}
-			}
-		});
-		mnFile.add(mntmLoad);
-
-		JMenuItem mntmSave = new JMenuItem("Save");
-		mntmSave.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (e.getSource() == mntmSave) {
-					int returnVal = fc.showSaveDialog(fc);
-					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						File file = fc.getSelectedFile();
-						// This is where a real application would save the file.
-						// System.err.println("Saving: " + file.getName() +
-						// ".");
-						try {
-							FileOutputStream fout = new FileOutputStream(file.getAbsolutePath());
-							ObjectOutputStream oos = new ObjectOutputStream(fout);
-							oos.writeObject(graph.getSnapCol().getCollection());
-						} catch (Exception e1) {
-							e1.printStackTrace();
-						}
-					} else {
-						// System.err.println("Save command cancelled by
-						// user.");
-					}
-				}
-			}
-		});
-		mnFile.add(mntmSave);
-
-		JMenu mnAbout = new JMenu("?");
-		mnAbout.setBackground(Color.WHITE);
-		menuBar.add(mnAbout);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
-
-		JToolBar toolBar = new JToolBar();
-		toolBar.setBackground(SystemColor.inactiveCaption);
-		toolBar.setRollover(true);
-		frame.getContentPane().add(toolBar, BorderLayout.NORTH);
 
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.SOUTH);
@@ -213,10 +159,10 @@ public class LinksApplication implements Serializable {
 				isSynch = !isSynch;
 			}
 		});
-		lblSynch.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/synchronization.png")));
+		lblSynch.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/synchronization.png")));
 		toolBar_1.add(lblSynch);
 		toolBar_1.add(lblPlay);
-		lblPlay.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/play.png")));
+		lblPlay.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/play.png")));
 
 		lblStop = new JLabel("");
 		lblStop.addMouseListener(new MouseAdapter() {
@@ -226,28 +172,28 @@ public class LinksApplication implements Serializable {
 			}
 		});
 		lblStop.setEnabled(false);
-		lblStop.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/stop.png")));
+		lblStop.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/stop.png")));
 		toolBar_1.add(lblStop);
 
 		JLabel lblPrev = new JLabel("");
 		lblPrev.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				switchToSnap(Math.max(1, currentSnap - Integer.valueOf(txtSpeed.getText())));
+				switchToSnap(Math.max(1, currentSnap - Integer.valueOf(txtFramerate.getText())));
 			}
 		});
-		lblPrev.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/backL.png")));
+		lblPrev.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/backL.png")));
 		toolBar_1.add(lblPrev);
 
 		JLabel lblNext = new JLabel("");
 		lblNext.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				switchToSnap(Math.max(Math.min(currentSnap + Integer.valueOf(txtSpeed.getText()),
-						graph.getCurrentSnap().getMaxNum() - 1),1));
+				switchToSnap(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
+						graph.getSnap().getMaxNum() - 1), 1));
 			}
 		});
-		lblNext.setIcon(new ImageIcon(LinksApplication.class.getResource("/icons/nextR.png")));
+		lblNext.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png")));
 		toolBar_1.add(lblNext);
 
 		JLabel lblSpeed = new JLabel("Speed:");
@@ -361,7 +307,7 @@ public class LinksApplication implements Serializable {
 	 * @return The snapshots collection.
 	 */
 	public SnapshotsCollection getSnapCol() {
-		return graph.getCurrentSnap();
+		return graph.getSnap();
 	}
 
 	/**
@@ -387,7 +333,7 @@ public class LinksApplication implements Serializable {
 
 	}
 
-	private void notifyJump(long number) {
+	private synchronized void notifyJump(long number) {
 		for (AgentVizFrame a : listAgent) {
 			a.notifyJump(number);
 		}

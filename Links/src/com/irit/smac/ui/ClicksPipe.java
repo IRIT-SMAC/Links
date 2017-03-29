@@ -11,9 +11,9 @@ public class ClicksPipe extends Thread implements ViewerListener{
 	
 	private Graph graph;
 	private  Viewer viewer;
-	private LinksApplication links;
+	private LinksWindows links;
 	
-	public ClicksPipe(Graph graph, Viewer viewer, LinksApplication links) {
+	public ClicksPipe(Graph graph, Viewer viewer, LinksWindows links) {
 		this.graph = graph;
 		this.viewer = viewer;
 		this.links = links;
@@ -47,7 +47,7 @@ public class ClicksPipe extends Thread implements ViewerListener{
 	}
 
 	public void buttonReleased(String id) {
-		AgentVizFrame f = new AgentVizFrame(links.getDisplayedGraph().getCurrentSnap().getAgent(id,links.getCurrentSnapNumber()),links.getSnapCol(),links);
+		AgentVizFrame f = new AgentVizFrame(links.getDisplayedGraph().getSnap().getAgent(id,links.getCurrentSnapNumber()),links.getSnapCol(),links);
 		links.registerObserver(f);
 	}
 }
