@@ -299,8 +299,14 @@ public class AgentVizFrame extends JFrame {
 		if (drawSizeLong == 0) {
 			max = this.links.getMaxSnapNumber();
 		}
-		for (long i = Math.max(this.lastSnapNumDrawn, Math.max(1, this.currentFrameNum - drawSizeLong)); i < max; i++) {
-			System.out.println("Yipeee");
+		long u;
+		if (links.getFrameSpeed() > 0) {
+			u = Math.max(this.lastSnapNumDrawn, Math.max(1, this.currentFrameNum - drawSizeLong));
+		} else {
+			u = Math.min(this.lastSnapNumDrawn, Math.max(1, this.currentFrameNum - drawSizeLong));
+		}
+
+		for (long i = u; i < max; i++) {
 			long timei = i;
 			if (drawSizeLong != 0) {
 				timei = i % drawSizeLong;

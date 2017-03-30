@@ -37,7 +37,7 @@ import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
 
 /**
- * LinksWindows: This class 
+ * LinksWindows: This class
  * 
  * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
  * @version 1.0
@@ -84,9 +84,13 @@ public class LinksWindows implements Serializable {
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
-	 * @param xpName The name of the experiment to display.
-	 * @param linkToCss The path to the CSS file.
-	 * @param links A reference to the main application.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment to display.
+	 * @param linkToCss
+	 *            The path to the CSS file.
+	 * @param links
+	 *            A reference to the main application.
 	 */
 	public LinksWindows(String xpName, String linkToCss, Links links) {
 		linksRef = links;
@@ -98,8 +102,8 @@ public class LinksWindows implements Serializable {
 		snapCol.setLinksWindows(this);
 		initialize();
 		this.frame.setVisible(true);
-		
-		if(snapCol.getSnaptshot(1)!=null){
+
+		if (snapCol.getSnaptshot(1) != null) {
 			switchToSnap(1);
 		}
 	}
@@ -371,5 +375,9 @@ public class LinksWindows implements Serializable {
 
 	public long getMaxSnapNumber() {
 		return graph.getSnapCol().getMaxNum();
+	}
+
+	public int getFrameSpeed() {
+		return Integer.valueOf(this.txtFramerate.getText());
 	}
 }
