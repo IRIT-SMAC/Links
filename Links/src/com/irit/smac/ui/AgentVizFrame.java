@@ -98,6 +98,8 @@ public class AgentVizFrame extends JFrame {
 
 	private long currentFrameNum;
 
+	private long lastSnapNumDrawn = 0;
+
 	/**
 	 * Create the frame.
 	 */
@@ -297,7 +299,8 @@ public class AgentVizFrame extends JFrame {
 		if (drawSizeLong == 0) {
 			max = this.links.getMaxSnapNumber();
 		}
-		for (long i = Math.max(1, this.currentFrameNum - drawSizeLong); i < max; i++) {
+		for (long i = Math.max(this.lastSnapNumDrawn, Math.max(1, this.currentFrameNum - drawSizeLong)); i < max; i++) {
+			System.out.println("Yipeee");
 			long timei = i;
 			if (drawSizeLong != 0) {
 				timei = i % drawSizeLong;
@@ -335,6 +338,8 @@ public class AgentVizFrame extends JFrame {
 				}
 			}
 		}
+
+		lastSnapNumDrawn = this.currentFrameNum;
 	}
 
 	public void drawLook() {
@@ -381,7 +386,6 @@ public class AgentVizFrame extends JFrame {
 			}
 			txtpnLook.setText(toDraw);
 		}
-
 	}
 
 	public void notifyJump(long num) {
