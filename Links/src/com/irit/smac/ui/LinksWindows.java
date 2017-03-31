@@ -217,7 +217,7 @@ public class LinksWindows implements Serializable {
 		toolBar_1.add(txtFramerate);
 		txtFramerate.setColumns(10);
 
-		snapNumber = new JLabel("New label");
+		snapNumber = new JLabel("");
 		toolBar_1.add(snapNumber);
 		setSnapNumber(0);
 

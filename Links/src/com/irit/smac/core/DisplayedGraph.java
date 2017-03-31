@@ -71,7 +71,7 @@ public class DisplayedGraph implements Serializable {
 		}
 
 		/* Ajout des liens */
-		for (Relation r : s.getAgentsRelations()) {
+		for (Relation r : s.getRelations()) {
 			if (graph.getEdge(r.getName()) == null) {
 				graph.addEdge(r.getName(), r.getA().getName(), r.getB().getName(), r.isDirectional());
 				graph.getEdge(r.getName()).addAttribute("ui.class", r.getType());

@@ -23,11 +23,13 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.view.Viewer;
 
+import com.irit.smac.attributes.DrawableAttribute;
 import com.irit.smac.core.DisplayedGraph;
 import com.irit.smac.model.Agent;
 import com.irit.smac.model.Attribute;
@@ -40,6 +42,8 @@ import fr.irit.smac.lxplot.commons.ChartType;
 import javax.swing.JFormattedTextField;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class AgentVizFrame extends JFrame {
 
@@ -86,8 +90,7 @@ public class AgentVizFrame extends JFrame {
 
 	private AgentVizFrame me;
 
-	private ArrayList<String> toLook = new ArrayList<String>();
-	private ArrayList<String> toDrawGraphic = new ArrayList<String>();
+	private ArrayList<DrawableAttribute> toLook = new ArrayList<DrawableAttribute>();
 
 	private String aname;
 	private JButton btnSynch;
@@ -98,7 +101,11 @@ public class AgentVizFrame extends JFrame {
 
 	private long currentFrameNum;
 
+	private ArrayList<Relation> relations = new ArrayList<Relation>();
+
 	private long lastSnapNumDrawn = 0;
+	private JPanel panel;
+	private JLabel lblNewLabel;
 
 	/**
 	 * Create the frame.
@@ -134,16 +141,16 @@ public class AgentVizFrame extends JFrame {
 		contentPane.add(splitPane, BorderLayout.CENTER);
 
 		attributeTree = new JTree();
+		attributeTree.setRootVisible(false);
 		attributeTree.addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent arg0) {
 				if (arg0.getSource().equals(attributeTree)) {
-					toLook = new ArrayList<String>();
-					for (int i : attributeTree.getSelectionRows()) {
-						toLook.add(attributeTree.getPathForRow(i).toString());
-					}
+					updateLookAndDraw(attributeTree.getSelectionPaths());
 				}
 			}
 		});
+
+		splitPane.setLeftComponent(attributeTree);
 
 		attributeViewerPanel = new JPanel();
 		splitPane.setRightComponent(attributeViewerPanel);
@@ -157,9 +164,11 @@ public class AgentVizFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (btnNewButton.getText().equals("Neighbouring:OFF")) {
 					isTargeted(true);
+					updateTreeList();
 					btnNewButton.setText("Neighbouring:ON");
 				} else {
 					isTargeted(false);
+					updateTreeList();
 					btnNewButton.setText("Neighbouring:OFF");
 				}
 			}
@@ -178,6 +187,16 @@ public class AgentVizFrame extends JFrame {
 				}
 			}
 		});
+
+		lblNewLabel = new JLabel("");
+		lblNewLabel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				updateTreeList();
+			}
+		});
+		lblNewLabel.setIcon(new ImageIcon(AgentVizFrame.class.getResource("/icons/refresh.png")));
+		toolBar.add(lblNewLabel);
 		btnSynch.setIcon(new ImageIcon(AgentVizFrame.class.getResource("/icons/synchronization.png")));
 		toolBar.add(btnSynch);
 		btnNewButton.setIcon(new ImageIcon(AgentVizFrame.class.getResource("/icons/neighb.png")));
@@ -226,11 +245,95 @@ public class AgentVizFrame extends JFrame {
 		drawSize.setText("100");
 		toolBar.add(drawSize);
 
+		panel = new JPanel();
+		contentPane.add(panel, BorderLayout.WEST);
+
 		lblBotTxt = new JLabel("Agent name : Toto ");
 		lblBotTxt.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblBotTxt, BorderLayout.SOUTH);
 
 		initFrame();
+		relations = snapCol.getRelations(aname, snapNum);
+		updateTreeList();
+	}
+
+	private void updateLookAndDraw(TreePath[] path) {
+		this.toLook = new ArrayList<DrawableAttribute>();
+		relations = snapCol.getRelations(aname, currentFrameNum);
+		if (path != null) {
+			for (int i = 0; i < path.length; i++) {
+				switch (path[i].getPath().length) {
+				case 1:
+					// System.out.println(path[i].getPath()[0].toString());
+					break;
+				case 2:
+					/* Whole agent or relations selected */
+					if (path[i].getPath()[1].toString().contains("Relations")) {
+						for (Relation r : this.relations) {
+							for (String s : r.getAttributes().keySet()) {
+								for (Attribute t : r.getAttributes().get(s)) {
+									this.toLook.add(
+											new DrawableAttribute(DrawableAttribute.Type.Relation, r.getName(), s, t));
+								}
+							}
+						}
+					}
+					if (path[i].getPath()[1].toString().contains("Agent")) {
+						for (String s : agent.getAttributes().keySet()) {
+							for (Attribute t : agent.getAttributes().get(s)) {
+								this.toLook.add(
+										new DrawableAttribute(DrawableAttribute.Type.Agent, agent.getName(), s, t));
+							}
+						}
+					}
+					break;
+				case 3:
+					/* Set of characteristics selected */
+
+					if (path[i].getPath()[1].toString().contains("Relations")) {
+						Relation r = snapCol.getRelation(path[i].getPath()[2].toString(), this.currentFrameNum);
+						for (String s : r.getAttributes().keySet()) {
+							for (Attribute t : r.getAttributes().get(s)) {
+								this.toLook
+										.add(new DrawableAttribute(DrawableAttribute.Type.Relation, r.getName(), s, t));
+							}
+						}
+					}
+
+					if (path[i].getPath()[1].toString().contains("Agent")) {
+
+						String s = path[i].getPath()[2].toString();
+						for (Attribute t : agent.getAttributes().get(s)) {
+							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Agent, agent.getName(), s, t));
+						}
+					}
+					break;
+				case 4:
+					/* One characteristic selected */
+
+					/* Set of characteristics selected */
+
+					if (path[i].getPath()[1].toString().contains("Relations")) {
+						Relation r = snapCol.getRelation(path[i].getPath()[2].toString(), this.currentFrameNum);
+						String s = path[i].getPath()[3].toString();
+						for (Attribute t : r.getAttributes().get(s)) {
+							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Relation, r.getName(), s, t));
+						}
+
+					}
+
+					if (path[i].getPath()[1].toString().contains("Agent")) {
+						String s = path[i].getPath()[2].toString();
+						String tmp = path[i].getPath()[3].toString();
+						tmp = tmp.substring(tmp.indexOf("[") + 1, tmp.indexOf("]"));
+						Attribute t = agent.getAttributesWithName(tmp);
+						this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Agent, agent.getName(), s, t));
+
+					}
+					break;
+				}
+			}
+		}
 	}
 
 	protected void isTargeted(boolean b) {
@@ -238,59 +341,51 @@ public class AgentVizFrame extends JFrame {
 		links.getDisplayedGraph().refresh(agent.getName(), agent.getType());
 	}
 
-	protected void switchNeighAtt() {
-		if (neigh) {
-			viewer.close();
-			g = null;
-			updateAttributeTreeList();
-		} else {
-			updateRelationsTreeList();
-			switchToNeighGraph();
-		}
-	}
-
-	protected void switchToNeighGraph() {
-		updateRelationsTreeList();
-	}
-
-	private void updateRelationsTreeList() {
-		attributeTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode("Relations") {
-			{
-				DefaultMutableTreeNode node;
-				for (Relation r : snapCol.getSnaptshot(snapNum).getAgentsRelations()) {
-					if (r.getA().getName().equals(agent.getName()) || r.getB().getName().equals(agent.getName())) {
-						node = new DefaultMutableTreeNode(r.getName());
-						add(node);
-					}
-				}
-			}
-		}));
-		splitPane.setLeftComponent(attributeTree);
-	}
-
 	private void initFrame() {
 		setlblBotTxt("Agent name : " + this.agent.getName() + " on snapshot number : " + links.getCurrentSnapNumber(),
 				links.getCurrentSnapNumber());
 
-		updateAttributeTreeList();
+		updateTreeList();
 
 		setVisible(true);
 	}
 
-	private void updateAttributeTreeList() {
-		attributeTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode("> Attributes") {
-			{
-				DefaultMutableTreeNode node;
-				for (String s : agent.getAttributes().keySet()) {
-					node = new DefaultMutableTreeNode("@ " + s);
-					for (Attribute a : agent.getAttributes().get(s)) {
-						node.add(new DefaultMutableTreeNode(a.getName() + " := " + a.type()));
-					}
-					add(node);
+	private void updateTreeList() {
+		DefaultTreeModel tree;
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+		tree = new DefaultTreeModel(root);
+
+		DefaultMutableTreeNode agentNode = new DefaultMutableTreeNode("Agent");
+		root.add(agentNode);
+
+		for (String carac : this.agent.getAttributes().keySet()) {
+
+			DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(carac);
+			agentNode.add(newCarac);
+
+			for (Attribute t : this.agent.getAttributes().get(carac)) {
+				newCarac.add(new DefaultMutableTreeNode(t.toString()));
+			}
+
+		}
+
+		DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
+		root.add(relNode);
+
+		for (Relation r : this.relations) {
+
+			DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(r.getName());
+			relNode.add(newCarac);
+			for (String s : r.getAttributes().keySet()) {
+				for (Attribute t : r.getAttributes().get(s)) {
+					newCarac.add(new DefaultMutableTreeNode(t.toString()));
 				}
 			}
-		}));
-		splitPane.setLeftComponent(attributeTree);
+
+		}
+
+		attributeTree.setModel(tree);
+		attributeTree.setRootVisible(false);
 	}
 
 	public void draw() {
@@ -306,39 +401,51 @@ public class AgentVizFrame extends JFrame {
 			u = Math.min(this.lastSnapNumDrawn, Math.max(1, this.currentFrameNum - drawSizeLong));
 		}
 
-		for (long i = u; i < max; i++) {
+		for (long i = u; i <= max; i++) {
 			long timei = i;
 			if (drawSizeLong != 0) {
 				timei = i % drawSizeLong;
 			}
 			a = snapCol.getAgent(this.aname, i);
 			if (a != null) {
-				for (String s : toDrawGraphic) {
-					if (a.getAttributesWithName(s).getTypeToDraw().equals("linear")) {
-						LxPlot.getChart(aname + " linear", ChartType.LINE).add(s, timei,
-								(Double) a.getAttributesWithName(s).getValue());
+				for (DrawableAttribute t : this.toLook) {
+					String s = t.getAttribute().getName();
+					Attribute theAttribute = t.getAttribute();
+					if (theAttribute.getTypeToDraw().equals("linear")) {
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
+								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
 					}
-					if (a.getAttributesWithName(s).getTypeToDraw().equals("bar")) {
-						LxPlot.getChart(aname + " bar", ChartType.BAR).add(s, timei,
-								(Double) a.getAttributesWithName(s).getValue());
+					if (theAttribute.getTypeToDraw().equals("bar")) {
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+								ChartType.BAR).add(s, timei, (Double) theAttribute.getValue());
 					}
-					if (a.getAttributesWithName(s).getTypeToDraw().equals("AVRT")) {
-						Double tab[] = (Double[]) a.getAttributesWithName(s).getValue();
+					if (theAttribute.getTypeToDraw().equals("AVRT")) {
+						Double tab[] = (Double[]) theAttribute.getValue();
 						for (Double val : tab) {
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "LOWER", timei, tab[0]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownLower", timei,
-									tab[1] - tab[2]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownValue", timei,
-									tab[1]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTDownUpper", timei,
-									tab[1] + tab[2]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpLower", timei,
-									tab[3] - tab[4]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpValue", timei,
-									tab[3]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "AVTUpUpper", timei,
-									tab[3] + tab[4]);
-							LxPlot.getChart(aname + " AVRT : " + s, ChartType.LINE).add(s + "UPPER", timei, tab[5]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "LOWER", timei, tab[0]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTDownLower", timei, tab[1] - tab[2]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTDownValue", timei, tab[1]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTDownUpper", timei, tab[1] + tab[2]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTUpLower", timei, tab[3] - tab[4]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTUpValue", timei, tab[3]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTUpUpper", timei, tab[3] + tab[4]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "UPPER", timei, tab[5]);
 						}
 					}
 				}
@@ -349,54 +456,23 @@ public class AgentVizFrame extends JFrame {
 	}
 
 	public void drawLook() {
-		toDrawGraphic = new ArrayList<String>();
-		if (agent == null) {
-			txtpnLook.setText("Warning : Agent do not exists in this snapshot");
-		} else {
-			String toDraw = "";
-			String toL = "";
-			for (String name : toLook) {
-				Scanner sc = new Scanner(name);
-				sc.useDelimiter(",");
-				while (sc.hasNext()) {
-					toL = sc.next();
-				}
-				String s = "";
-				if (toL.contains(">")) {
-					for (String key : agent.getAttributes().keySet()) {
-						for (Attribute a : agent.getAttributes().get(key)) {
-
-							toDraw += a.toString() + "\n";
-
-							if (a.type().equals("double") || a.type().equals("AVRT")) {
-								String nameToDraw = a.toString().substring(a.toString().indexOf("[") + 1,
-										a.toString().indexOf("]"));
-								toDrawGraphic.add(nameToDraw);
-							}
-						}
-					}
-				}
-				if (toL.contains("@")) {
-					s = toL.substring(toL.indexOf("@") + 2, toL.length() - 1);
-					ArrayList<Attribute> list = agent.getAttributes().get(s);
-					for (Attribute a : list) {
-						toDrawGraphic.add(a.getName());
-						toDraw += a.toString() + "\n";
-					}
-				}
-				if (toL.contains(":=")) {
-					s = toL.substring(1, toL.indexOf(":") - 1);
-					toDrawGraphic.add(s);
-					toDraw += agent.getAttributesWithName(s) + "\n";
-				}
+		String s = "";
+		for (DrawableAttribute t : this.toLook) {
+			if (t.getType().equals(DrawableAttribute.Type.Agent)) {
+				s = s + "{" + t.getCaracList() + "} " + t.getAttribute().toString() + "\n";
+			} else {
+				s = s + " " + t.getType() + ":" + t.getName() + " : {" + t.getCaracList() + "} "
+						+ t.getAttribute().toString() + "\n";
 			}
-			txtpnLook.setText(toDraw);
 		}
+		txtpnLook.setText(s);
 	}
 
 	public void notifyJump(long num) {
 		if (isSynch) {
 			agent = snapCol.getAgent(aname, num);
+			relations = snapCol.getRelations(aname, num);
+			updateLookAndDraw(attributeTree.getSelectionPaths());
 			drawLook();
 			if (isDrawing) {
 				draw();
@@ -409,5 +485,4 @@ public class AgentVizFrame extends JFrame {
 		currentFrameNum = num;
 		lblBotTxt.setText(txt);
 	}
-
 }

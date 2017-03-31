@@ -159,4 +159,8 @@ public class Relation implements Serializable {
 		return isDirectional;
 	}
 
+	public HashMap<String, ArrayList<Attribute>> getAttributes() {
+		return attributes;
+	}
+
 }

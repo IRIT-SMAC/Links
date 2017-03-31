@@ -1,6 +1,7 @@
 package com.irit.smac.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -56,6 +57,7 @@ public class SnapshotsCollection implements Serializable {
 		Document doc = new Document("snapNum", maxNum);
 		Document caract;
 		Document attributeList;
+		Document relationCaract;
 
 		for (Agent a : s.getAgentsList()) {
 			caract = new Document("Type", "Agent").append("Name", a.getName()).append("Class", a.getType().toString());
@@ -70,10 +72,18 @@ public class SnapshotsCollection implements Serializable {
 			doc.append(a.getName(), caract);
 		}
 
-		for (Relation a : s.getAgentsRelations()) {
+		for (Relation a : s.getRelations()) {
 			attributeList = new Document("Type", "Relation").append("RelationName", a.getName())
 					.append("A", a.getA().getName()).append("B", a.getB().getName())
 					.append("isDirectionnal", a.isDirectional()).append("Class", a.getType().toString());
+			relationCaract = new Document();
+			for (String atName : a.getAttributes().keySet()) {
+				for (Attribute t : a.getAttributes().get(atName)) {
+					relationCaract.append(t.getName(),
+							new Document("TypeToDraw", t.getTypeToDraw()).append("toString", t.toString()));
+				}
+				attributeList.append(atName, relationCaract);
+			}
 			doc.append(a.getName(), attributeList);
 		}
 		collection.insertOne(doc);
@@ -198,7 +208,6 @@ public class SnapshotsCollection implements Serializable {
 	}
 
 	public boolean containsSnap(long number) {
-
 		return false;
 	}
 
@@ -214,7 +223,14 @@ public class SnapshotsCollection implements Serializable {
 		return maxNum;
 	}
 
-	public Snapshot getCurrentSnap() {
-		return currentSnap;
+	public ArrayList<Relation> getRelations(String aname, long num) {
+		Snapshot s = this.getSnaptshot(num);
+		ArrayList<Relation> relations = new ArrayList<Relation>();
+		for (Relation r : s.getRelations()) {
+			if (r.getA().getName().equals(aname) || r.getB().getName().equals(aname)) {
+				relations.add(r);
+			}
+		}
+		return relations;
 	}
 }

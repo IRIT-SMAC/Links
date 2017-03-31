@@ -8,6 +8,7 @@ import com.irit.smac.attributes.DoubleAttribute;
 import com.irit.smac.attributes.StringAttribute;
 import com.irit.smac.model.Agent;
 import com.irit.smac.model.Attribute;
+import com.irit.smac.model.Relation;
 import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
 import com.irit.smac.ui.LinksWindows;
@@ -32,7 +33,7 @@ public class Example {
 		a.addOneAttribute("Domain", new AVRT("VRange1", new AVT("Up", 1, 0), new AVT("Down", 1, -5), 10, -10));
 
 		Agent b = s.addAgent("Rufus", "Dog");
-		s.addRelation("Toto", "Rufus", "TotoPossedeRufus", false, "possede");
+		Relation r = s.addRelation("Toto", "Rufus", "TotoPossedeRufus", false, "possede");
 
 		links.addSnapshot(s);
 

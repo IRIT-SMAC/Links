@@ -52,7 +52,7 @@ public class Snapshot implements Serializable{
 	 * @return An ArrayList containing the agent relation. May be empty if there
 	 *         is no relation on the Snapshot.
 	 */
-	public ArrayList<Relation> getAgentsRelations() {
+	public ArrayList<Relation> getRelations() {
 		return agentsRelations;
 	}
 
