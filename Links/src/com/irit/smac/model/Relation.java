@@ -22,11 +22,11 @@ public class Relation implements Serializable {
 	/**
 	 * The reference to the the Agent A.
 	 */
-	private Agent A;
+	private Entity A;
 	/**
 	 * The reference to the Agent B.
 	 */
-	private Agent B;
+	private Entity B;
 	/**
 	 * The name of the relation (must be unique).
 	 */
@@ -67,7 +67,7 @@ public class Relation implements Serializable {
 	 * @param s
 	 *            The reference to the snapshot the relation belongs to.
 	 */
-	public Relation(Agent a, Agent b, String name, String type, boolean directional, Snapshot s) {
+	public Relation(Entity a, Entity b, String name, String type, boolean directional, Snapshot s) {
 		A = a;
 		B = b;
 		this.name = name;
@@ -90,7 +90,7 @@ public class Relation implements Serializable {
 	 * 
 	 * @return The reference to the agent A.
 	 */
-	public Agent getA() {
+	public Entity getA() {
 		return A;
 	}
 
@@ -99,7 +99,7 @@ public class Relation implements Serializable {
 	 * 
 	 * @return The reference to the agent B.
 	 */
-	public Agent getB() {
+	public Entity getB() {
 		return B;
 	}
 

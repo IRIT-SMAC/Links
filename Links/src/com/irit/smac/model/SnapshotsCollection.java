@@ -59,10 +59,11 @@ public class SnapshotsCollection implements Serializable {
 		Document attributeList;
 		Document relationCaract;
 
-		for (Agent a : s.getAgentsList()) {
-			caract = new Document("Type", "Agent").append("Name", a.getName()).append("Class", a.getType().toString());
-			attributeList = new Document();
+		for (Entity a : s.getEntityList()) {
+			caract = new Document("Type", "Entity").append("Name", a.getName()).append("Class", a.getType().toString());
+		
 			for (String atName : a.getAttributes().keySet()) {
+				attributeList = new Document();
 				for (Attribute t : a.getAttributes().get(atName)) {
 					attributeList.append(t.getName(),
 							new Document("TypeToDraw", t.getTypeToDraw()).append("toString", t.toString()));
@@ -76,8 +77,9 @@ public class SnapshotsCollection implements Serializable {
 			attributeList = new Document("Type", "Relation").append("RelationName", a.getName())
 					.append("A", a.getA().getName()).append("B", a.getB().getName())
 					.append("isDirectionnal", a.isDirectional()).append("Class", a.getType().toString());
-			relationCaract = new Document();
+		
 			for (String atName : a.getAttributes().keySet()) {
+				relationCaract = new Document();
 				for (Attribute t : a.getAttributes().get(atName)) {
 					relationCaract.append(t.getName(),
 							new Document("TypeToDraw", t.getTypeToDraw()).append("toString", t.toString()));
@@ -124,10 +126,10 @@ public class SnapshotsCollection implements Serializable {
 		Iterator<Entry<String, Object>> it = d.entrySet().iterator();
 		String type = (String) it.next().getValue();
 		switch (type) {
-		case "Agent":
+		case "Entity":
 			String name = (String) it.next().getValue();
 			String uiClass = (String) it.next().getValue();
-			Agent a = snap.addAgent(name, uiClass);
+			Entity a = snap.addEntity(name, uiClass);
 
 			while (it.hasNext()) {
 				/* For any caracteristic list */
@@ -183,16 +185,16 @@ public class SnapshotsCollection implements Serializable {
 		Attribute t = null;
 		if (toString.contains("Double")) {
 			t = new DoubleAttribute(caracName,
-					Double.valueOf(toString.substring(toString.indexOf("=") + 1, toString.length() - 1)), typeToDraw);
+					Double.valueOf(toString.substring(toString.indexOf("=") + 1, toString.length())), typeToDraw);
 		} else {
 			if (toString.contains("String")) {
 				t = new StringAttribute(caracName,
-						(toString.substring(toString.indexOf("=") + 1, toString.length() - 1)));
+						(toString.substring(toString.indexOf("=") + 1, toString.length())));
 			} else {
 				if (toString.contains("AVRT")) {
-					String value = (toString.substring(toString.indexOf("=") + 1, toString.length() - 1));
+					String value = (toString.substring(toString.indexOf("=") + 1, toString.length()));
 					Scanner sc = new Scanner(value);
-					sc.useDelimiter(" | ");
+					sc.useDelimiter(":");
 					Double lowerValue = Double.valueOf(sc.next());
 					Double downcValue = Double.valueOf(sc.next());
 					Double downdelta = Double.valueOf(sc.next());
@@ -211,8 +213,8 @@ public class SnapshotsCollection implements Serializable {
 		return false;
 	}
 
-	public Agent getAgent(String id, long snap) {
-		return getSnaptshot(snap).getAgent(id);
+	public Entity getEntity(String id, long snap) {
+		return getSnaptshot(snap).getEntity(id);
 	}
 
 	public Relation getRelation(String id, long snap) {

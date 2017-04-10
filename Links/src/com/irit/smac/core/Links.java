@@ -3,6 +3,9 @@ package com.irit.smac.core;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import org.bson.Document;
 
 import com.irit.smac.model.Snapshot;
@@ -66,6 +69,21 @@ public class Links {
 	 * selection of the experiment name.
 	 */
 	public Links() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		mongoClient = new MongoClient();
 		database = mongoClient.getDatabase(dataBaseName);
 
@@ -87,7 +105,7 @@ public class Links {
 		mongoClient = new MongoClient();
 		database = mongoClient.getDatabase(dataBaseName);
 
-		XpChooser xpChooser = new XpChooser(this);
+//		XpChooser xpChooser = new XpChooser(this);
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName));
 	}
@@ -179,8 +197,8 @@ public class Links {
 		MongoCollection<Document> maCollection = Links.database.getCollection(Links.collectionNameExperimentList);
 		Document myXP = maCollection.find(Filters.eq("xpName", xpName)).first();
 		Iterator<Entry<String, Object>> it = myXP.entrySet().iterator();
-		it.next();
-		it.next();
+		it.next(); // Skip first
+		it.next(); // Skip second
 		return it.next().getValue().toString();
 	}
 

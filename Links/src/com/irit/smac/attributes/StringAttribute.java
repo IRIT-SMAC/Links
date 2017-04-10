@@ -15,6 +15,10 @@ public class StringAttribute implements Attribute,Serializable {
 	
 	private String value;
 	
+	/**
+	 * @param name Name of the attribute
+	 * @param value Value
+	 */
 	public StringAttribute(String name, String value) {
 		super();
 		this.name = name;
@@ -27,7 +31,7 @@ public class StringAttribute implements Attribute,Serializable {
 	}
 
 	@Override
-	public String type() {
+	public String getType() {
 		return "string";
 	}
 	

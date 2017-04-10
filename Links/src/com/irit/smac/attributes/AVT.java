@@ -22,7 +22,7 @@ public class AVT implements Attribute,Serializable {
 		return name;
 	}
 
-	public String type() {
+	public String getType() {
 		return "AVT";
 	}
 

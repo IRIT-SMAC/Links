@@ -3,15 +3,19 @@ package com.irit.smac.ui;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
@@ -23,8 +27,7 @@ import org.bson.Document;
 import com.irit.smac.core.Links;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.Font;
 
 public class XpChooser extends JFrame {
 
@@ -39,6 +42,7 @@ public class XpChooser extends JFrame {
 	 * @param links
 	 */
 	public XpChooser(Links links) {
+		setTitle("Links: Xp Chooser");
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent arg0) {
@@ -47,7 +51,7 @@ public class XpChooser extends JFrame {
 		});
 		this.linksRef = links;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 190, 522);
+		setBounds(100, 100, 280, 250);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -72,9 +76,16 @@ public class XpChooser extends JFrame {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
 				if (arg0.getSource().equals(lblRemove)) {
-					String xpName = (String) list.getSelectedValue();
-					if (xpName != null) {
-						destroyExperiment(xpName);
+					int dialogButton = JOptionPane.YES_NO_OPTION;
+					int dialogResult = JOptionPane.showConfirmDialog(null,
+							"Would You Like to Completly Delete the Experiment Entitled : " + list.getSelectedValue()
+									+ " ?",
+							"Warning", dialogButton);
+					if (dialogResult == JOptionPane.YES_OPTION) {
+						String xpName = (String) list.getSelectedValue();
+						if (xpName != null) {
+							destroyExperiment(xpName);
+						}
 					}
 				}
 			}
@@ -105,12 +116,39 @@ public class XpChooser extends JFrame {
 					if (list.getSelectedValue() != null) {
 						String xpName = (String) list.getSelectedValue();
 						if (xpName != null) {
-							xpWindows = new NewXpWindows(XpChooser.this,xpName);
+							xpWindows = new NewXpWindows(XpChooser.this, xpName);
 						}
 					}
 				}
 			}
 		});
+
+		JLabel lblErase = new JLabel("");
+		lblErase.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				int dialogButton = JOptionPane.YES_NO_OPTION;
+				int dialogResult = JOptionPane.showConfirmDialog(null,
+						"Would You Like to Drop the Experiment Entitled : " + list.getSelectedValue() + " ?", "Warning",
+						dialogButton);
+
+				if (dialogResult == JOptionPane.YES_OPTION) {
+
+					String xpName = (String) list.getSelectedValue();
+					System.out.println(xpName);
+					MongoCollection<Document> collection = Links.database
+							.getCollection(Links.collectionNameExperimentList);
+
+					MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
+					collection2.deleteMany(Filters.eq("xpName", xpName));
+					collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+
+				}
+
+			}
+		});
+		lblErase.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/eraser.png")));
+		toolBar.add(lblErase);
 		lblNewLabel.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/edit.png")));
 		toolBar.add(lblNewLabel);
 		lblPlay.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/play.png")));
@@ -124,9 +162,8 @@ public class XpChooser extends JFrame {
 	protected void destroyExperiment(String xpName) {
 		Links.database.getCollection(xpName).drop();
 		Links.database.getCollection(Links.collectionNameExperimentList).findOneAndDelete(Filters.eq("xpName", xpName));
+		this.redrawList();
 	}
-
-	
 
 	private void init() {
 		Vector<String> v = new Vector<String>();
@@ -140,6 +177,7 @@ public class XpChooser extends JFrame {
 		}
 
 		list = new JList<String>(v);
+		list.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		contentPane.add(list, BorderLayout.CENTER);
 
@@ -158,7 +196,6 @@ public class XpChooser extends JFrame {
 			Iterator<Entry<String, Object>> it = document.entrySet().iterator();
 			String id = (String) it.next().getValue().toString();
 			String xpName = (String) it.next().getValue();
-			System.out.println(xpName);
 			v.addElement(xpName);
 		}
 

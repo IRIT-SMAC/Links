@@ -13,7 +13,7 @@ import java.util.HashMap;
  * @since 29/03/2017
  *
  */
-public class Agent implements Serializable {
+public class Entity implements Serializable {
 
 	/**
 	 * Auto-Genearted UID.
@@ -51,7 +51,7 @@ public class Agent implements Serializable {
 	 * @param s
 	 *            The snapshot it belongs to.
 	 */
-	public Agent(String name, String type, Snapshot s) {
+	public Entity(String name, String type, Snapshot s) {
 		this.name = name;
 		this.stype = type;
 		this.ctype = type;
@@ -120,7 +120,7 @@ public class Agent implements Serializable {
 	 *            The agent to be compared with.
 	 * @return True if they have the same name, false otherwise.
 	 */
-	public boolean equals(Agent obj) {
+	public boolean equals(Entity obj) {
 		return name.equals(obj.getName()) && stype.equals(obj.getType());
 	}
 
@@ -148,7 +148,7 @@ public class Agent implements Serializable {
 	 * @param b
 	 *            True if it is, false otherwise.
 	 */
-	public void isTargeted(boolean b) {
+	public void setTargeted(boolean b) {
 		if (b) {
 			ctype = "Targeted";
 		} else {

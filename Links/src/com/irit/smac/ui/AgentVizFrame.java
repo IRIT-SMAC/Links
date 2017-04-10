@@ -31,7 +31,7 @@ import org.graphstream.ui.view.Viewer;
 
 import com.irit.smac.attributes.DrawableAttribute;
 import com.irit.smac.core.DisplayedGraph;
-import com.irit.smac.model.Agent;
+import com.irit.smac.model.Entity;
 import com.irit.smac.model.Attribute;
 import com.irit.smac.model.Relation;
 import com.irit.smac.model.Snapshot;
@@ -60,7 +60,7 @@ public class AgentVizFrame extends JFrame {
 
 	private JLabel lblBotTxt;
 
-	private Agent agent;
+	private Entity entity;
 
 	private SnapshotsCollection snapCol;
 
@@ -110,17 +110,17 @@ public class AgentVizFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public AgentVizFrame(Agent a, SnapshotsCollection snapCol, LinksWindows links) {
+	public AgentVizFrame(Entity a, SnapshotsCollection snapCol, LinksWindows links) {
 		me = this;
 		aname = a.getName();
 		addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowClosed(WindowEvent arg0) {
+			public void windowClosing(WindowEvent arg0) {
 				links.unregisterObserver(me);
-				agent.isTargeted(false);
+				entity.setTargeted(false);
 			}
 		});
-		this.agent = a;
+		this.entity = a;
 		this.snapCol = snapCol;
 		this.links = links;
 		snapNum = links.getCurrentSnapNumber();
@@ -255,12 +255,15 @@ public class AgentVizFrame extends JFrame {
 		initFrame();
 		relations = snapCol.getRelations(aname, snapNum);
 		updateTreeList();
+		for (int i = 0; i < attributeTree.getRowCount(); i++) {
+			attributeTree.expandRow(i);
+		}
 	}
 
 	private void updateLookAndDraw(TreePath[] path) {
 		this.toLook = new ArrayList<DrawableAttribute>();
 		relations = snapCol.getRelations(aname, currentFrameNum);
-		if (path != null) {
+		if (path != null && entity !=null) {
 			for (int i = 0; i < path.length; i++) {
 				switch (path[i].getPath().length) {
 				case 1:
@@ -278,11 +281,11 @@ public class AgentVizFrame extends JFrame {
 							}
 						}
 					}
-					if (path[i].getPath()[1].toString().contains("Agent")) {
-						for (String s : agent.getAttributes().keySet()) {
-							for (Attribute t : agent.getAttributes().get(s)) {
+					if (path[i].getPath()[1].toString().contains("Entity")) {
+						for (String s : entity.getAttributes().keySet()) {
+							for (Attribute t : entity.getAttributes().get(s)) {
 								this.toLook.add(
-										new DrawableAttribute(DrawableAttribute.Type.Agent, agent.getName(), s, t));
+										new DrawableAttribute(DrawableAttribute.Type.Entity, entity.getName(), s, t));
 							}
 						}
 					}
@@ -300,11 +303,11 @@ public class AgentVizFrame extends JFrame {
 						}
 					}
 
-					if (path[i].getPath()[1].toString().contains("Agent")) {
+					if (path[i].getPath()[1].toString().contains("Entity")) {
 
 						String s = path[i].getPath()[2].toString();
-						for (Attribute t : agent.getAttributes().get(s)) {
-							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Agent, agent.getName(), s, t));
+						for (Attribute t : entity.getAttributes().get(s)) {
+							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Entity, entity.getName(), s, t));
 						}
 					}
 					break;
@@ -322,12 +325,14 @@ public class AgentVizFrame extends JFrame {
 
 					}
 
-					if (path[i].getPath()[1].toString().contains("Agent")) {
+					if (path[i].getPath()[1].toString().contains("Entity")) {
 						String s = path[i].getPath()[2].toString();
 						String tmp = path[i].getPath()[3].toString();
 						tmp = tmp.substring(tmp.indexOf("[") + 1, tmp.indexOf("]"));
-						Attribute t = agent.getAttributesWithName(tmp);
-						this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Agent, agent.getName(), s, t));
+						if (entity != null) {
+							Attribute t = entity.getAttributesWithName(tmp);
+							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Entity, entity.getName(), s, t));
+						}
 
 					}
 					break;
@@ -337,12 +342,12 @@ public class AgentVizFrame extends JFrame {
 	}
 
 	protected void isTargeted(boolean b) {
-		agent.isTargeted(b);
-		links.getDisplayedGraph().refresh(agent.getName(), agent.getType());
+		entity.setTargeted(b);
+		links.getDisplayedGraph().refresh(entity.getName(), entity.getType());
 	}
 
 	private void initFrame() {
-		setlblBotTxt("Agent name : " + this.agent.getName() + " on snapshot number : " + links.getCurrentSnapNumber(),
+		setlblBotTxt("Entity name : " + this.entity.getName() + " on snapshot number : " + links.getCurrentSnapNumber(),
 				links.getCurrentSnapNumber());
 
 		updateTreeList();
@@ -355,15 +360,15 @@ public class AgentVizFrame extends JFrame {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 		tree = new DefaultTreeModel(root);
 
-		DefaultMutableTreeNode agentNode = new DefaultMutableTreeNode("Agent");
-		root.add(agentNode);
+		DefaultMutableTreeNode entityNode = new DefaultMutableTreeNode("Entity");
+		root.add(entityNode);
 
-		for (String carac : this.agent.getAttributes().keySet()) {
+		for (String carac : this.entity.getAttributes().keySet()) {
 
 			DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(carac);
-			agentNode.add(newCarac);
+			entityNode.add(newCarac);
 
-			for (Attribute t : this.agent.getAttributes().get(carac)) {
+			for (Attribute t : this.entity.getAttributes().get(carac)) {
 				newCarac.add(new DefaultMutableTreeNode(t.toString()));
 			}
 
@@ -389,7 +394,7 @@ public class AgentVizFrame extends JFrame {
 	}
 
 	public void draw() {
-		Agent a;
+		Entity a;
 		long max = this.currentFrameNum;
 		if (drawSizeLong == 0) {
 			max = this.links.getMaxSnapNumber();
@@ -406,7 +411,7 @@ public class AgentVizFrame extends JFrame {
 			if (drawSizeLong != 0) {
 				timei = i % drawSizeLong;
 			}
-			a = snapCol.getAgent(this.aname, i);
+			a = snapCol.getEntity(this.aname, i);
 			if (a != null) {
 				for (DrawableAttribute t : this.toLook) {
 					String s = t.getAttribute().getName();
@@ -458,26 +463,29 @@ public class AgentVizFrame extends JFrame {
 	public void drawLook() {
 		String s = "";
 		for (DrawableAttribute t : this.toLook) {
-			if (t.getType().equals(DrawableAttribute.Type.Agent)) {
+			if (t.getType().equals(DrawableAttribute.Type.Entity)) {
 				s = s + "{" + t.getCaracList() + "} " + t.getAttribute().toString() + "\n";
 			} else {
 				s = s + " " + t.getType() + ":" + t.getName() + " : {" + t.getCaracList() + "} "
 						+ t.getAttribute().toString() + "\n";
 			}
 		}
+		if(s==""){
+			s = "Entity is dead or not alive yet";
+		}
 		txtpnLook.setText(s);
 	}
 
 	public void notifyJump(long num) {
 		if (isSynch) {
-			agent = snapCol.getAgent(aname, num);
+			entity = snapCol.getEntity(aname, num);
 			relations = snapCol.getRelations(aname, num);
 			updateLookAndDraw(attributeTree.getSelectionPaths());
 			drawLook();
 			if (isDrawing) {
 				draw();
 			}
-			setlblBotTxt("Agent name : " + aname + " on snapshot number : " + num, num);
+			setlblBotTxt("Entity name : " + aname + " on snapshot number : " + num, num);
 		}
 	}
 

@@ -74,6 +74,8 @@ public class LinksWindows implements Serializable {
 
 	private final String linkToCss;
 
+	private boolean isInfoWindowsOpened = false;
+
 	private final AutoPlayThread autoPlayThread;
 
 	private JLabel lblStop;
@@ -81,6 +83,9 @@ public class LinksWindows implements Serializable {
 	private JTextField txtFramerate;
 	private Links linksRef;
 	private JFileChooser fc = new JFileChooser();
+	private JLabel lblInfo;
+
+	private InfoWindow info;
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
@@ -100,6 +105,7 @@ public class LinksWindows implements Serializable {
 		SnapshotsCollection snapCol = new SnapshotsCollection();
 		graph = new DisplayedGraph(snapCol, linkToCss);
 		snapCol.setLinksWindows(this);
+
 		initialize();
 		this.frame.setVisible(true);
 
@@ -163,6 +169,20 @@ public class LinksWindows implements Serializable {
 				isSynch = !isSynch;
 			}
 		});
+
+		lblInfo = new JLabel("");
+		LinksWindows myWindow = this;
+		lblInfo.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				if(!isInfoWindowsOpened){
+					isInfoWindowsOpened = true;
+					info = new InfoWindow(myWindow);
+				}
+			}
+		});
+		lblInfo.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/question.png")));
+		toolBar_1.add(lblInfo);
 		lblSynch.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/synchronization.png")));
 		toolBar_1.add(lblSynch);
 		toolBar_1.add(lblPlay);
@@ -341,6 +361,11 @@ public class LinksWindows implements Serializable {
 		for (AgentVizFrame a : listAgent) {
 			a.notifyJump(number);
 		}
+		if(isInfoWindowsOpened){
+			if(info!=null){
+			info.buildText();
+			}
+		}
 	}
 
 	/**
@@ -379,5 +404,9 @@ public class LinksWindows implements Serializable {
 
 	public int getFrameSpeed() {
 		return Integer.valueOf(this.txtFramerate.getText());
+	}
+
+	public void inforInfoWindowsClosing() {
+		this.isInfoWindowsOpened = false;
 	}
 }

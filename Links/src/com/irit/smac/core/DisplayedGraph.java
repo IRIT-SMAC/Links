@@ -8,7 +8,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 
-import com.irit.smac.model.Agent;
+import com.irit.smac.model.Entity;
 import com.irit.smac.model.Relation;
 import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
@@ -38,46 +38,48 @@ public class DisplayedGraph implements Serializable {
 		currentSnapNumber = snapNumber;
 		Snapshot s = snapColl.getSnaptshot(snapNumber);
 
-		/* Retrait des noeuds */
-		Iterator<Node> it = graph.getNodeIterator();
-		while (it.hasNext()) {
-			String nodeName = it.next().getId();
-			if (s.getAgent(nodeName) == null) {
-				graph.removeNode(nodeName);
-			}
-		}
-
-		/* Retrait des liens */
-		Iterator<Edge> it2 = graph.getEdgeIterator();
-		while (it2.hasNext()) {
-			String nodeName = it2.next().getId();
-			if (s.getRelation(nodeName) == null) {
-				graph.removeEdge(nodeName);
-			}
-		}
-
-		/* Ajout des noeuds */
-		for (Agent a : s.getAgentsList()) {
-			Node n = graph.getNode(a.getName());
-			if (n == null) {
-				graph.addNode(a.getName());
-				graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
-				graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
-			} else {
-				if (!n.getAttribute("ui.class").equals(a.getType())) {
-					n.setAttribute("ui.class", a.getType());
+		if (s != null) {
+			/* Retrait des noeuds */
+			Iterator<Node> it = graph.getNodeIterator();
+			while (it.hasNext()) {
+				String nodeName = it.next().getId();
+				if (s.getEntity(nodeName) == null) {
+					graph.removeNode(nodeName);
 				}
 			}
-		}
 
-		/* Ajout des liens */
-		for (Relation r : s.getRelations()) {
-			if (graph.getEdge(r.getName()) == null) {
-				graph.addEdge(r.getName(), r.getA().getName(), r.getB().getName(), r.isDirectional());
-				graph.getEdge(r.getName()).addAttribute("ui.class", r.getType());
-			} else {
-				if (!graph.getEdge(r.getName()).getAttribute("ui.class").equals(r.getType())) {
-					graph.getEdge(r.getName()).setAttribute("ui.class", r.getType());
+			/* Retrait des liens */
+			Iterator<Edge> it2 = graph.getEdgeIterator();
+			while (it2.hasNext()) {
+				String nodeName = it2.next().getId();
+				if (s.getRelation(nodeName) == null) {
+					graph.removeEdge(nodeName);
+				}
+			}
+
+			/* Ajout des noeuds */
+			for (Entity a : s.getEntityList()) {
+				Node n = graph.getNode(a.getName());
+				if (n == null) {
+					graph.addNode(a.getName());
+					graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
+					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
+				} else {
+					if (!n.getAttribute("ui.class").equals(a.getType())) {
+						n.setAttribute("ui.class", a.getType());
+					}
+				}
+			}
+
+			/* Ajout des liens */
+			for (Relation r : s.getRelations()) {
+				if (graph.getEdge(r.getName()) == null) {
+					graph.addEdge(r.getName(), r.getA().getName(), r.getB().getName(), r.isDirectional());
+					graph.getEdge(r.getName()).addAttribute("ui.class", r.getType());
+				} else {
+					if (!graph.getEdge(r.getName()).getAttribute("ui.class").equals(r.getType())) {
+						graph.getEdge(r.getName()).setAttribute("ui.class", r.getType());
+					}
 				}
 			}
 		}

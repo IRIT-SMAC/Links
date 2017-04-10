@@ -28,7 +28,7 @@ public class AVRT implements Attribute,Serializable {
 	}
 
 	@Override
-	public String type() {
+	public String getType() {
 		return "AVRT";
 	}
 
@@ -45,7 +45,7 @@ public class AVRT implements Attribute,Serializable {
 	}
 	
 	public String toString(){
-		return "["+name+"] AVRT:= " +lowerValue + " | " + down.cValue + " | " + down.delta + " | " + up.cValue + " | " + up.delta + " | " + upperValue;
+		return "["+name+"] AVRT:= " +String.valueOf(lowerValue) + ":" + String.valueOf(down.cValue) + ":" + String.valueOf(down.delta) + ":" + String.valueOf(up.cValue) + ":" + String.valueOf(up.delta) + ":" + String.valueOf(upperValue);
 	}
 
 	@Override

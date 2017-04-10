@@ -29,7 +29,7 @@ public class DoubleAttribute implements Attribute,Serializable {
 		return name;
 	}
 
-	public String type() {
+	public String getType() {
 		return "double";
 	}
 
