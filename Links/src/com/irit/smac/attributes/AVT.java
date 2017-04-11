@@ -4,38 +4,56 @@ import java.io.Serializable;
 
 import com.irit.smac.model.Attribute;
 
-public class AVT implements Attribute,Serializable {
+/**
+ * This class models an AVT as an attribute. For more information on AVRT, see
+ * http://thesesups.ups-tlse.fr/3249/.
+ * 
+ * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
+ * 
+ *
+ */
+public class AVT extends Attribute implements Serializable {
 	
-	public double delta;
-	public double cValue;
+	private double delta;
 	
-	private String name;
-
-	public AVT(String name, double delta, double cValue) {
-		super();
+	/**
+	 * Construct an AVT as an attirubte.
+	 * @param name The name of the AVT
+	 * @param delta The delta value
+	 * @param value The start value of the AVT
+	 */
+	public AVT(String name, double delta, double value) {
+		super(name,value);
 		this.delta = delta;
-		this.cValue = cValue;
-		this.name = name;
+		this.setValue(value);
 	}
 
-	public String getName() {
-		return name;
+	/**
+	 * Get the delta value.
+	 * @return The delta value.
+	 */
+	public double getDelta(){
+		return delta;
 	}
-
+	
+	@Override
 	public String getType() {
 		return "AVT";
 	}
 
 	@Override
 	public Object getValue() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.getValue();
+	}
+	
+	@Override
+	public String toString() {
+		return "[" + this.getName() + "] AVT:= " + String.valueOf(delta) + ":" + this.getValue();
 	}
 
 	@Override
-	public String getTypeToDraw() {
-		// TODO Auto-generated method stub
-		return "AVT";
+	public AttributeStyle getTypeToDraw() {
+		return AttributeStyle.AVRT;
 	}
 
 }

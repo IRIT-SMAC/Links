@@ -5,7 +5,7 @@ import com.irit.smac.model.Attribute;
 public class DrawableAttribute {
 
 	public enum Type {
-		Entity, Relation;
+		ENTITY, RELATION;
 	};
 
 	private Type type;

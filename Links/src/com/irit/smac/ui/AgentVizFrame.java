@@ -3,13 +3,17 @@ package com.irit.smac.ui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,24 +30,18 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.view.Viewer;
 
+import com.irit.smac.attributes.AVT;
 import com.irit.smac.attributes.DrawableAttribute;
-import com.irit.smac.core.DisplayedGraph;
-import com.irit.smac.model.Entity;
 import com.irit.smac.model.Attribute;
+import com.irit.smac.model.Attribute.AttributeStyle;
+import com.irit.smac.model.Entity;
 import com.irit.smac.model.Relation;
-import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
 
 import fr.irit.smac.lxplot.LxPlot;
 import fr.irit.smac.lxplot.commons.ChartType;
-import javax.swing.JFormattedTextField;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class AgentVizFrame extends JFrame {
 
@@ -109,6 +107,9 @@ public class AgentVizFrame extends JFrame {
 
 	/**
 	 * Create the frame.
+	 * @param a The entity to look at.
+	 * @param snapCol The reference to the snapshot collection.
+	 * @param links The reference to the links windows.
 	 */
 	public AgentVizFrame(Entity a, SnapshotsCollection snapCol, LinksWindows links) {
 		me = this;
@@ -263,7 +264,7 @@ public class AgentVizFrame extends JFrame {
 	private void updateLookAndDraw(TreePath[] path) {
 		this.toLook = new ArrayList<DrawableAttribute>();
 		relations = snapCol.getRelations(aname, currentFrameNum);
-		if (path != null && entity !=null) {
+		if (path != null && entity != null) {
 			for (int i = 0; i < path.length; i++) {
 				switch (path[i].getPath().length) {
 				case 1:
@@ -276,7 +277,7 @@ public class AgentVizFrame extends JFrame {
 							for (String s : r.getAttributes().keySet()) {
 								for (Attribute t : r.getAttributes().get(s)) {
 									this.toLook.add(
-											new DrawableAttribute(DrawableAttribute.Type.Relation, r.getName(), s, t));
+											new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
 								}
 							}
 						}
@@ -285,7 +286,7 @@ public class AgentVizFrame extends JFrame {
 						for (String s : entity.getAttributes().keySet()) {
 							for (Attribute t : entity.getAttributes().get(s)) {
 								this.toLook.add(
-										new DrawableAttribute(DrawableAttribute.Type.Entity, entity.getName(), s, t));
+										new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
 							}
 						}
 					}
@@ -298,7 +299,7 @@ public class AgentVizFrame extends JFrame {
 						for (String s : r.getAttributes().keySet()) {
 							for (Attribute t : r.getAttributes().get(s)) {
 								this.toLook
-										.add(new DrawableAttribute(DrawableAttribute.Type.Relation, r.getName(), s, t));
+										.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
 							}
 						}
 					}
@@ -307,7 +308,8 @@ public class AgentVizFrame extends JFrame {
 
 						String s = path[i].getPath()[2].toString();
 						for (Attribute t : entity.getAttributes().get(s)) {
-							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Entity, entity.getName(), s, t));
+							this.toLook
+									.add(new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
 						}
 					}
 					break;
@@ -320,7 +322,7 @@ public class AgentVizFrame extends JFrame {
 						Relation r = snapCol.getRelation(path[i].getPath()[2].toString(), this.currentFrameNum);
 						String s = path[i].getPath()[3].toString();
 						for (Attribute t : r.getAttributes().get(s)) {
-							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Relation, r.getName(), s, t));
+							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
 						}
 
 					}
@@ -331,7 +333,8 @@ public class AgentVizFrame extends JFrame {
 						tmp = tmp.substring(tmp.indexOf("[") + 1, tmp.indexOf("]"));
 						if (entity != null) {
 							Attribute t = entity.getAttributesWithName(tmp);
-							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.Entity, entity.getName(), s, t));
+							this.toLook
+									.add(new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
 						}
 
 					}
@@ -343,7 +346,7 @@ public class AgentVizFrame extends JFrame {
 
 	protected void isTargeted(boolean b) {
 		entity.setTargeted(b);
-		links.getDisplayedGraph().refresh(entity.getName(), entity.getType());
+		links.getDisplayedGraph().refreshNeighbouring(entity.getName(), entity.getType());
 	}
 
 	private void initFrame() {
@@ -416,15 +419,15 @@ public class AgentVizFrame extends JFrame {
 				for (DrawableAttribute t : this.toLook) {
 					String s = t.getAttribute().getName();
 					Attribute theAttribute = t.getAttribute();
-					if (theAttribute.getTypeToDraw().equals("linear")) {
+					if (theAttribute.getTypeToDraw().equals(AttributeStyle.LINEAR)) {
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
 								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
 					}
-					if (theAttribute.getTypeToDraw().equals("bar")) {
+					if (theAttribute.getTypeToDraw().equals(AttributeStyle.BAR)) {
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
 								ChartType.BAR).add(s, timei, (Double) theAttribute.getValue());
 					}
-					if (theAttribute.getTypeToDraw().equals("AVRT")) {
+					if (theAttribute.getTypeToDraw().equals(AttributeStyle.AVRT)) {
 						Double tab[] = (Double[]) theAttribute.getValue();
 						for (Double val : tab) {
 							LxPlot.getChart(
@@ -453,6 +456,12 @@ public class AgentVizFrame extends JFrame {
 									ChartType.LINE).add(s + "UPPER", timei, tab[5]);
 						}
 					}
+					if (theAttribute.getTypeToDraw().equals(AttributeStyle.AVT)) {
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
+								ChartType.LINE).add(s + "Value", timei, (Double) theAttribute.getValue());
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
+								ChartType.LINE).add(s + "Delta", timei, ((AVT) theAttribute).getDelta());
+					}
 				}
 			}
 		}
@@ -463,14 +472,14 @@ public class AgentVizFrame extends JFrame {
 	public void drawLook() {
 		String s = "";
 		for (DrawableAttribute t : this.toLook) {
-			if (t.getType().equals(DrawableAttribute.Type.Entity)) {
+			if (t.getType().equals(DrawableAttribute.Type.ENTITY)) {
 				s = s + "{" + t.getCaracList() + "} " + t.getAttribute().toString() + "\n";
 			} else {
 				s = s + " " + t.getType() + ":" + t.getName() + " : {" + t.getCaracList() + "} "
 						+ t.getAttribute().toString() + "\n";
 			}
 		}
-		if(s==""){
+		if (s == "") {
 			s = "Entity is dead or not alive yet";
 		}
 		txtpnLook.setText(s);

@@ -39,7 +39,7 @@ public class XpChooser extends JFrame {
 	/**
 	 * Create the frame.
 	 * 
-	 * @param links
+	 * @param links The reference to the links window.
 	 */
 	public XpChooser(Links links) {
 		setTitle("Links: Xp Chooser");

@@ -62,8 +62,8 @@ public class Relation implements Serializable {
 	 * @param type
 	 *            The type of the relation (used to determine its ui.class).
 	 * @param directional
-	 *            True if the relation is directional (A->B) false if it is
-	 *            bidirectional (A<->B).
+	 *            True if the relation is directional (A to B) false if it is
+	 *            bidirectional (A--B).
 	 * @param s
 	 *            The reference to the snapshot the relation belongs to.
 	 */
@@ -120,7 +120,7 @@ public class Relation implements Serializable {
 
 	/**
 	 * Compares two relations to determine if they are equals
-	 * (R1.A==R1.A&&R1.B==R2.B&&R1.isDirectional==R2.isDirectional)
+	 * (R1.A==R1.A and R1.B==R2.B and R1.isDirectional==R2.isDirectional)
 	 * 
 	 * @param obj
 	 *            The relation to be compared with.

@@ -110,7 +110,7 @@ public class NewXpWindows extends JFrame {
 	/**
 	 * Create the frame.
 	 * 
-	 * @param ref
+	 * @param ref The reference to the XpChooser window.
 	 */
 	public NewXpWindows(XpChooser ref) {
 		this.xpRef = ref;

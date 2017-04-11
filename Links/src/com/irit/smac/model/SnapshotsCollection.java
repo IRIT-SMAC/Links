@@ -13,6 +13,8 @@ import com.irit.smac.attributes.AVT;
 import com.irit.smac.attributes.DoubleAttribute;
 import com.irit.smac.attributes.StringAttribute;
 import com.irit.smac.core.Links;
+import com.irit.smac.model.Attribute.AttributeStyle;
+import com.irit.smac.model.Attribute.AttributeType;
 import com.irit.smac.ui.LinksWindows;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
@@ -61,7 +63,7 @@ public class SnapshotsCollection implements Serializable {
 
 		for (Entity a : s.getEntityList()) {
 			caract = new Document("Type", "Entity").append("Name", a.getName()).append("Class", a.getType().toString());
-		
+
 			for (String atName : a.getAttributes().keySet()) {
 				attributeList = new Document();
 				for (Attribute t : a.getAttributes().get(atName)) {
@@ -77,7 +79,7 @@ public class SnapshotsCollection implements Serializable {
 			attributeList = new Document("Type", "Relation").append("RelationName", a.getName())
 					.append("A", a.getA().getName()).append("B", a.getB().getName())
 					.append("isDirectionnal", a.isDirectional()).append("Class", a.getType().toString());
-		
+
 			for (String atName : a.getAttributes().keySet()) {
 				relationCaract = new Document();
 				for (Attribute t : a.getAttributes().get(atName)) {
@@ -184,12 +186,16 @@ public class SnapshotsCollection implements Serializable {
 	private Attribute buildAttribute(String caracName, String typeToDraw, String toString) {
 		Attribute t = null;
 		if (toString.contains("Double")) {
+			AttributeStyle a = AttributeStyle.LINEAR;
+			switch (typeToDraw) {
+			case "BAR":
+				a = AttributeStyle.BAR;
+			}
 			t = new DoubleAttribute(caracName,
-					Double.valueOf(toString.substring(toString.indexOf("=") + 1, toString.length())), typeToDraw);
+					Double.valueOf(toString.substring(toString.indexOf("=") + 1, toString.length())), a);
 		} else {
 			if (toString.contains("String")) {
-				t = new StringAttribute(caracName,
-						(toString.substring(toString.indexOf("=") + 1, toString.length())));
+				t = new StringAttribute(caracName, (toString.substring(toString.indexOf("=") + 1, toString.length())));
 			} else {
 				if (toString.contains("AVRT")) {
 					String value = (toString.substring(toString.indexOf("=") + 1, toString.length()));

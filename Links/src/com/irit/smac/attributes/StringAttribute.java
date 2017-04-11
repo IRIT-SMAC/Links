@@ -4,15 +4,13 @@ import java.io.Serializable;
 
 import com.irit.smac.model.Attribute;
 
-public class StringAttribute implements Attribute,Serializable {
+public class StringAttribute extends Attribute implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6726345506370602566L;
 
-	private String name;
-	
 	private String value;
 	
 	/**
@@ -20,14 +18,8 @@ public class StringAttribute implements Attribute,Serializable {
 	 * @param value Value
 	 */
 	public StringAttribute(String name, String value) {
-		super();
-		this.name = name;
-		this.value = value;
-	}
-
-	@Override
-	public String getName() {
-		return name;
+		super(name,value);
+		this.setValue(value);
 	}
 
 	@Override
@@ -36,17 +28,12 @@ public class StringAttribute implements Attribute,Serializable {
 	}
 	
 	public String toString(){
-		return "["+name+"] String:= " + value;
+		return "["+this.getName()+"] String:= " + value;
 	}
 
 	@Override
-	public Object getValue() {
-		return value;
-	}
-
-	@Override
-	public String getTypeToDraw() {
-		return "String";
+	public AttributeStyle getTypeToDraw() {
+		return AttributeStyle.STRING;
 	}
 
 }

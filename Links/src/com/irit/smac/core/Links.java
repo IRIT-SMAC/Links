@@ -69,21 +69,7 @@ public class Links {
 	 * selection of the experiment name.
 	 */
 	public Links() {
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		setLookAndFeel();
 		mongoClient = new MongoClient();
 		database = mongoClient.getDatabase(dataBaseName);
 
@@ -102,10 +88,11 @@ public class Links {
 	 * 
 	 */
 	public Links(String xpName) {
+		setLookAndFeel();
 		mongoClient = new MongoClient();
 		database = mongoClient.getDatabase(dataBaseName);
 
-//		XpChooser xpChooser = new XpChooser(this);
+		// XpChooser xpChooser = new XpChooser(this);
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName));
 	}
@@ -124,7 +111,7 @@ public class Links {
 	 * 
 	 */
 	public Links(ServerAddress addr, String xpName) {
-
+		setLookAndFeel();
 		mongoClient = new MongoClient(addr);
 		database = mongoClient.getDatabase(dataBaseName);
 
@@ -140,13 +127,10 @@ public class Links {
 	 * 
 	 * @param addr
 	 *            The ServerAddress of the MongoDB database.
-	 * @param xpName
-	 *            The name of the experiment to use. If an experiment with this
-	 *            name already exists, the application restore the previously
-	 *            loaded data.
 	 * 
 	 */
 	public Links(ServerAddress addr) {
+		setLookAndFeel();
 		mongoClient = new MongoClient(addr);
 		database = mongoClient.getDatabase(dataBaseName);
 		XpChooser xpChooser = new XpChooser(this);
@@ -183,6 +167,14 @@ public class Links {
 	 */
 	public void informClose() {
 		linksWindow = null;
+	}
+
+	public void setLookAndFeel() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

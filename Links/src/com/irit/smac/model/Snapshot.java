@@ -63,6 +63,7 @@ public class Snapshot implements Serializable{
 	 *            The name of the agent. Must be unique.
 	 * @param type
 	 *            The type of the agent (used to determine its css class).
+	 *            @return A reference to the newly created entity.
 	 */
 	public Entity addEntity(String name, String type) {
 		Entity a = new Entity(name, type, this);
@@ -127,12 +128,12 @@ public class Snapshot implements Serializable{
 	 * @param name
 	 *            The name of the relation (must be unique).
 	 * @param isDirectional
-	 *            True if the relation is directional (from A->B), false if the
-	 *            relation is bidirectional (A<->B).
+	 *            True if the relation is directional (from A to B), false if the
+	 *            relation is bidirectional (A--B).
 	 * @param type
 	 *            The type of the relation (used to determine its class in the
 	 *            css).
-	 * @return 
+	 * @return A reference to the newly created relation.
 	 */
 	public Relation addRelation(String A, String B, String name, boolean isDirectional, String type) {
 		if (containsEntity(A) && containsEntity(B)) {

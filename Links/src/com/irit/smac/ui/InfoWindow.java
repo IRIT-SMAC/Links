@@ -23,7 +23,7 @@ public class InfoWindow extends JFrame {
 	/**
 	 * Create the frame.
 	 * 
-	 * @param linksWindows
+	 * @param linksWindows The reference to the links window.
 	 */
 	public InfoWindow(LinksWindows linksWindows) {
 		setTitle("Statistic Window");

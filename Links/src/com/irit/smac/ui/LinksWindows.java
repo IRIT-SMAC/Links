@@ -214,7 +214,7 @@ public class LinksWindows implements Serializable {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				switchToSnap(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
-						graph.getSnap().getMaxNum() - 1), 1));
+						graph.getSnapCol().getMaxNum() - 1), 1));
 			}
 		});
 		lblNext.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png")));
@@ -331,7 +331,7 @@ public class LinksWindows implements Serializable {
 	 * @return The snapshots collection.
 	 */
 	public SnapshotsCollection getSnapCol() {
-		return graph.getSnap();
+		return graph.getSnapCol();
 	}
 
 	/**

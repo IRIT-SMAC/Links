@@ -12,16 +12,23 @@ import com.irit.smac.model.Entity;
 import com.irit.smac.model.Relation;
 import com.irit.smac.model.Snapshot;
 import com.irit.smac.model.SnapshotsCollection;
-
+/**
+ * This class controls the graph vizualisation.
+ * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
+ *
+ */
 public class DisplayedGraph implements Serializable {
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = -7697345043271592254L;
 	private Graph graph;
 	private SnapshotsCollection snapColl;
 	private long currentSnapNumber;
 
+	/**
+	 * Create a new DisplayedGraph.
+	 * @param snapColl The reference to the snapshot collection. 
+	 * @param linkToCss The link to the graphstream css file.
+	 */
 	public DisplayedGraph(SnapshotsCollection snapColl, String linkToCss) {
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 		graph = new MultiGraph("embedded");
@@ -30,10 +37,18 @@ public class DisplayedGraph implements Serializable {
 		this.snapColl = snapColl;
 	}
 
+	/**
+	 * Get the current displayed graph.
+	 * @return The reference to the displayed graph.
+	 */
 	public Graph getGraph() {
 		return graph;
 	}
 
+	/**
+	 * Load a graph from the snapshot number. 
+	 * @param snapNumber The number of the snapshot to be displayed.
+	 */
 	public void loadGraph(long snapNumber) {
 		currentSnapNumber = snapNumber;
 		Snapshot s = snapColl.getSnaptshot(snapNumber);
@@ -85,6 +100,11 @@ public class DisplayedGraph implements Serializable {
 		}
 	}
 
+	/**
+	 * Add a node to the graph.
+	 * @param name The name of the node (must be unique).
+	 * @param type The type of the node (ui.class).
+	 */
 	public void addNode(String name, String type) {
 		Node n = graph.getNode("name");
 		if (n == null) {
@@ -94,21 +114,23 @@ public class DisplayedGraph implements Serializable {
 		}
 	}
 
-	public boolean containsSnap(long number) {
-		return this.snapColl.containsSnap(number);
-	}
-
-	public SnapshotsCollection getSnap() {
-		return snapColl;
-	}
-
+	/**
+	 * Get the snapshot collection. 
+	 * @return The reference to the snapshot collection.
+	 */
 	public SnapshotsCollection getSnapCol() {
 		return snapColl;
 	}
 
-	public void refresh(String agent, String type) {
-		graph.getNode(agent).addAttribute("ui.class", type);
-		for (Edge e : graph.getNode(agent).getLeavingEdgeSet()) {
+	/**
+	 * This method is called when an node is targeted.
+	 * It refreshes the graph to redraw the node outgoing edges.
+	 * @param node The name of the node.
+	 * @param type The type of the node.
+	 */
+	public void refreshNeighbouring(String node, String type) {
+		graph.getNode(node).addAttribute("ui.class", type);
+		for (Edge e : graph.getNode(node).getLeavingEdgeSet()) {
 			if (!type.equals("Targeted")) {
 				e.addAttribute("ui.class",
 						this.snapColl.getSnaptshot(currentSnapNumber).getRelation(e.getId()).getType());
