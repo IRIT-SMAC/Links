@@ -68,7 +68,7 @@ public class SnapshotsCollection implements Serializable {
 				attributeList = new Document();
 				for (Attribute t : a.getAttributes().get(atName)) {
 					attributeList.append(t.getName(),
-							new Document("TypeToDraw", t.getTypeToDraw()).append("toString", t.toString()));
+							new Document("TypeToDraw", t.getTypeToDraw().toString()).append("toString", t.toString()));
 				}
 				caract.append(atName, attributeList);
 			}
@@ -84,7 +84,7 @@ public class SnapshotsCollection implements Serializable {
 				relationCaract = new Document();
 				for (Attribute t : a.getAttributes().get(atName)) {
 					relationCaract.append(t.getName(),
-							new Document("TypeToDraw", t.getTypeToDraw()).append("toString", t.toString()));
+							new Document("TypeToDraw", t.getTypeToDraw().toString()).append("toString", t.toString()));
 				}
 				attributeList.append(atName, relationCaract);
 			}

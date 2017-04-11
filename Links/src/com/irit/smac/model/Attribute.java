@@ -1,6 +1,8 @@
 package com.irit.smac.model;
 
-public abstract class Attribute {
+import java.io.Serializable;
+
+public abstract class Attribute implements Serializable{
 
 	/**
 	 * This enum describes the type of graphic to draw with this attribute.
@@ -8,7 +10,7 @@ public abstract class Attribute {
 	 * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
 	 *
 	 */
-	public enum AttributeStyle {
+	public enum AttributeStyle implements Serializable{
 		LINEAR, BAR, AVRT, AVT, STRING;
 	};
 
@@ -18,7 +20,7 @@ public abstract class Attribute {
 	 * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
 	 *
 	 */
-	public enum AttributeType {
+	public enum AttributeType implements Serializable{
 		AVRT, AVT, STRING, DOUBLE;
 	};
 

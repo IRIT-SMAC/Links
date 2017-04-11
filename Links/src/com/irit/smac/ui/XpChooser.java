@@ -135,7 +135,6 @@ public class XpChooser extends JFrame {
 				if (dialogResult == JOptionPane.YES_OPTION) {
 
 					String xpName = (String) list.getSelectedValue();
-					System.out.println(xpName);
 					MongoCollection<Document> collection = Links.database
 							.getCollection(Links.collectionNameExperimentList);
 

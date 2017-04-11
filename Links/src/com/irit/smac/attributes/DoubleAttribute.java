@@ -13,8 +13,6 @@ import com.irit.smac.model.Attribute;
  */
 public class DoubleAttribute extends Attribute implements Serializable {
 
-	private double value;
-
 	private AttributeStyle myStyle = AttributeStyle.LINEAR;
 
 	/**
@@ -42,7 +40,6 @@ public class DoubleAttribute extends Attribute implements Serializable {
 	 */
 	public DoubleAttribute(String name, Double value, AttributeStyle style) {
 		super(name,value);
-		this.setValue(value);
 		myStyle = style;
 	}
 
@@ -53,12 +50,7 @@ public class DoubleAttribute extends Attribute implements Serializable {
 
 	@Override
 	public String toString() {
-		return "[" + this.getName() + "] Double:= " + value;
-	}
-
-	@Override
-	public Object getValue() {
-		return value;
+		return "[" + this.getName() + "] Double:= " + this.getValue();
 	}
 
 	/**

@@ -10,8 +10,6 @@ public class StringAttribute extends Attribute implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -6726345506370602566L;
-
-	private String value;
 	
 	/**
 	 * @param name Name of the attribute
@@ -28,7 +26,7 @@ public class StringAttribute extends Attribute implements Serializable {
 	}
 	
 	public String toString(){
-		return "["+this.getName()+"] String:= " + value;
+		return "["+this.getName()+"] String:= " + this.getValue();
 	}
 
 	@Override
