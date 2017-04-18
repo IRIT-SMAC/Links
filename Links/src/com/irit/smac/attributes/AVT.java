@@ -43,7 +43,7 @@ public class AVT extends Attribute implements Serializable {
 
 	@Override
 	public Object getValue() {
-		return this.getValue();
+		return this.delta;
 	}
 	
 	@Override
