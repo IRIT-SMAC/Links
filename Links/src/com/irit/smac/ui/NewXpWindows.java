@@ -118,17 +118,10 @@ public class NewXpWindows extends JFrame {
 	}
 
 	private void create() {
-		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
 		String xpName = this.txtXpName.getText();
-		collection.deleteMany(Filters.eq("xpName", xpName));
-		collection.insertOne(new Document("xpName", xpName).append("cssFile", this.txtLinkToCss.getText()));
-
-		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
-		collection2.deleteMany(Filters.eq("xpName", xpName));
-		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+		XpChooser.create(xpName);
 		
 		xpRef.redrawList();
-		
 		this.setVisible(false);
 	}
 }

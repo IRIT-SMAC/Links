@@ -135,12 +135,7 @@ public class XpChooser extends JFrame {
 				if (dialogResult == JOptionPane.YES_OPTION) {
 
 					String xpName = (String) list.getSelectedValue();
-					MongoCollection<Document> collection = Links.database
-							.getCollection(Links.collectionNameExperimentList);
-
-					MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
-					collection2.deleteMany(Filters.eq("xpName", xpName));
-					collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+				drop(xpName);
 
 				}
 
@@ -157,10 +152,33 @@ public class XpChooser extends JFrame {
 		init();
 		this.setVisible(true);
 	}
-
-	protected void destroyExperiment(String xpName) {
+	
+	public static void delete(String xpName){
 		Links.database.getCollection(xpName).drop();
 		Links.database.getCollection(Links.collectionNameExperimentList).findOneAndDelete(Filters.eq("xpName", xpName));
+	}
+	
+	public static void create(String xpName){
+		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
+		collection.deleteMany(Filters.eq("xpName", xpName));
+		collection.insertOne(new Document("xpName", xpName).append("cssFile", Links.getCssFilePathFromXpName(xpName)));
+
+		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
+		collection2.deleteMany(Filters.eq("xpName", xpName));
+		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+	}
+
+	public static void drop(String xpName) {
+		MongoCollection<Document> collection = Links.database
+				.getCollection(Links.collectionNameExperimentList);
+
+		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
+		collection2.deleteMany(Filters.eq("xpName", xpName));
+		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+	}
+
+	protected void destroyExperiment(String xpName) {
+		delete(xpName);
 		this.redrawList();
 	}
 

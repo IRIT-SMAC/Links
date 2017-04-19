@@ -25,6 +25,10 @@ import com.mongodb.client.model.Filters;
  * @since 29/03/2017
  *
  */
+/**
+ * @author Bob
+ *
+ */
 public class Links {
 
 	/**
@@ -147,6 +151,54 @@ public class Links {
 		if (linksWindow != null) {
 			linksWindow.addSnapshot(s);
 		}
+	}
+
+	/**
+	 * Create a new experiment with the given name. Drop if any other experiment
+	 * with the same name already exists.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment
+	 */
+	public static void createExperiment(String xpName) {
+		XpChooser.create(xpName);
+	}
+
+	/**
+	 * Delete an experiment with the given name.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment.
+	 */
+	public static void deleteExperiment(String xpName) {
+		XpChooser.delete(xpName);
+	}
+
+	/**
+	 * Test if an experiment with the given name has been created.
+	 * @param xpName
+	 * The name of the experiment.
+	 * @return
+	 * True if the experiment exists, false otherwise.
+	 */
+	public static boolean existsExperiment(String xpName) {
+		MongoCollection<Document> maCollection = Links.database.getCollection(Links.collectionNameExperimentList);
+		Document myXP = maCollection.find(Filters.eq("xpName", xpName)).first();
+		if (myXP != null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Drop the experiment with the givent name.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment.
+	 */
+	public void dropExperiment(String xpName) {
+		XpChooser.drop(xpName);
 	}
 
 	/**
