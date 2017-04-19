@@ -175,7 +175,7 @@ public class LinksWindows implements Serializable {
 		lblInfo.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				if(!isInfoWindowsOpened){
+				if (!isInfoWindowsOpened) {
 					isInfoWindowsOpened = true;
 					info = new InfoWindow(myWindow);
 				}
@@ -359,11 +359,13 @@ public class LinksWindows implements Serializable {
 
 	private synchronized void notifyJump(long number) {
 		for (AgentVizFrame a : listAgent) {
-			a.notifyJump(number);
+			if (a != null) {
+				a.notifyJump(number);
+			}
 		}
-		if(isInfoWindowsOpened){
-			if(info!=null){
-			info.buildText();
+		if (isInfoWindowsOpened) {
+			if (info != null) {
+				info.buildText();
 			}
 		}
 	}
