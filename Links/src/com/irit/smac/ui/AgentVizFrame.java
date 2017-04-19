@@ -32,7 +32,7 @@ import javax.swing.tree.TreePath;
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.view.Viewer;
 
-import com.irit.smac.attributes.AVT;
+import com.irit.smac.attributes.AVTAttribute;
 import com.irit.smac.attributes.DrawableAttribute;
 import com.irit.smac.model.Attribute;
 import com.irit.smac.model.Attribute.AttributeStyle;
@@ -460,7 +460,7 @@ public class AgentVizFrame extends JFrame {
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
 								ChartType.LINE).add(s + "Value", timei, (Double) theAttribute.getValue());
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
-								ChartType.LINE).add(s + "Delta", timei, ((AVT) theAttribute).getDelta());
+								ChartType.LINE).add(s + "Delta", timei, ((AVTAttribute) theAttribute).getDelta());
 					}
 				}
 			}

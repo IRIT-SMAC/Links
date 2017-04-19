@@ -4,6 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.irit.smac.attributes.AVRTAttribute;
+import com.irit.smac.attributes.AVTAttribute;
+import com.irit.smac.attributes.DoubleAttribute;
+import com.irit.smac.attributes.StringAttribute;
+import com.irit.smac.model.Attribute.AttributeStyle;
+
 /**
  * Agent: This class models an agent. It possesses a type (used to determine its
  * ui.class) and a list of Attributes.
@@ -106,11 +112,113 @@ public class Entity implements Serializable {
 	 * @param t
 	 *            The attribute to add.
 	 */
-	public void addOneAttribute(String attributeListName, Attribute t) {
+	void addOneAttribute(String attributeListName, Attribute t) {
 		if (!attributes.containsKey(attributeListName)) {
 			attributes.put(attributeListName, new ArrayList<Attribute>());
 		}
 		attributes.get(attributeListName).add(t);
+	}
+
+	/**
+	 * Add one string attribute to the precised list.
+	 * 
+	 * @param attributeListName
+	 *            The name of the list.
+	 * @param aname
+	 *            The name of the attribute.
+	 * @param s
+	 *            The string attribute to add.
+	 */
+	public void addOneAttribute(String attributeListName, String aname, String s) {
+		if (!attributes.containsKey(attributeListName)) {
+			attributes.put(attributeListName, new ArrayList<Attribute>());
+		}
+		attributes.get(attributeListName).add(new StringAttribute(aname, s));
+	}
+
+	/**
+	 * Add one double attribute to the precised list.
+	 * 
+	 * @param attributeListName
+	 *            The name of the list.
+	 * @param aname
+	 *            The name of the attribute.
+	 * @param d
+	 *            The double attribute to add.
+	 */
+	public void addOneAttribute(String attributeListName, String aname, double d) {
+		if (!attributes.containsKey(attributeListName)) {
+			attributes.put(attributeListName, new ArrayList<Attribute>());
+		}
+		attributes.get(attributeListName).add(new DoubleAttribute(aname, d));
+	}
+
+	/**
+	 * Add one avt attribute to the precised list.
+	 * 
+	 * @param attributeListName
+	 *            The name of the list.
+	 * @param aname
+	 *            The name of the attribute.
+	 * @param delta
+	 *            The delta value of the attribute to add.
+	 * @param cvalue
+	 *            The current value of the attribute to add.
+	 */
+	public void addOneAttribute(String attributeListName, String aname, double delta, double cvalue) {
+		if (!attributes.containsKey(attributeListName)) {
+			attributes.put(attributeListName, new ArrayList<Attribute>());
+		}
+		attributes.get(attributeListName).add(new AVTAttribute(aname, delta, cvalue));
+	}
+
+	/**
+	 * Add one avrt attribute to the precised list.
+	 * 
+	 * @param attributeListName
+	 *            The name of the list.
+	 * @param aname
+	 *            The name of the attribute.
+	 * @param updelta
+	 *            The delta value of the upper AVT attribute to add.
+	 * @param upcvalue
+	 *            The current value of the upper AVT attribute to add.
+	 * @param downdelta
+	 *            The delta value of the lower AVT attribute to add.
+	 * @param downcvalue
+	 *            The current value of the lower AVT attribute to add.
+	 * @param uppervalue
+	 *            The upper value of the range.
+	 * @param lowervalue
+	 *            The lower value of the range.
+	 */
+	public void addOneAttribute(String attributeListName, String aname, double updelta, double upcvalue,
+			double downdelta, double downcvalue, double uppervalue, double lowervalue) {
+		if (!attributes.containsKey(attributeListName)) {
+			attributes.put(attributeListName, new ArrayList<Attribute>());
+		}
+		attributes.get(attributeListName)
+				.add(new AVRTAttribute(aname, new AVTAttribute(aname + "UpAVT", updelta, upcvalue),
+						new AVTAttribute(aname + "DownAVT", downdelta, downcvalue), uppervalue, lowervalue));
+	}
+	
+	/**
+	 * Add one double attribute to the precised list.
+	 * 
+	 * @param attributeListName
+	 *            The name of the list.
+	 * @param aname
+	 *            The name of the attribute.
+	 * @param d
+	 *            The double attribute to add.
+	 * @param style
+	 *            The drawing style of the attribute.
+	 */
+	public void addOneAttribute(String attributeListName, String aname, double d, AttributeStyle style) {
+		if (!attributes.containsKey(attributeListName)) {
+			attributes.put(attributeListName, new ArrayList<Attribute>());
+		}
+		attributes.get(attributeListName).add(new DoubleAttribute(aname, d, style));
 	}
 
 	/**

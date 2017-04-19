@@ -12,10 +12,10 @@ import com.irit.smac.model.Attribute;
  * 
  *
  */
-public class AVRT extends Attribute implements Serializable {
+public class AVRTAttribute extends Attribute implements Serializable {
 
-	private AVT up;
-	private AVT down;
+	private AVTAttribute up;
+	private AVTAttribute down;
 	private double upperValue;
 	private double lowerValue;
 
@@ -33,7 +33,7 @@ public class AVRT extends Attribute implements Serializable {
 	 * @param lowerValue
 	 *            The minimum lower bound value.
 	 */
-	public AVRT(String name, AVT up, AVT lower, double upperValue, double lowerValue) {
+	public AVRTAttribute(String name, AVTAttribute up, AVTAttribute lower, double upperValue, double lowerValue) {
 		super(name, null);
 		this.up = up;
 		this.down = lower;

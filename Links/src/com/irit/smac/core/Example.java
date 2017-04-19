@@ -11,7 +11,9 @@ public class Example {
 
 	/**
 	 * Launch the application.
-	 * @param args The parameters of the application.
+	 * 
+	 * @param args
+	 *            The parameters of the application.
 	 */
 	public static void main(String[] args) {
 
@@ -21,9 +23,9 @@ public class Example {
 
 		Entity a = s.addEntity("Toto", "Humain");
 
-		a.addOneAttribute("Charct", new DoubleAttribute("Age", 24));
-		a.addOneAttribute("Charct", new DoubleAttribute("Bonbons", 2., AttributeStyle.BAR));
-		a.addOneAttribute("Charct", new StringAttribute("Nom", "Toto"));
+		a.addOneAttribute("Charct", "Age", 24);
+		a.addOneAttribute("Charct", "Bonbons", 2., AttributeStyle.BAR);
+		a.addOneAttribute("Charct", "Nom", "Toto");
 
 		// a.addOneAttribute("Domain", new AVRT("VRange1", new AVT("Up", 1, 0),
 		// new AVT("Down", 1, -5), 10, -10));
@@ -39,9 +41,9 @@ public class Example {
 
 		a = s2.addEntity("Toto", "Humain");
 
-		a.addOneAttribute("Charct", new DoubleAttribute("Age", 24));
-		a.addOneAttribute("Charct", new DoubleAttribute("Bonbons", 2., AttributeStyle.BAR));
-		a.addOneAttribute("Charct", new StringAttribute("Nom", "Toto"));
+		a.addOneAttribute("Charct", "Age", 24);
+		a.addOneAttribute("Charct", "Bonbons", 2., AttributeStyle.BAR);
+		a.addOneAttribute("Charct", "Nom", "Toto");
 
 		// a.addOneAttribute("Domain", new AVRT("VRange1", new AVT("Up", 1, 0),
 		// new AVT("Down", 1, -5), 10, -10));

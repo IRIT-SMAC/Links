@@ -8,8 +8,8 @@ import java.util.Scanner;
 
 import org.bson.Document;
 
-import com.irit.smac.attributes.AVRT;
-import com.irit.smac.attributes.AVT;
+import com.irit.smac.attributes.AVRTAttribute;
+import com.irit.smac.attributes.AVTAttribute;
 import com.irit.smac.attributes.DoubleAttribute;
 import com.irit.smac.attributes.StringAttribute;
 import com.irit.smac.core.Links;
@@ -207,7 +207,7 @@ public class SnapshotsCollection implements Serializable {
 					Double upcValue = Double.valueOf(sc.next());
 					Double updelta = Double.valueOf(sc.next());
 					Double upperValue = Double.valueOf(sc.next());
-					t = new AVRT(caracName, new AVT("Up", updelta, upcValue), new AVT("Down", downdelta, downcValue),
+					t = new AVRTAttribute(caracName, new AVTAttribute("Up", updelta, upcValue), new AVTAttribute("Down", downdelta, downcValue),
 							upperValue, lowerValue);
 				}
 			}

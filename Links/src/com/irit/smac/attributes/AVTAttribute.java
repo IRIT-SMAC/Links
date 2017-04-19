@@ -12,7 +12,7 @@ import com.irit.smac.model.Attribute;
  * 
  *
  */
-public class AVT extends Attribute implements Serializable {
+public class AVTAttribute extends Attribute implements Serializable {
 	
 	private double delta;
 	
@@ -22,7 +22,7 @@ public class AVT extends Attribute implements Serializable {
 	 * @param delta The delta value
 	 * @param value The start value of the AVT
 	 */
-	public AVT(String name, double delta, double value) {
+	public AVTAttribute(String name, double delta, double value) {
 		super(name,value);
 		this.delta = delta;
 		this.setValue(value);
