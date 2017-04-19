@@ -221,7 +221,10 @@ public class Links {
 		linksWindow = null;
 	}
 
-	public void setLookAndFeel() {
+	/**
+	 * Set look and feel according to the OS.
+	 */
+	private void setLookAndFeel() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
