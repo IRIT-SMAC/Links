@@ -53,6 +53,10 @@ public class LinksWindows implements Serializable {
 
 	private ArrayList<AgentVizFrame> listAgent = new ArrayList<AgentVizFrame>();
 
+	private ArrayList<AgentVizFrame> toRemove = new ArrayList<AgentVizFrame>();
+
+	private ArrayList<AgentVizFrame> toAdd = new ArrayList<AgentVizFrame>();
+
 	private DisplayedGraph graph;
 
 	private JPanel graphPanel;
@@ -249,7 +253,7 @@ public class LinksWindows implements Serializable {
 	}
 
 	/**
-	 * Not implemented.
+	 * This method is called on a click on the play icon.
 	 */
 	public void onPlayClick() {
 		autoPlayThread.setActivated(true);
@@ -259,6 +263,9 @@ public class LinksWindows implements Serializable {
 		this.lblStop.setEnabled(true);
 	}
 
+	/**
+	 * This method is called on a click on the pause icon.
+	 */
 	public void onPauseClick() {
 		autoPlayThread.setActivated(false);
 		this.lblPlay.setEnabled(true);
@@ -345,7 +352,7 @@ public class LinksWindows implements Serializable {
 	}
 
 	/**
-	 * This methode is called to inform Links that a new snapshot is availabe.
+	 * This method is called to inform Links that a new snapshot is availabe.
 	 * 
 	 * @param maxNum
 	 *            The number of the new snapshot.
@@ -359,10 +366,22 @@ public class LinksWindows implements Serializable {
 	}
 
 	private synchronized void notifyJump(long number) {
-		Iterator<AgentVizFrame> it = listAgent.iterator();
-		while (it.hasNext()) {
-			it.next().notifyJump(number);
+		for (AgentVizFrame a : toAdd) {
+			listAgent.add(a);
 		}
+
+		toAdd = new ArrayList<AgentVizFrame>();
+
+		for (AgentVizFrame a : listAgent) {
+			if (a != null) {
+				a.notifyJump(number);
+			}
+		}
+		for (AgentVizFrame a : toRemove) {
+			listAgent.remove(a);
+		}
+		toRemove = new ArrayList<AgentVizFrame>();
+
 		if (isInfoWindowsOpened) {
 			if (info != null) {
 				info.buildText();
@@ -377,7 +396,7 @@ public class LinksWindows implements Serializable {
 	 *            The reference to the new observer.
 	 */
 	public void registerObserver(AgentVizFrame aviz) {
-		this.listAgent.add(aviz);
+		toAdd.add(aviz);
 	}
 
 	/**
@@ -387,7 +406,7 @@ public class LinksWindows implements Serializable {
 	 *            The reference of the observer to remove.
 	 */
 	public void unregisterObserver(AgentVizFrame me) {
-		listAgent.remove(me);
+		toRemove.add(me);
 	}
 
 	/**
@@ -400,14 +419,27 @@ public class LinksWindows implements Serializable {
 		graph.getSnapCol().addSnapshot(s);
 	}
 
+	/**
+	 * Get the highest snapshot num.
+	 * 
+	 * @return The highest snapshot num.
+	 */
 	public long getMaxSnapNumber() {
 		return graph.getSnapCol().getMaxNum();
 	}
 
+	/**
+	 * Get the frame speed.
+	 * 
+	 * @return The frame speed.
+	 */
 	public int getFrameSpeed() {
 		return Integer.valueOf(this.txtFramerate.getText());
 	}
 
+	/**
+	 * 
+	 */
 	public void inforInfoWindowsClosing() {
 		this.isInfoWindowsOpened = false;
 	}
