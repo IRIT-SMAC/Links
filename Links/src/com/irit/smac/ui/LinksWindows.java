@@ -13,6 +13,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -358,10 +359,9 @@ public class LinksWindows implements Serializable {
 	}
 
 	private synchronized void notifyJump(long number) {
-		for (AgentVizFrame a : listAgent) {
-			if (a != null) {
-				a.notifyJump(number);
-			}
+		Iterator<AgentVizFrame> it = listAgent.iterator();
+		while (it.hasNext()) {
+			it.next().notifyJump(number);
 		}
 		if (isInfoWindowsOpened) {
 			if (info != null) {
