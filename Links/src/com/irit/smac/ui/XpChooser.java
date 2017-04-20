@@ -161,7 +161,11 @@ public class XpChooser extends JFrame {
 	public static void create(String xpName){
 		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
 		collection.deleteMany(Filters.eq("xpName", xpName));
-		collection.insertOne(new Document("xpName", xpName).append("cssFile", Links.getCssFilePathFromXpName(xpName)));
+		String cssLink = "graphStream.css";
+		if(Links.existsExperiment(xpName)){
+			cssLink = Links.getCssFilePathFromXpName(xpName);
+		}
+		collection.insertOne(new Document("xpName", xpName).append("cssFile", cssLink));
 
 		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
 		collection2.deleteMany(Filters.eq("xpName", xpName));

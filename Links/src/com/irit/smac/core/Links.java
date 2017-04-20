@@ -98,6 +98,11 @@ public class Links {
 
 		// XpChooser xpChooser = new XpChooser(this);
 
+		if (!existsExperiment(xpName)) {
+			System.out.println("TOTOTO");
+			createExperiment(xpName);
+		}
+
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName));
 	}
 
@@ -176,10 +181,10 @@ public class Links {
 
 	/**
 	 * Test if an experiment with the given name has been created.
+	 * 
 	 * @param xpName
-	 * The name of the experiment.
-	 * @return
-	 * True if the experiment exists, false otherwise.
+	 *            The name of the experiment.
+	 * @return True if the experiment exists, false otherwise.
 	 */
 	public static boolean existsExperiment(String xpName) {
 		MongoCollection<Document> maCollection = Links.database.getCollection(Links.collectionNameExperimentList);

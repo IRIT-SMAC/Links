@@ -299,7 +299,7 @@ public class AgentVizFrame extends JFrame {
 						for (String s : r.getAttributes().keySet()) {
 							for (Attribute t : r.getAttributes().get(s)) {
 								this.toLook
-										.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
+								.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
 							}
 						}
 					}
@@ -309,7 +309,7 @@ public class AgentVizFrame extends JFrame {
 						String s = path[i].getPath()[2].toString();
 						for (Attribute t : entity.getAttributes().get(s)) {
 							this.toLook
-									.add(new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
+							.add(new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
 						}
 					}
 					break;
@@ -334,7 +334,7 @@ public class AgentVizFrame extends JFrame {
 						if (entity != null) {
 							Attribute t = entity.getAttributesWithName(tmp);
 							this.toLook
-									.add(new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
+							.add(new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
 						}
 
 					}
@@ -480,7 +480,11 @@ public class AgentVizFrame extends JFrame {
 			}
 		}
 		if (s == "") {
-			s = "Entity is dead or not alive yet";
+			if(toLook.isEmpty()){
+				s = "Nothing is selected";
+			}else{
+				s = "Entity is dead or not alive yet";
+			}
 		}
 		txtpnLook.setText(s);
 	}
