@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project Mask">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.workspace" value="${dir.buildfile}/.."/>
+    <property name="dir.jarfile" value="${dir.buildfile}"/>
+	<property name="javadoc.dir" value="javadoc" />
+
+	<target name="build-javadoc">
+		<javadoc packagenames="fr.irit.smac.*" sourcepath="src"
+			 destdir="${javadoc.dir}" version="true" 
+			windowtitle="Links">
+			<arg value="-notimestamp" />
+		</javadoc>
+	</target>
+    <target name="create_run_jar">
+        <jar destfile="${dir.jarfile}/Links.jar" filesetmanifest="mergewithoutmain">
+            <!--<manifest>
+                <attribute name="Main-Class" value="Test"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>-->
+            <fileset dir="${dir.buildfile}/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jars/lx-plot-standalone.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jars/gs-algo-1.3/gs-algo-1.3.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jars/gs-core-1.3/gs-core-1.3.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jars/gs-ui-1.3/gs-ui-1.3.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jars/mongo-java-driver-3.4.2.jar"/>
+        </jar>
+        <jar destfile="${dir.jarfile}/Links_without_dependencies.jar" filesetmanifest="mergewithoutmain">
+            <!--<manifest>
+                <attribute name="Main-Class" value="Test"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>-->
+            <fileset dir="${dir.buildfile}/bin"/>
+        </jar>
+    </target>
+</project>
