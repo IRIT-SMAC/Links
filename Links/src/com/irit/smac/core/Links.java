@@ -96,10 +96,9 @@ public class Links {
 		mongoClient = new MongoClient();
 		database = mongoClient.getDatabase(dataBaseName);
 
-		// XpChooser xpChooser = new XpChooser(this);
+		XpChooser xpChooser = new XpChooser(this);
 
 		if (!existsExperiment(xpName)) {
-			System.out.println("TOTOTO");
 			createExperiment(xpName);
 		}
 
