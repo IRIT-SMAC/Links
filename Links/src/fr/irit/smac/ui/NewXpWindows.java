@@ -26,12 +26,12 @@ public class NewXpWindows extends JFrame {
 	private JPanel contentPane;
 	private JTextField txtLinkToCss;
 	private JTextField txtXpName;
-	
+
 	private XpChooser xpRef;
 	private JButton btnCreate;
 	private final JFileChooser fc = new JFileChooser();
-	
-	public void init(){
+
+	public void init() {
 		setTitle("Create a new experiment");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 700, 150);
@@ -76,21 +76,21 @@ public class NewXpWindows extends JFrame {
 		btnCreate = new JButton("Create");
 		btnCreate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(e.getSource().equals(btnCreate)){
-					if(btnCreate.getText().equals("Create")){
-					create();
-					}else{
+				if (e.getSource().equals(btnCreate)) {
+					if (btnCreate.getText().equals("Create")) {
+						create();
+					} else {
 						update();
 					}
 				}
 			}
 
-			
 		});
 		btnCreate.setBounds(283, 77, 89, 23);
 		contentPane.add(btnCreate);
 		this.setVisible(true);
 	}
+
 	private void update() {
 		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
 		String xpName = this.txtXpName.getText();
@@ -111,7 +111,8 @@ public class NewXpWindows extends JFrame {
 	/**
 	 * Create the frame.
 	 * 
-	 * @param ref The reference to the XpChooser window.
+	 * @param ref
+	 *            The reference to the XpChooser window.
 	 */
 	public NewXpWindows(XpChooser ref) {
 		this.xpRef = ref;
@@ -120,8 +121,9 @@ public class NewXpWindows extends JFrame {
 
 	private void create() {
 		String xpName = this.txtXpName.getText();
-		XpChooser.create(xpName);
-		
+		String cssPath = this.txtLinkToCss.getText();
+		XpChooser.create(xpName, cssPath);
+
 		xpRef.redrawList();
 		this.setVisible(false);
 	}

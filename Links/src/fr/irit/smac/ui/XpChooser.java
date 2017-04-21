@@ -41,7 +41,8 @@ public class XpChooser extends JFrame {
 	/**
 	 * Create the frame.
 	 * 
-	 * @param links The reference to the links window.
+	 * @param links
+	 *            The reference to the links window.
 	 */
 	public XpChooser(Links links) {
 		setTitle("Links: Xp Chooser");
@@ -152,20 +153,33 @@ public class XpChooser extends JFrame {
 		init();
 		this.setVisible(true);
 	}
-	
-	public static void delete(String xpName){
+
+	public static void delete(String xpName) {
 		Links.database.getCollection(xpName).drop();
 		Links.database.getCollection(Links.collectionNameExperimentList).findOneAndDelete(Filters.eq("xpName", xpName));
 	}
-	
-	public static void create(String xpName){
+
+	public static void create(String xpName) {
 		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
 		collection.deleteMany(Filters.eq("xpName", xpName));
 		String cssLink = "graphStream.css";
-		if(Links.existsExperiment(xpName)){
+//		if (Links.existsExperiment(xpName)) {
 			cssLink = Links.getCssFilePathFromXpName(xpName);
-		}
-		collection.insertOne(new Document("xpName", xpName).append("cssFile", cssLink));
+//		} else {
+			System.out.println("coucou2");
+			collection.insertOne(new Document("xpName", xpName).append("cssFile", cssLink));
+//		}
+
+		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
+		collection2.deleteMany(Filters.eq("xpName", xpName));
+		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+	}
+	
+	public static void create(String xpName,String cssPath) {
+		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
+		collection.deleteMany(Filters.eq("xpName", xpName));
+		String cssLink = "graphStream.css";
+		collection.insertOne(new Document("xpName", xpName).append("cssFile", cssPath));
 
 		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
 		collection2.deleteMany(Filters.eq("xpName", xpName));
@@ -173,8 +187,7 @@ public class XpChooser extends JFrame {
 	}
 
 	public static void drop(String xpName) {
-		MongoCollection<Document> collection = Links.database
-				.getCollection(Links.collectionNameExperimentList);
+		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
 		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
 		collection2.drop();
 		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
