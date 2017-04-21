@@ -133,10 +133,8 @@ public class XpChooser extends JFrame {
 						dialogButton);
 
 				if (dialogResult == JOptionPane.YES_OPTION) {
-
 					String xpName = (String) list.getSelectedValue();
-				drop(xpName);
-
+					drop(xpName);
 				}
 
 			}
@@ -175,9 +173,8 @@ public class XpChooser extends JFrame {
 	public static void drop(String xpName) {
 		MongoCollection<Document> collection = Links.database
 				.getCollection(Links.collectionNameExperimentList);
-
 		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
-		collection2.deleteMany(Filters.eq("xpName", xpName));
+		collection2.drop();
 		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
 	}
 
