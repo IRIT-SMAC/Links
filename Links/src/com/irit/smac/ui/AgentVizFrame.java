@@ -139,6 +139,7 @@ public class AgentVizFrame extends JFrame {
 		contentPane.add(toolBar, BorderLayout.NORTH);
 
 		splitPane = new JSplitPane();
+		splitPane.setResizeWeight(0.3);
 		contentPane.add(splitPane, BorderLayout.CENTER);
 
 		attributeTree = new JTree();
@@ -222,8 +223,8 @@ public class AgentVizFrame extends JFrame {
 						isDrawing = !isDrawing;
 						btnDraw.setText("Draw:OFF");
 					} else {
-						isDrawing = !isDrawing;
 						draw();
+						isDrawing = !isDrawing;
 						btnDraw.setText("Draw:ON");
 					}
 				}
