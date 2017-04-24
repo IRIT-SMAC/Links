@@ -242,4 +242,8 @@ public class SnapshotsCollection implements Serializable {
 		}
 		return relations;
 	}
+
+	public void resetNumber() {
+		maxNum=1;
+	}
 }

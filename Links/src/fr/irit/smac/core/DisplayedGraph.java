@@ -39,6 +39,7 @@ public class DisplayedGraph implements Serializable {
 	
 	public void resetSnapNumber(){
 		currentSnapNumber = 0;
+		snapColl.resetNumber();
 	}
 
 	/**
