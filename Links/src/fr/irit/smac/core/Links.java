@@ -197,13 +197,20 @@ public class Links {
 	}
 
 	/**
-	 * Drop the experiment with the givent name.
+	 * Drop the experiment with the given name.
 	 * 
 	 * @param xpName
 	 *            The name of the experiment.
 	 */
-	public void dropExperiment(String xpName) {
+	public static void dropExperiment(String xpName) {
 		XpChooser.drop(xpName);
+	}
+	
+	/**
+	 * Set the current snapNumber at 0.
+	 */
+	public void resetSnapNumber(){
+		this.linksWindow.getDisplayedGraph().resetSnapNumber();
 	}
 
 	/**

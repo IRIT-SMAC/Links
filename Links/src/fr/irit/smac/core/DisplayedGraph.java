@@ -36,6 +36,10 @@ public class DisplayedGraph implements Serializable {
 		currentSnapNumber = 0;
 		this.snapColl = snapColl;
 	}
+	
+	public void resetSnapNumber(){
+		currentSnapNumber = 0;
+	}
 
 	/**
 	 * Get the current displayed graph.
