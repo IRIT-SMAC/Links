@@ -155,16 +155,16 @@ public class XpChooser extends JFrame {
 		this.setVisible(true);
 	}
 
-	public static void delete(String xpName) {
+	public void delete(String xpName) {
 		Links.database.getCollection(xpName).drop();
 		Links.database.getCollection(Links.collectionNameExperimentList).findOneAndDelete(Filters.eq("xpName", xpName));
 	}
 
-	public static void create(String xpName) {
+	public void create(String xpName) {
 		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
 		collection.deleteMany(Filters.eq("xpName", xpName));
 		String cssLink = "";
-		if (Links.existsExperiment(xpName)) {
+		if (linksRef.existsExperiment(xpName)) {
 			cssLink = Links.getCssFilePathFromXpName(xpName);
 		} else {
 			try{
@@ -187,7 +187,7 @@ public class XpChooser extends JFrame {
 		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
 	}
 
-	public static void create(String xpName, String cssPath) {
+	public void create(String xpName, String cssPath) {
 		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
 		collection.deleteMany(Filters.eq("xpName", xpName));
 		String cssLink = "graphStream.css";
@@ -198,7 +198,7 @@ public class XpChooser extends JFrame {
 		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
 	}
 
-	public static void drop(String xpName) {
+	public void drop(String xpName) {
 		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
 		collection2.drop();
 		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));

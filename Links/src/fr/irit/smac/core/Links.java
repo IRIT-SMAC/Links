@@ -57,6 +57,8 @@ public class Links {
 	 * The main UI windows.
 	 */
 	private LinksWindows linksWindow;
+	
+	private XpChooser xpChooser;
 
 	/**
 	 * Main Launch to start the standalone application.
@@ -78,7 +80,7 @@ public class Links {
 		mongoClient = new MongoClient();
 		database = mongoClient.getDatabase(dataBaseName);
 
-		XpChooser xpChooser = new XpChooser(this);
+		xpChooser = new XpChooser(this);
 	}
 
 	/**
@@ -97,7 +99,7 @@ public class Links {
 		mongoClient = new MongoClient();
 		database = mongoClient.getDatabase(dataBaseName);
 
-		XpChooser xpChooser = new XpChooser(this);
+		xpChooser = new XpChooser(this);
 
 		if (!existsExperiment(xpName)) {
 			createExperiment(xpName);
@@ -124,7 +126,7 @@ public class Links {
 		mongoClient = new MongoClient(addr);
 		database = mongoClient.getDatabase(dataBaseName);
 
-		XpChooser xpChooser = new XpChooser(this);
+		xpChooser = new XpChooser(this);
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName));
 	}
@@ -142,7 +144,7 @@ public class Links {
 		setLookAndFeel();
 		mongoClient = new MongoClient(addr);
 		database = mongoClient.getDatabase(dataBaseName);
-		XpChooser xpChooser = new XpChooser(this);
+		xpChooser = new XpChooser(this);
 	}
 
 	/**
@@ -165,8 +167,8 @@ public class Links {
 	 * @param xpName
 	 *            The name of the experiment
 	 */
-	public static void createExperiment(String xpName) {
-		XpChooser.create(xpName);
+	public void createExperiment(String xpName) {
+		xpChooser.create(xpName);
 	}
 
 	/**
@@ -175,8 +177,8 @@ public class Links {
 	 * @param xpName
 	 *            The name of the experiment.
 	 */
-	public static void deleteExperiment(String xpName) {
-		XpChooser.delete(xpName);
+	public void deleteExperiment(String xpName) {
+		xpChooser.delete(xpName);
 	}
 
 	/**
@@ -186,7 +188,7 @@ public class Links {
 	 *            The name of the experiment.
 	 * @return True if the experiment exists, false otherwise.
 	 */
-	public static boolean existsExperiment(String xpName) {
+	public boolean existsExperiment(String xpName) {
 		MongoCollection<Document> maCollection = Links.database.getCollection(Links.collectionNameExperimentList);
 		Document myXP = maCollection.find(Filters.eq("xpName", xpName)).first();
 		if (myXP != null) {
@@ -197,22 +199,16 @@ public class Links {
 	}
 
 	/**
-	 * Drop the experiment with the given name.
+	 * Drop the experiment with the given name and reset the current snapNumber at 0.
 	 * 
 	 * @param xpName
 	 *            The name of the experiment.
 	 */
-	public static void dropExperiment(String xpName) {
-		XpChooser.drop(xpName);
-	}
-	
-	/**
-	 * Set the current snapNumber at 0.
-	 */
-	public void resetSnapNumber(){
+	public void dropExperiment(String xpName) {
+		xpChooser.drop(xpName);
 		this.linksWindow.getDisplayedGraph().resetSnapNumber();
 	}
-
+	
 	/**
 	 * Initialize the vizualization windows on the specficied experiment using
 	 * the specified CSS file.

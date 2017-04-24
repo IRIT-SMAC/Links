@@ -122,7 +122,7 @@ public class NewXpWindows extends JFrame {
 	private void create() {
 		String xpName = this.txtXpName.getText();
 		String cssPath = this.txtLinkToCss.getText();
-		XpChooser.create(xpName, cssPath);
+		xpRef.create(xpName, cssPath);
 
 		xpRef.redrawList();
 		this.setVisible(false);
