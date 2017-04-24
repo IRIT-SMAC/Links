@@ -76,11 +76,11 @@ public class AutoPlayThread extends Thread implements Serializable {
 				} else {
 					links.switchToSnap(Math.max((links.getCurrentSnapNumber() + this.frameRate), 1));
 				}
-				try {
-					Thread.sleep(frameSpeed);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+			}
+			try {
+				Thread.sleep(frameSpeed);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 	}
