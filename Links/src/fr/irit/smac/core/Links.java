@@ -7,6 +7,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import org.bson.Document;
+import org.graphstream.graph.Graph;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
@@ -146,6 +147,14 @@ public class Links {
 		database = mongoClient.getDatabase(dataBaseName);
 		xpChooser = new XpChooser(this);
 	}
+	
+	public Graph getGraph(){
+		if(linksWindow!=null){
+			return linksWindow.getDisplayedGraph().getGraph();
+		}else{
+			return null;
+		}
+	}
 
 	/**
 	 * Add a new Snapshot to the model. The number of this snapshot is
@@ -157,6 +166,12 @@ public class Links {
 	public void addSnapshot(Snapshot s) {
 		if (linksWindow != null) {
 			linksWindow.addSnapshot(s);
+		}
+	}
+	
+	public void viewSnapshot(Snapshot s){
+		if (linksWindow != null) {
+			linksWindow.getDisplayedGraph().viewSnapshot(s);
 		}
 	}
 
