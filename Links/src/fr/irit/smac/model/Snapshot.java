@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
  *
  */
-public class Snapshot implements Serializable{
+public class Snapshot implements Serializable {
 
 	/**
 	 * 
@@ -63,7 +63,7 @@ public class Snapshot implements Serializable{
 	 *            The name of the agent. Must be unique.
 	 * @param type
 	 *            The type of the agent (used to determine its css class).
-	 *            @return A reference to the newly created entity.
+	 * @return A reference to the newly created entity.
 	 */
 	public Entity addEntity(String name, String type) {
 		Entity a = new Entity(name, type, this);
@@ -87,7 +87,7 @@ public class Snapshot implements Serializable{
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Test if an agent in the agent list has the name passed in parameter.
 	 * 
@@ -128,8 +128,8 @@ public class Snapshot implements Serializable{
 	 * @param name
 	 *            The name of the relation (must be unique).
 	 * @param isDirectional
-	 *            True if the relation is directional (from A to B), false if the
-	 *            relation is bidirectional (A--B).
+	 *            True if the relation is directional (from A to B), false if
+	 *            the relation is bidirectional (A--B).
 	 * @param type
 	 *            The type of the relation (used to determine its class in the
 	 *            css).
@@ -142,7 +142,7 @@ public class Snapshot implements Serializable{
 				relations.add(a);
 			}
 			return a;
-		}else{
+		} else {
 			return null;
 		}
 	}
@@ -162,6 +162,42 @@ public class Snapshot implements Serializable{
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Remove an entity from its name.
+	 * 
+	 * @param name
+	 *            The name of the entity to remove.
+	 * 
+	 */
+	public void removeEntity(String name) {
+		Entity entity = null;
+		for (Entity e : entityList) {
+			if (e.getName().equals(name)) {
+				entity = e;
+			}
+		}
+		if (entity != null)
+			entityList.remove(entity);
+	}
+
+	/**
+	 * Remove a relation from its name.
+	 * 
+	 * @param name
+	 *            The name of the relation to remove.
+	 * 
+	 */
+	public void removeRelation(String name) {
+		Relation entity = null;
+		for (Relation e : relations) {
+			if (e.getName().equals(name)) {
+				entity = e;
+			}
+		}
+		if (entity != null)
+			relations.remove(entity);
 	}
 
 }

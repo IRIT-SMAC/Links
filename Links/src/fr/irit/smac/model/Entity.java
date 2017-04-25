@@ -57,7 +57,7 @@ public class Entity implements Serializable {
 	 * @param s
 	 *            The snapshot it belongs to.
 	 */
-	public Entity(String name, String type, Snapshot s) {
+	protected Entity(String name, String type, Snapshot s) {
 		this.name = name;
 		this.stype = type;
 		this.ctype = type;
@@ -262,6 +262,14 @@ public class Entity implements Serializable {
 		} else {
 			ctype = stype;
 		}
+	}
+	
+	/**
+	 * Set the type of the entity (use to determine ui.class)
+	 * @param type The type of the entity.
+	 */
+	public void setType(String type){
+		ctype = type;
 	}
 
 }

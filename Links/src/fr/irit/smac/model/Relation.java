@@ -11,8 +11,8 @@ import fr.irit.smac.attributes.StringAttribute;
 import fr.irit.smac.model.Attribute.AttributeStyle;
 
 /**
- * Relation: This class models a relation between two agents. It possesses a type
- * (used to determine its ui.class) and a list of Attributes.
+ * Relation: This class models a relation between two agents. It possesses a
+ * type (used to determine its ui.class) and a list of Attributes.
  * 
  * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
  * @version 1.0
@@ -73,7 +73,7 @@ public class Relation implements Serializable {
 	 * @param s
 	 *            The reference to the snapshot the relation belongs to.
 	 */
-	public Relation(Entity a, Entity b, String name, String type, boolean directional, Snapshot s) {
+	protected Relation(Entity a, Entity b, String name, String type, boolean directional, Snapshot s) {
 		A = a;
 		B = b;
 		this.name = name;
@@ -123,7 +123,7 @@ public class Relation implements Serializable {
 		}
 		attributes.get(attributeListName).add(t);
 	}
-	
+
 	/**
 	 * Add one string attribute to the precised list.
 	 * 
@@ -206,7 +206,7 @@ public class Relation implements Serializable {
 				.add(new AVRTAttribute(aname, new AVTAttribute(aname + "UpAVT", updelta, upcvalue),
 						new AVTAttribute(aname + "DownAVT", downdelta, downcvalue), uppervalue, lowervalue));
 	}
-	
+
 	/**
 	 * Add one double attribute to the precised list.
 	 * 
@@ -227,8 +227,8 @@ public class Relation implements Serializable {
 	}
 
 	/**
-	 * Compares two relations to determine if they are equals
-	 * (R1.A==R1.A and R1.B==R2.B and R1.isDirectional==R2.isDirectional)
+	 * Compares two relations to determine if they are equals (R1.A==R1.A and
+	 * R1.B==R2.B and R1.isDirectional==R2.isDirectional)
 	 * 
 	 * @param obj
 	 *            The relation to be compared with.
@@ -256,6 +256,16 @@ public class Relation implements Serializable {
 	 */
 	public String getType() {
 		return type;
+	}
+
+	/**
+	 * Set the type of the relation (used to determine the ui.class)
+	 * 
+	 * @param The
+	 *            type of the relation.
+	 */
+	public void getType(String type) {
+		this.type = type;
 	}
 
 	/**
