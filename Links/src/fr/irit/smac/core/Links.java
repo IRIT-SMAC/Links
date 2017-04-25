@@ -148,6 +148,10 @@ public class Links {
 		xpChooser = new XpChooser(this);
 	}
 	
+	/**
+	 * Get the displayed graph (to access advanced graphstream options).
+	 * @return The currently displayed graph.
+	 */
 	public Graph getGraph(){
 		if(linksWindow!=null){
 			return linksWindow.getDisplayedGraph().getGraph();
@@ -169,6 +173,10 @@ public class Links {
 		}
 	}
 	
+	/**
+	 * Update the current graph to visualize the snapshot.
+	 * @param s The snapshot to view.
+	 */
 	public void viewSnapshot(Snapshot s){
 		if (linksWindow != null) {
 			linksWindow.getDisplayedGraph().viewSnapshot(s);
