@@ -28,6 +28,7 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 
+import org.graphstream.graph.Graph;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
@@ -442,5 +443,9 @@ public class LinksWindows implements Serializable {
 	 */
 	public void inforInfoWindowsClosing() {
 		this.isInfoWindowsOpened = false;
+	}
+
+	public Viewer getViewer() {
+		return viewer;
 	}
 }

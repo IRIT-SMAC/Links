@@ -4,10 +4,10 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import org.bson.Document;
 import org.graphstream.graph.Graph;
+import org.graphstream.ui.view.Viewer;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
@@ -159,6 +159,19 @@ public class Links {
 			return null;
 		}
 	}
+	
+	/**
+	 * Get the graph view (to access advanced graphstream options).
+	 * @return The currently displayed graph.
+	 */
+	public Viewer getGraphView(){
+		if(linksWindow!=null){
+			return linksWindow.getViewer();
+		}else{
+			return null;
+		}
+	}
+	
 
 	/**
 	 * Add a new Snapshot to the model. The number of this snapshot is
