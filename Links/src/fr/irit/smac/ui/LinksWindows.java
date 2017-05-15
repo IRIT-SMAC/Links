@@ -110,7 +110,7 @@ public class LinksWindows implements Serializable {
 		autoPlayThread = new AutoPlayThread(this);
 		SnapshotsCollection snapCol = null;
 		if (links != null) {
-			snapCol = new SnapshotsCollection();
+			snapCol = new SnapshotsCollection(this);
 			snapCol.setLinksWindows(this);
 		}
 		graph = new DisplayedGraph(snapCol, linkToCss);

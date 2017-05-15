@@ -33,7 +33,7 @@ public class SnapshotsCollection implements Serializable {
 
 	private LinksWindows links;
 
-	private MongoCollection<Document> collection = Links.database.getCollection(links.getXpName());
+	private MongoCollection<Document> collection;
 
 	private Snapshot currentSnap;
 
@@ -41,7 +41,9 @@ public class SnapshotsCollection implements Serializable {
 		this.links = links;
 	}
 
-	public SnapshotsCollection() {
+	public SnapshotsCollection(LinksWindows links) {
+		this.links = links;
+		collection = Links.database.getCollection(links.getXpName());
 		Document myXP = collection.find(Filters.eq("xpName", links.getXpName())).first();
 		if (myXP != null) {
 			Iterator<Entry<String, Object>> it = myXP.entrySet().iterator();
