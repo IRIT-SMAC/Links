@@ -452,4 +452,8 @@ public class LinksWindows implements Serializable {
 	public Viewer getViewer() {
 		return viewer;
 	}
+
+	public String getXpName() {
+		return xpName;
+	}
 }

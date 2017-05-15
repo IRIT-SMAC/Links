@@ -33,7 +33,7 @@ public class SnapshotsCollection implements Serializable {
 
 	private LinksWindows links;
 
-	private MongoCollection<Document> collection = Links.database.getCollection(LinksWindows.xpName);
+	private MongoCollection<Document> collection = Links.database.getCollection(links.getXpName());
 
 	private Snapshot currentSnap;
 
@@ -42,7 +42,7 @@ public class SnapshotsCollection implements Serializable {
 	}
 
 	public SnapshotsCollection() {
-		Document myXP = collection.find(Filters.eq("xpName", LinksWindows.xpName)).first();
+		Document myXP = collection.find(Filters.eq("xpName", links.getXpName())).first();
 		if (myXP != null) {
 			Iterator<Entry<String, Object>> it = myXP.entrySet().iterator();
 			String _id = (String) it.next().toString();
@@ -53,7 +53,7 @@ public class SnapshotsCollection implements Serializable {
 
 	public void addSnapshot(Snapshot s) {
 
-		Document myXP = collection.find(Filters.eq("xpName", LinksWindows.xpName)).first();
+		Document myXP = collection.find(Filters.eq("xpName", links.getXpName())).first();
 
 		collection.deleteMany(Filters.eq("snapNum", maxNum));
 
@@ -98,7 +98,7 @@ public class SnapshotsCollection implements Serializable {
 
 		BasicDBObject newDocument = new BasicDBObject().append("$inc", new BasicDBObject().append("maxNum", 1));
 
-		collection.findOneAndUpdate(new BasicDBObject().append("xpName", LinksWindows.xpName), newDocument);
+		collection.findOneAndUpdate(new BasicDBObject().append("xpName", links.getXpName()), newDocument);
 
 	}
 
