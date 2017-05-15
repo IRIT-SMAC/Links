@@ -48,7 +48,7 @@ import fr.irit.smac.model.SnapshotsCollection;
  */
 public class LinksWindows implements Serializable {
 
-	public static String xpName;
+	public String xpName;
 
 	private JFrame frame;
 
@@ -108,15 +108,19 @@ public class LinksWindows implements Serializable {
 		this.xpName = xpName;
 		this.linkToCss = linkToCss;
 		autoPlayThread = new AutoPlayThread(this);
-		SnapshotsCollection snapCol = new SnapshotsCollection();
+		SnapshotsCollection snapCol = null;
+		if (links != null) {
+			snapCol = new SnapshotsCollection();
+			snapCol.setLinksWindows(this);
+		}
 		graph = new DisplayedGraph(snapCol, linkToCss);
-		snapCol.setLinksWindows(this);
 
 		initialize();
 		this.frame.setVisible(true);
-
-		if (snapCol.getSnaptshot(1) != null) {
-			switchToSnap(1);
+		if (snapCol != null) {
+			if (snapCol.getSnaptshot(1) != null) {
+				switchToSnap(1);
+			}
 		}
 	}
 

@@ -58,7 +58,7 @@ public class Links {
 	 * The main UI windows.
 	 */
 	private LinksWindows linksWindow;
-	
+
 	private XpChooser xpChooser;
 
 	/**
@@ -78,9 +78,7 @@ public class Links {
 	 */
 	public Links() {
 		setLookAndFeel();
-		mongoClient = new MongoClient();
-		database = mongoClient.getDatabase(dataBaseName);
-
+		initMongoConnection();
 		xpChooser = new XpChooser(this);
 	}
 
@@ -97,8 +95,7 @@ public class Links {
 	 */
 	public Links(String xpName) {
 		setLookAndFeel();
-		mongoClient = new MongoClient();
-		database = mongoClient.getDatabase(dataBaseName);
+		initMongoConnection();
 
 		xpChooser = new XpChooser(this);
 
@@ -124,10 +121,13 @@ public class Links {
 	 */
 	public Links(ServerAddress addr, String xpName) {
 		setLookAndFeel();
-		mongoClient = new MongoClient(addr);
-		database = mongoClient.getDatabase(dataBaseName);
+		initMongoConnection();
 
 		xpChooser = new XpChooser(this);
+		
+		if (!existsExperiment(xpName)) {
+			createExperiment(xpName);
+		}
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName));
 	}
@@ -143,35 +143,56 @@ public class Links {
 	 */
 	public Links(ServerAddress addr) {
 		setLookAndFeel();
-		mongoClient = new MongoClient(addr);
-		database = mongoClient.getDatabase(dataBaseName);
+		initMongoConnection(addr);
 		xpChooser = new XpChooser(this);
 	}
-	
+
 	/**
 	 * Get the displayed graph (to access advanced graphstream options).
+	 * 
 	 * @return The currently displayed graph.
 	 */
-	public Graph getGraph(){
-		if(linksWindow!=null){
+	public Graph getGraph() {
+		if (linksWindow != null) {
 			return linksWindow.getDisplayedGraph().getGraph();
-		}else{
+		} else {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Get the graph view (to access advanced graphstream options).
+	 * 
 	 * @return The currently displayed graph.
 	 */
-	public Viewer getGraphView(){
-		if(linksWindow!=null){
+	public Viewer getGraphView() {
+		if (linksWindow != null) {
 			return linksWindow.getViewer();
-		}else{
+		} else {
 			return null;
 		}
 	}
-	
+
+	private void initMongoConnection(){
+		try{
+			mongoClient = new MongoClient();
+			database = mongoClient.getDatabase(dataBaseName);
+		}catch(Exception e){
+			e.printStackTrace();
+			System.err.println("It seems that you have not a running mongoDB server. If you whish not to use mongoDB, be sure to use only the method viewSnapshot.");
+		}
+	}
+
+	private void initMongoConnection(ServerAddress addr) {
+		try{
+			mongoClient = new MongoClient(addr);
+			database = mongoClient.getDatabase(dataBaseName);
+		}catch(Exception e){
+
+			e.printStackTrace();
+			System.err.println("It seems that you have not a running mongoDB server. If you whish not to use mongoDB, be sure to use only the method viewSnapshot.");
+		}
+	}
 
 	/**
 	 * Add a new Snapshot to the model. The number of this snapshot is
@@ -185,12 +206,14 @@ public class Links {
 			linksWindow.addSnapshot(s);
 		}
 	}
-	
+
 	/**
 	 * Update the current graph to visualize the snapshot.
-	 * @param s The snapshot to view.
+	 * 
+	 * @param s
+	 *            The snapshot to view.
 	 */
-	public void viewSnapshot(Snapshot s){
+	public void viewSnapshot(Snapshot s) {
 		if (linksWindow != null) {
 			linksWindow.getDisplayedGraph().viewSnapshot(s);
 		}
@@ -235,7 +258,8 @@ public class Links {
 	}
 
 	/**
-	 * Drop the experiment with the given name and reset the current snapNumber at 0.
+	 * Drop the experiment with the given name and reset the current snapNumber
+	 * at 0.
 	 * 
 	 * @param xpName
 	 *            The name of the experiment.
@@ -244,7 +268,7 @@ public class Links {
 		xpChooser.drop(xpName);
 		this.linksWindow.getDisplayedGraph().resetSnapNumber();
 	}
-	
+
 	/**
 	 * Initialize the vizualization windows on the specficied experiment using
 	 * the specified CSS file.

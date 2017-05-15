@@ -32,6 +32,8 @@ public class Example {
 
 		Entity b = s.addEntity("Rufus", "Dog");
 		Relation r = s.addRelation("Toto", "Rufus", "TotoPossedeRufus", false, "possede");
+		
+		s.addEntity("Toto", "Humain");
 
 		links.addSnapshot(s);
 
