@@ -33,6 +33,8 @@ public class DisplayedGraph implements Serializable {
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 		graph = new MultiGraph("embedded");
 		graph.addAttribute("ui.stylesheet", "url('" + linkToCss + "')");
+		graph.addAttribute("ui.quality");
+		graph.addAttribute("ui.antialias");
 		currentSnapNumber = 0;
 		this.snapColl = snapColl;
 	}
