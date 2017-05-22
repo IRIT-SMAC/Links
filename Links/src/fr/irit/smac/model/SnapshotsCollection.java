@@ -35,8 +35,6 @@ public class SnapshotsCollection implements Serializable {
 
 	private MongoCollection<Document> collection;
 
-	private Snapshot currentSnap;
-
 	public void setLinksWindows(LinksWindows links) {
 		this.links = links;
 	}
@@ -54,8 +52,6 @@ public class SnapshotsCollection implements Serializable {
 	}
 
 	public void addSnapshot(Snapshot s) {
-
-		Document myXP = collection.find(Filters.eq("xpName", links.getXpName())).first();
 
 		collection.deleteMany(Filters.eq("snapNum", maxNum));
 
