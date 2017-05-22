@@ -66,7 +66,7 @@ public class Snapshot implements Serializable {
 	 * @return A reference to the newly created entity.
 	 */
 	public Entity addEntity(String name, String type) {
-		Entity a = new Entity(name, type, this);
+		Entity a = new Entity(name, type);
 		if (!entityList.contains(a)) {
 			entityList.add(a);
 		}
@@ -137,7 +137,7 @@ public class Snapshot implements Serializable {
 	 */
 	public Relation addRelation(String A, String B, String name, boolean isDirectional, String type) {
 		if (containsEntity(A) && containsEntity(B)) {
-			Relation a = new Relation(getEntity(A), getEntity(B), name, type, isDirectional, this);
+			Relation a = new Relation(getEntity(A), getEntity(B), name, type, isDirectional);
 			if (!relations.contains(a)) {
 				relations.add(a);
 			}

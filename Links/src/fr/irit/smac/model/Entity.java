@@ -38,11 +38,6 @@ public class Entity implements Serializable {
 	 */
 	private String ctype;
 	/**
-	 * A reference to the snapshot the agent belongs to.
-	 */
-	private Snapshot s;
-
-	/**
 	 * The list of attributes.
 	 */
 	private HashMap<String, ArrayList<Attribute>> attributes = new HashMap<String, ArrayList<Attribute>>();
@@ -57,11 +52,10 @@ public class Entity implements Serializable {
 	 * @param s
 	 *            The snapshot it belongs to.
 	 */
-	protected Entity(String name, String type, Snapshot s) {
+	protected Entity(String name, String type) {
 		this.name = name;
 		this.stype = type;
 		this.ctype = type;
-		this.s = s;
 	}
 
 	/**

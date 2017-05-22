@@ -42,11 +42,6 @@ public class Relation implements Serializable {
 	 */
 	private String type;
 	/**
-	 * A reference to the snapshot it belongs to.
-	 */
-	private Snapshot s;
-
-	/**
 	 * The collection of attributes associated with this relation.
 	 */
 	private HashMap<String, ArrayList<Attribute>> attributes = new HashMap<String, ArrayList<Attribute>>();
@@ -73,12 +68,11 @@ public class Relation implements Serializable {
 	 * @param s
 	 *            The reference to the snapshot the relation belongs to.
 	 */
-	protected Relation(Entity a, Entity b, String name, String type, boolean directional, Snapshot s) {
+	protected Relation(Entity a, Entity b, String name, String type, boolean directional) {
 		A = a;
 		B = b;
 		this.name = name;
 		this.isDirectional = directional;
-		this.s = s;
 		this.type = type;
 	}
 
