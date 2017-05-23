@@ -175,7 +175,7 @@ public class Links {
 	 * Permet de recuperer le chemin d'acces a mongoDB si le fichier a ete rempli
 	 */
 	private void lireMongoPath() {
-		BufferedReader br;
+		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader("src"+File.separator+"ressources"+File.separator+"setMongoDB.txt"));
 			String line;
@@ -184,9 +184,13 @@ public class Links {
 			}
 			br.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			try {
+				BufferedWriter bw = new BufferedWriter (new FileWriter("src"+File.separator+"ressources"+File.separator+"setMongoDB.txt"));
+				bw.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		}
-
 	}
 
 	/**
@@ -254,6 +258,9 @@ public class Links {
 				// affichage
 				dialogue.showOpenDialog(null);
 				try {
+					if (dialogue.getSelectedFile() == null){
+						System.exit(0);
+					}
 					mongoPath = dialogue.getSelectedFile().toString();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -270,12 +277,6 @@ public class Links {
 				e.printStackTrace();
 				System.err.println("Can't run mongod please check the path");
 
-				// création de la boîte de dialogue
-				JFileChooser dialogue = new JFileChooser("Veuillez indiquer mongod.exe");
-
-				// affichage
-				dialogue.showOpenDialog(null);
-				mongoPath = dialogue.getSelectedFile().toString();
 			}
 		}
 		else{
@@ -305,7 +306,7 @@ public class Links {
 			e.printStackTrace();
 		}
 	}
-	
+
 
 	/**
 	 * Add a new Snapshot to the model. The number of this snapshot is
