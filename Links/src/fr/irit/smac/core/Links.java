@@ -1,8 +1,21 @@
 package fr.irit.smac.core;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 
 import org.bson.Document;
@@ -55,6 +68,13 @@ public class Links {
 	public static MongoDatabase database;
 
 	/**
+	 * The mongoPath to know it path if we want to execute it
+	 */
+	public String mongoPath;
+	/*public static String mongoPath = "C:"+File.separator+"Program Files"+File.separator+"MongoDB"+File.separator+"Server"
+			+File.separator+"3.4"+File.separator+"bin"+File.separator+"mongod.exe";*/
+
+	/**
 	 * The main UI windows.
 	 */
 	private LinksWindows linksWindow;
@@ -78,6 +98,7 @@ public class Links {
 	 */
 	public Links() {
 		setLookAndFeel();
+		lireMongoPath();
 		initMongoConnection();
 		xpChooser = new XpChooser(this);
 	}
@@ -95,6 +116,7 @@ public class Links {
 	 */
 	public Links(String xpName) {
 		setLookAndFeel();
+		lireMongoPath();
 		initMongoConnection();
 
 		xpChooser = new XpChooser(this);
@@ -120,11 +142,12 @@ public class Links {
 	 * 
 	 */
 	public Links(ServerAddress addr, String xpName) {
-		setLookAndFeel();
+		setLookAndFeel();	
+		lireMongoPath();
 		initMongoConnection();
 
 		xpChooser = new XpChooser(this);
-		
+
 		if (!existsExperiment(xpName)) {
 			createExperiment(xpName);
 		}
@@ -143,8 +166,27 @@ public class Links {
 	 */
 	public Links(ServerAddress addr) {
 		setLookAndFeel();
+		lireMongoPath();
 		initMongoConnection(addr);
 		xpChooser = new XpChooser(this);
+	}
+
+	/**
+	 * Permet de recuperer le chemin d'acces a mongoDB si le fichier a ete rempli
+	 */
+	private void lireMongoPath() {
+		BufferedReader br;
+		try {
+			br = new BufferedReader(new FileReader("src"+File.separator+"ressources"+File.separator+"setMongoDB.txt"));
+			String line;
+			while ((line = br.readLine()) != null) {
+				mongoPath = line;
+			}
+			br.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	/**
@@ -174,6 +216,7 @@ public class Links {
 	}
 
 	private void initMongoConnection(){
+		checkMongo();
 		try{
 			mongoClient = new MongoClient();
 			database = mongoClient.getDatabase(dataBaseName);
@@ -181,9 +224,12 @@ public class Links {
 			e.printStackTrace();
 			System.err.println("It seems that you have not a running mongoDB server. If you whish not to use mongoDB, be sure to use only the method viewSnapshot.");
 		}
+		// in the case where mongoDB is not running, we run it
+
 	}
 
 	private void initMongoConnection(ServerAddress addr) {
+		checkMongo();
 		try{
 			mongoClient = new MongoClient(addr);
 			database = mongoClient.getDatabase(dataBaseName);
@@ -193,6 +239,73 @@ public class Links {
 			System.err.println("It seems that you have not a running mongoDB server. If you whish not to use mongoDB, be sure to use only the method viewSnapshot.");
 		}
 	}
+
+	/**
+	 * Check the OS to know how to execute mongoDB
+	 */
+	private void checkMongo(){
+		String osName = System.getProperty("os.name").toLowerCase();
+		if(osName.contains("win")){
+			if(mongoPath == null){
+				JOptionPane.showMessageDialog(xpChooser, "Can you give the path to mongod.exe ?");
+				// création de la boîte de dialogue
+				JFileChooser dialogue = new JFileChooser("Veuillez indiquer mongod.exe");
+
+				// affichage
+				dialogue.showOpenDialog(null);
+				try {
+					mongoPath = dialogue.getSelectedFile().toString();
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.err.println("BufferedWriter error");
+				}
+			}
+			//Execute on Windows
+			try{
+				String[] commande = {"cmd.exe","/c",mongoPath};
+				ProcessBuilder pb = new ProcessBuilder(commande);
+				Process p = pb.start();
+			}
+			catch(Exception e){
+				e.printStackTrace();
+				System.err.println("Can't run mongod please check the path");
+
+				// création de la boîte de dialogue
+				JFileChooser dialogue = new JFileChooser("Veuillez indiquer mongod.exe");
+
+				// affichage
+				dialogue.showOpenDialog(null);
+				mongoPath = dialogue.getSelectedFile().toString();
+			}
+		}
+		else{
+			//Execute on Linux
+			String[] commande = {"mongod"};
+			try {
+				ProcessBuilder pb = new ProcessBuilder(commande);
+				Process p = pb.start();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.err.println("Runtime error");
+			}
+		}
+
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter("src"+File.separator+"ressources"+File.separator+"setMongoDB.txt"));
+			bw.write(mongoPath);
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.err.println("BufferedWriter error");
+		}
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
 
 	/**
 	 * Add a new Snapshot to the model. The number of this snapshot is
