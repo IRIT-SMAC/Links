@@ -17,6 +17,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
@@ -151,10 +152,10 @@ public class AgentVizFrame extends JFrame {
 			}
 		});
 
-		splitPane.setLeftComponent(attributeTree);
+		splitPane.setLeftComponent(new JScrollPane(attributeTree));
 
 		attributeViewerPanel = new JPanel();
-		splitPane.setRightComponent(attributeViewerPanel);
+		splitPane.setRightComponent(new JScrollPane(attributeViewerPanel));
 		attributeViewerPanel.setLayout(new BorderLayout(0, 0));
 
 		txtpnLook = new JTextPane();
