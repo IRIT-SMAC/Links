@@ -73,6 +73,8 @@ public class Links {
 	public String mongoPath;
 	/*public static String mongoPath = "C:"+File.separator+"Program Files"+File.separator+"MongoDB"+File.separator+"Server"
 			+File.separator+"3.4"+File.separator+"bin"+File.separator+"mongod.exe";*/
+	
+	private String resMong = "setMongo.txt";
 
 	/**
 	 * The main UI windows.
@@ -177,7 +179,7 @@ public class Links {
 	private void lireMongoPath() {
 		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new FileReader("src"+File.separator+"ressources"+File.separator+"setMongoDB.txt"));
+			br = new BufferedReader(new FileReader(resMong));
 			String line;
 			while ((line = br.readLine()) != null) {
 				mongoPath = line;
@@ -185,7 +187,7 @@ public class Links {
 			br.close();
 		} catch (Exception e) {
 			try {
-				BufferedWriter bw = new BufferedWriter (new FileWriter("src"+File.separator+"ressources"+File.separator+"setMongoDB.txt"));
+				BufferedWriter bw = new BufferedWriter (new FileWriter(resMong));
 				bw.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
@@ -292,7 +294,7 @@ public class Links {
 		}
 
 		try{
-			BufferedWriter bw = new BufferedWriter(new FileWriter("src"+File.separator+"ressources"+File.separator+"setMongoDB.txt"));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(resMong));
 			bw.write(mongoPath);
 			bw.close();
 		}
