@@ -104,6 +104,7 @@ public class AgentVizFrame extends JFrame {
 	private long lastSnapNumDrawn = 0;
 	private JPanel panel;
 	private JLabel lblNewLabel;
+	
 
 	/**
 	 * Create the frame.
@@ -126,7 +127,7 @@ public class AgentVizFrame extends JFrame {
 		this.links = links;
 		snapNum = links.getCurrentSnapNumber();
 
-		setTitle(a.getName() + " Vizualization tool");
+		setTitle(a.getName() + " Vizualization tool"+ "   Type : "+ a.getType());
 
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 592, 300);
@@ -362,12 +363,14 @@ public class AgentVizFrame extends JFrame {
 
 	private void updateTreeList() {
 		
+		setTitle(entity.getName() + " Vizualization tool"+ "   Type : "+ entity.getType());
+		
 		//We use reload if we have to create entity or relation
 		boolean needReload = false;
 		DefaultTreeModel model = (DefaultTreeModel) this.attributeTree.getModel();
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
 		DefaultMutableTreeNode entityNode = root.getFirstLeaf();
-		if(entityNode == null || entityNode.toString() != "Entity"){
+		if(entityNode == null || !(entityNode.toString().equals("Entity"))){
 			entityNode = new DefaultMutableTreeNode("Entity");
 			//root.add(entityNode);
 			model.insertNodeInto(entityNode, root, 0);
@@ -397,7 +400,7 @@ public class AgentVizFrame extends JFrame {
 
 		//DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
 		DefaultMutableTreeNode relNode = root.getFirstLeaf().getNextSibling();
-		if(relNode == null){
+		if(relNode == null || !(relNode.toString().equals("Relations"))){
 			relNode = new DefaultMutableTreeNode("Relations");
 			//root.add(relNode);
 			model.insertNodeInto(relNode, root, 1);
