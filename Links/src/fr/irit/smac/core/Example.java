@@ -1,5 +1,7 @@
 package fr.irit.smac.core;
 
+import java.util.Scanner;
+
 import fr.irit.smac.attributes.DoubleAttribute;
 import fr.irit.smac.attributes.StringAttribute;
 import fr.irit.smac.model.Entity;
@@ -32,7 +34,7 @@ public class Example {
 
 		Entity b = s.addEntity("Rufus", "Dog");
 		Relation r = s.addRelation("Toto", "Rufus", "TotoPossedeRufus", false, "possede");
-		
+
 		s.addEntity("Toto", "Humain");
 
 		links.addSnapshot(s);
@@ -59,6 +61,30 @@ public class Example {
 
 		s2.addRelation("Luna", "Rufus", "LR", true, "seBattre");
 		s2.addRelation("Toto", "Luna", "LU", true, "seBattre");
-		links.addSnapshot(s2);
+
+		boolean continu = true;
+		int i = 0;
+		s2.addEntity(""+i, "Test");
+		s2.getEntity("0").addOneAttribute("TestAtt0", "Test : 1", "Boop");
+		Scanner scan = new Scanner(System.in);
+		while(continu){
+			i++;
+			s2.addEntity(""+i, "Test");
+			
+			s2.addRelation("0",""+i,"0Test"+i,true,"RelTest");
+			if (i == 4){
+				Entity e = s2.getEntity("0");
+				e.addOneAttribute("TestATTBis", "TestBis : 1", "Blabla");
+			}
+			
+		
+
+			links.addSnapshot(s2);
+			String rep = scan.nextLine();
+			
+			if(rep == "n")
+				continu = false;
+			
+		}
 	}
 }
