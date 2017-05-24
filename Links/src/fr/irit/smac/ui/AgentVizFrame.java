@@ -144,6 +144,7 @@ public class AgentVizFrame extends JFrame {
 
 		attributeTree = new JTree();
 		attributeTree.setRootVisible(false);
+		attributeTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
 		attributeTree.addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent arg0) {
 				if (arg0.getSource().equals(attributeTree)) {
@@ -323,7 +324,7 @@ public class AgentVizFrame extends JFrame {
 						Relation r = snapCol.getRelation(path[i].getPath()[2].toString(), this.currentFrameNum);
 						String s = path[i].getPath()[3].toString();
 						for (Attribute t : r.getAttributes().get(s)) {
-							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
+							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName() , s, t));
 						}
 
 					}
@@ -335,7 +336,7 @@ public class AgentVizFrame extends JFrame {
 						if (entity != null) {
 							Attribute t = entity.getAttributesWithName(tmp);
 							this.toLook
-							.add(new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
+							.add(new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName() + entity.getType(), s, t));
 						}
 
 					}
@@ -360,41 +361,79 @@ public class AgentVizFrame extends JFrame {
 	}
 
 	private void updateTreeList() {
-		DefaultTreeModel tree;
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-		tree = new DefaultTreeModel(root);
-
-		DefaultMutableTreeNode entityNode = new DefaultMutableTreeNode("Entity");
-		root.add(entityNode);
-
-		for (String carac : this.entity.getAttributes().keySet()) {
-
-			DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(carac);
-			entityNode.add(newCarac);
-
-			for (Attribute t : this.entity.getAttributes().get(carac)) {
-				newCarac.add(new DefaultMutableTreeNode(t.toString()));
-			}
-
+		
+		//We use reload if we have to create entity or relation
+		boolean needReload = false;
+		DefaultTreeModel model = (DefaultTreeModel) this.attributeTree.getModel();
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+		DefaultMutableTreeNode entityNode = root.getFirstLeaf();
+		if(entityNode == null || entityNode.toString() != "Entity"){
+			entityNode = new DefaultMutableTreeNode("Entity");
+			//root.add(entityNode);
+			model.insertNodeInto(entityNode, root, 0);
+			needReload = true;
 		}
 
-		DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
-		root.add(relNode);
 
-		for (Relation r : this.relations) {
+		for (String carac : this.entity.getAttributes().keySet()) {
+			boolean exist = false;
+			for(int i = 0; i < entityNode.getChildCount(); i++){
+				if(entityNode.getChildAt(i).toString().equals(carac)){
+					exist = true;
+				}
+			}
+			if(!(exist)){
+				DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(carac);
+				//entityNode.add(newCarac);
+				model.insertNodeInto(newCarac, entityNode, entityNode.getChildCount());
 
-			DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(r.getName());
-			relNode.add(newCarac);
-			for (String s : r.getAttributes().keySet()) {
-				for (Attribute t : r.getAttributes().get(s)) {
-					newCarac.add(new DefaultMutableTreeNode(t.toString()));
+				for (Attribute t : this.entity.getAttributes().get(carac)) {
+					//newCarac.add(new DefaultMutableTreeNode(t.toString()));
+					model.insertNodeInto(new DefaultMutableTreeNode(t.toString()), newCarac, newCarac.getChildCount());
 				}
 			}
 
 		}
 
-		attributeTree.setModel(tree);
-		attributeTree.setRootVisible(false);
+		//DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
+		DefaultMutableTreeNode relNode = root.getFirstLeaf().getNextSibling();
+		if(relNode == null){
+			relNode = new DefaultMutableTreeNode("Relations");
+			//root.add(relNode);
+			model.insertNodeInto(relNode, root, 1);
+			needReload = true;
+		}
+
+		for (Relation r : this.relations) {
+			boolean exist = false;
+			for(int i = 0; i < relNode.getChildCount(); i++){
+				if(relNode.getChildAt(i).toString().equals(r.getName())){
+					exist = true;
+				}
+			}
+			if(!(exist)){
+				DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(r.getName());
+				//relNode.add(newCarac);
+				model.insertNodeInto(newCarac, relNode, relNode.getChildCount());
+				for (String s : r.getAttributes().keySet()) {
+					for (Attribute t : r.getAttributes().get(s)) {
+						newCarac.add(new DefaultMutableTreeNode(t.toString()));
+						model.insertNodeInto(new DefaultMutableTreeNode(t.toString()), newCarac, newCarac.getChildCount());
+					}
+				}
+			}
+
+
+		}
+		if(needReload)
+			model.reload();
+		else{
+		model.nodeChanged(root);
+		model.nodeChanged(entityNode);
+		model.nodeChanged(relNode);
+		}
+		//attributeTree.setModel(tree);
+		//attributeTree.setRootVisible(false);
 	}
 
 	public void draw() {
