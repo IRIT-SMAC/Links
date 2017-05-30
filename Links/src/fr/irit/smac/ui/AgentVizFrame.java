@@ -386,7 +386,7 @@ public class AgentVizFrame extends JFrame {
 		DefaultTreeModel model = (DefaultTreeModel) this.attributeTree.getModel();
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
 		if(root.isLeaf()){
-			DefaultMutableTreeNode entityNode = new DefaultMutableTreeNode(entity.getName());
+			DefaultMutableTreeNode entityNode = new DefaultMutableTreeNode("Entity : "+entity.getName());
 			//root.add(entityNode);
 			model.insertNodeInto(entityNode, root, 0);
 			needReload = true;
