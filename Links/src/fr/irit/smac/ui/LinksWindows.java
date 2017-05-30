@@ -83,6 +83,8 @@ public class LinksWindows implements Serializable {
 	private boolean isInfoWindowsOpened = false;
 
 	private final AutoPlayThread autoPlayThread;
+	
+	private boolean moving;
 
 	private JLabel lblStop;
 	private JTextField txtSpeed;
@@ -92,6 +94,7 @@ public class LinksWindows implements Serializable {
 	private JLabel lblInfo;
 
 	private InfoWindow info;
+	private JLabel lblMoving;
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
@@ -108,6 +111,7 @@ public class LinksWindows implements Serializable {
 		this.xpName = xpName;
 		this.linkToCss = linkToCss;
 		autoPlayThread = new AutoPlayThread(this);
+		this.moving = false;
 		SnapshotsCollection snapCol = null;
 		if (links != null) {
 			snapCol = new SnapshotsCollection(this);
@@ -229,6 +233,19 @@ public class LinksWindows implements Serializable {
 		});
 		lblNext.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png")));
 		toolBar_1.add(lblNext);
+		
+		lblMoving = new JLabel("Moving   : NO");
+		lblMoving.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				moving = !moving;
+				if(moving)
+					lblMoving.setText("Moving : OK ");
+				else
+					lblMoving.setText("Moving : NO ");
+			}
+		});
+		toolBar_1.add(lblMoving);
 
 		JLabel lblSpeed = new JLabel("Speed:");
 		toolBar_1.add(lblSpeed);
@@ -455,6 +472,10 @@ public class LinksWindows implements Serializable {
 
 	public String getXpName() {
 		return xpName;
+	}
+	
+	public boolean getMoving(){
+		return this.moving;
 	}
 	
 }

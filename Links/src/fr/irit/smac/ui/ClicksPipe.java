@@ -8,21 +8,21 @@ import org.graphstream.ui.view.ViewerPipe;
 
 public class ClicksPipe extends Thread implements ViewerListener{
 	protected boolean loop = true;
-	
+
 	private Graph graph;
 	private  Viewer viewer;
 	private LinksWindows links;
-	
+
 	public ClicksPipe(Graph graph, Viewer viewer, LinksWindows links) {
 		this.graph = graph;
 		this.viewer = viewer;
 		this.links = links;
 		this.start();
 	}
-	
-	
+
+
 	public void run(){
-		
+
 		ViewerPipe fromViewer = viewer.newViewerPipe();
 		fromViewer.addViewerListener(this);
 		fromViewer.addSink(graph);
@@ -30,7 +30,7 @@ public class ClicksPipe extends Thread implements ViewerListener{
 		while(loop) {
 			try {
 				Thread.sleep(10);
-			fromViewer.pump(); 
+				fromViewer.pump(); 
 
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -43,11 +43,13 @@ public class ClicksPipe extends Thread implements ViewerListener{
 	}
 
 	public void buttonPushed(String id) {
-		
+
 	}
 
 	public void buttonReleased(String id) {
-		AgentVizFrame f = new AgentVizFrame(links.getDisplayedGraph().getSnapCol().getEntity(id,links.getCurrentSnapNumber()),links.getSnapCol(),links);
-		links.registerObserver(f);
+		if(!this.links.getMoving()){
+			AgentVizFrame f = new AgentVizFrame(links.getDisplayedGraph().getSnapCol().getEntity(id,links.getCurrentSnapNumber()),links.getSnapCol(),links);
+			links.registerObserver(f);
+		}
 	}
 }
