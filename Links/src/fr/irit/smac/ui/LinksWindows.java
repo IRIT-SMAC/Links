@@ -218,6 +218,8 @@ public class LinksWindows implements Serializable {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
 				switchToSnap(Math.max(1, currentSnap - Integer.valueOf(txtFramerate.getText())));
+				notifyJump(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
+						graph.getSnapCol().getMaxNum() - 1), 1));
 			}
 		});
 		lblPrev.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/backL.png")));
