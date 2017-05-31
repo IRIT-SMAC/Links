@@ -234,7 +234,7 @@ public class LinksWindows implements Serializable {
 		lblNext.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png")));
 		toolBar_1.add(lblNext);
 		
-		lblMoving = new JLabel("Moving   : NO");
+		lblMoving = new JLabel("Moving   : NO ");
 		lblMoving.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
