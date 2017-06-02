@@ -1,6 +1,7 @@
 package fr.irit.smac.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -29,6 +30,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import org.graphstream.graph.Graph;
@@ -142,7 +144,7 @@ public class AgentVizFrame extends JFrame {
 		contentPane.add(toolBar, BorderLayout.NORTH);
 
 		splitPane = new JSplitPane();
-		splitPane.setResizeWeight(0.3);
+		splitPane.setResizeWeight(0.5);
 		contentPane.add(splitPane, BorderLayout.CENTER);
 
 		attributeTree = new JTree();
@@ -379,100 +381,126 @@ public class AgentVizFrame extends JFrame {
 	//TODO
 	// Raffraichir la valeur de l'attribut
 	private void updateTreeList() {
-		setTitle(entity.getName() + " Vizualization tool"+ "   Type : "+ entity.getType());
+		if(entity != null){
+			setTitle(entity.getName() + " Vizualization tool"+ "   Type : "+ entity.getType());
 
-		//We use reload if we have to create entity or relation
-		boolean needReload = false;
-		DefaultTreeModel model = (DefaultTreeModel) this.attributeTree.getModel();
-		DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-		if(root.isLeaf()){
-			DefaultMutableTreeNode entityNode = new DefaultMutableTreeNode("Entity : "+entity.getName());
-			//root.add(entityNode);
-			model.insertNodeInto(entityNode, root, 0);
-			needReload = true;
-		}
-		DefaultMutableTreeNode entityNode = (DefaultMutableTreeNode) root.getFirstChild();
-
-		for (String carac : this.entity.getAttributes().keySet()) {
-			boolean exist = false;
-			int pos =0;
-			for(int i = 0; i < entityNode.getChildCount(); i++){
-				if(entityNode.getChildAt(i).toString().equals(carac)){
-					exist = true;
-					pos = i;
-				}
+			//We use reload if we have to create entity or relation
+			boolean needReload = false;
+			DefaultTreeModel model = (DefaultTreeModel) this.attributeTree.getModel();
+			DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+			if(root.isLeaf()){
+				DefaultMutableTreeNode entityNode = new DefaultMutableTreeNode("Entity : "+entity.getName());
+				model.insertNodeInto(entityNode, root, 0);
+				needReload = true;
 			}
-			if(!(exist)){
-				DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(carac);
-				//entityNode.add(newCarac);
-				model.insertNodeInto(newCarac, entityNode, entityNode.getChildCount());
+			DefaultMutableTreeNode entityNode = (DefaultMutableTreeNode) root.getFirstChild();
 
-				for (Attribute t : this.entity.getAttributes().get(carac)) {
-					//newCarac.add(new DefaultMutableTreeNode(t.toString()));
-					model.insertNodeInto(new DefaultMutableTreeNode(t.toString()), newCarac, newCarac.getChildCount());
-				}
-			}
-			else{
-				boolean valExist = true;
-				int rem = 0;
-				//DefaultMutableTreeNode a = (DefaultMutableTreeNode) entityNode.getChildAt(pos);
-				for(Attribute att : this.entity.getAttributes().get(carac)){
-					//System.out.println(att);
-					boolean find = false;
-					for(int i = 0; i < entityNode.getChildAt(pos).getChildCount();i++){
-						//System.out.println("||| : "+entityNode.getChildAt(pos).getChildAt(i).toString());
-						if(entityNode.getChildAt(pos).getChildAt(i).toString().equals(att.toString()))
-							find = true;
-						rem = i;
+			//Verify if the tree already knows the attributes
+			for (String carac : this.entity.getAttributes().keySet()) {
+				boolean exist = false;
+				int pos =0;
+				for(int i = 0; i < entityNode.getChildCount(); i++){
+					if(entityNode.getChildAt(i).toString().equals(carac)){
+						exist = true;
+						pos = i;
 					}
-					if(!(find))
-						valExist = false;
 				}
-				if(!(valExist)){
-					//((DefaultMutableTreeNode) entityNode.getChildAt(pos)).removeAllChildren();
-					model.removeNodeFromParent((MutableTreeNode) entityNode.getChildAt(pos).getChildAt(0));
+				//If no we create it
+				if(!(exist)){
+					DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(carac);
+					model.insertNodeInto(newCarac, entityNode, entityNode.getChildCount());
+
+					for (Attribute t : this.entity.getAttributes().get(carac)) {
+						model.insertNodeInto(new DefaultMutableTreeNode(t.toString()), newCarac, newCarac.getChildCount());
+					}
+					model.nodeChanged(entityNode);
+				}
+				//If yes we verify if the values are the same
+				else{
+					boolean valExist = true;
+					ArrayList<Attribute> addList = new ArrayList<Attribute>();
 					for(Attribute att : this.entity.getAttributes().get(carac)){
-						model.insertNodeInto(new DefaultMutableTreeNode(att), (MutableTreeNode) entityNode.getChildAt(pos), entityNode.getChildAt(pos).getChildCount());
+						boolean find = false;
+						for(int i = 0; i < entityNode.getChildAt(pos).getChildCount();i++){
+							if(entityNode.getChildAt(pos).getChildAt(i).toString().equals(att.toString()))
+								find = true;
+						}
+						if(!(find)){
+							valExist = false;
+							addList.add(att);
+						}
+					}
+					//If no we replace the old value with the new
+					if(!(valExist)){
+						for(Attribute att : addList){
+							for(int i =0; i < entityNode.getChildAt(pos).getChildCount(); i++){
+								if(entityNode.getChildAt(pos).getChildAt(i).toString().contains(att.getName())){
+									TreeNode tmp = entityNode.getChildAt(pos).getChildAt(i);
+									model.insertNodeInto(new DefaultMutableTreeNode(att), (MutableTreeNode) entityNode.getChildAt(pos), 0);
+									model.removeNodeFromParent((MutableTreeNode) tmp);
+								}
+							}
+						}
+						//TreeNode tmp = entityNode.getChildAt(pos).getChildAt(0);
+
+					}
+					model.nodeChanged(entityNode);
+				}
+
+			}
+
+
+			/*for(String s : this.entity.getAttributes().keySet()){
+			if(this.entity.getAttributes().keySet().size() != entityNode.getChildCount()){
+				for(int i = entityNode.getChildCount()-1; i>= 0;i--){
+					if(!(this.entity.getAttributes().keySet().contains(entityNode.getChildAt(i).toString())))
+						model.removeNodeFromParent((MutableTreeNode) entityNode.getChildAt(i));	
+				}
+			}
+		}*/
+
+			//DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
+			if(root.getChildCount()<2){
+				DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
+				//root.add(relNode);
+				model.insertNodeInto(relNode, root, 1);
+				needReload = true;
+			}
+			DefaultMutableTreeNode relNode = (DefaultMutableTreeNode) root.getChildAt(1);
+
+
+			for(int i =relNode.getChildCount()-1; i>= 1;i--){
+				if(!(this.relations.contains(((DefaultMutableTreeNode) relNode.getChildAt(i)).getUserObject())))
+					model.removeNodeFromParent((MutableTreeNode) relNode.getChildAt(i));
+			}
+
+			for (Relation r : this.relations) {
+				boolean exist = false;
+				for(int i = 0; i < relNode.getChildCount(); i++){
+					if(relNode.getChildAt(i).toString().equals(r.getName())){
+						exist = true;
+					}
+				}
+				if(!(exist)){
+					DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(r.getName());
+					//relNode.add(newCarac);
+					model.insertNodeInto(newCarac, relNode, relNode.getChildCount());
+					for (String s : r.getAttributes().keySet()) {
+						for (Attribute t : r.getAttributes().get(s)) {
+							newCarac.add(new DefaultMutableTreeNode(t.toString()));
+							model.insertNodeInto(new DefaultMutableTreeNode(t), newCarac, newCarac.getChildCount());
+						}
 					}
 				}
 			}
 
-		}
-
-		//DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
-		if(root.getChildCount()<2){
-			DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
-			//root.add(relNode);
-			model.insertNodeInto(relNode, root, 1);
-			needReload = true;
-		}
-		DefaultMutableTreeNode relNode = (DefaultMutableTreeNode) root.getChildAt(1);
-		for (Relation r : this.relations) {
-			boolean exist = false;
-			for(int i = 0; i < relNode.getChildCount(); i++){
-				if(relNode.getChildAt(i).toString().equals(r.getName())){
-					exist = true;
-				}
+			if(needReload)
+				model.reload();
+			else{
+				model.nodeChanged(root);
+				model.nodeChanged(relNode);
+				model.nodeChanged(entityNode);
 			}
-			if(!(exist)){
-				DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(r.getName());
-				//relNode.add(newCarac);
-				model.insertNodeInto(newCarac, relNode, relNode.getChildCount());
-				for (String s : r.getAttributes().keySet()) {
-					for (Attribute t : r.getAttributes().get(s)) {
-						newCarac.add(new DefaultMutableTreeNode(t.toString()));
-						model.insertNodeInto(new DefaultMutableTreeNode(t), newCarac, newCarac.getChildCount());
-					}
-				}
-			}
-		}
-
-		if(needReload)
-			model.reload();
-		else{
-			model.nodeChanged(root);
-			model.nodeChanged(relNode);
-			model.nodeChanged(entityNode);
 		}
 		//attributeTree.setModel(tree);
 		//attributeTree.setRootVisible(false);
