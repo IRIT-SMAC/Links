@@ -11,6 +11,8 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -378,8 +380,6 @@ public class AgentVizFrame extends JFrame {
 			updateTreeList();
 	}
 
-	//TODO
-	// Raffraichir la valeur de l'attribut
 	private void updateTreeList() {
 		if(entity != null){
 			setTitle(entity.getName() + " Vizualization tool"+ "   Type : "+ entity.getType());
@@ -581,22 +581,29 @@ public class AgentVizFrame extends JFrame {
 
 	public void drawLook() {
 		String s = "";
-		for (DrawableAttribute t : this.toLook) {
-			if (t.getType().equals(DrawableAttribute.Type.ENTITY)) {
-				s = s + "{" + t.getCaracList() + "} " + t.getAttribute().toString() + "\n";
-			} else {
-				s = s + " " + t.getType() + ":" + t.getName() + " : {" + t.getCaracList() + "} "
-						+ t.getAttribute().toString() + "\n";
+		Lock l = new ReentrantLock();
+		l.lock();
+		try{
+			for (DrawableAttribute t : this.toLook) {
+				if (t.getType().equals(DrawableAttribute.Type.ENTITY)) {
+					s = s + "{" + t.getCaracList() + "} " + t.getAttribute().toString() + "\n";
+				} else {
+					s = s + " " + t.getType() + ":" + t.getName() + " : {" + t.getCaracList() + "} "
+							+ t.getAttribute().toString() + "\n";
+				}
 			}
-		}
-		if (s == "") {
-			if(toLook.isEmpty()){
-				s = "Nothing is selected";
-			}else{
-				s = "Entity is dead or not alive yet";
+			if (s == "") {
+				if(toLook.isEmpty()){
+					s = "Nothing is selected";
+				}else{
+					s = "Entity is dead or not alive yet";
+				}
 			}
+			txtpnLook.setText(s);
 		}
-		txtpnLook.setText(s);
+		finally{
+			l.unlock();
+		}
 	}
 
 	public void notifyJump(long num) {
@@ -616,5 +623,9 @@ public class AgentVizFrame extends JFrame {
 	public void setlblBotTxt(String txt, long num) {
 		currentFrameNum = num;
 		lblBotTxt.setText(txt);
+	}
+	
+	public String getName(){
+		return this.aname;
 	}
 }
