@@ -3,7 +3,9 @@ package fr.irit.smac.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -98,6 +100,8 @@ public class LinksWindows implements Serializable {
 
 	private boolean moving;
 
+	private boolean drawing = false;
+
 	private JLabel lblStop;
 	private JTextField txtSpeed;
 	private JTextField txtFramerate;
@@ -110,6 +114,7 @@ public class LinksWindows implements Serializable {
 	private List<Map<Entity,List<String>>> charts;
 	private Map<Attribute,AttributeStyle> typeChart;
 	private long lastSnapNumDrawn = 0;
+	private JLabel lblDraw;
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
@@ -151,10 +156,11 @@ public class LinksWindows implements Serializable {
 		Thread t = new Thread(){
 			public void run(){
 				System.out.println("Enter : 'NBSNAP for the number of snapshot'");
-				System.out.println("Enter : 'SHOW <nameEntity> <Attribute1> <Attribute2> <AttributeN> <NOSYNCHR>(synchronization) <BAR/LIN/AVRT/AVT>' to show the graph (in case of blank put the name between simple quote");
+				System.out.println("Enter : 'SHOW <nameEntity> <Attribute1> <Attribute2> <AttributeN> <NOSYNCHR>(synchronization) <BAR/LIN/AVRT/AVT> <SIZE=N>' to show the graph (in case of blank put the name between simple quote");
 				Scanner sc = new Scanner(System.in);
 				while(true){
 					int option = 0;
+					long size = 100;
 					String ans = sc.nextLine();
 					if(ans.equals("NBSNAP")){
 						System.out.println("The number of snapshot is : " + getSnapCol().getMaxNum());
@@ -186,6 +192,10 @@ public class LinksWindows implements Serializable {
 							type = AttributeStyle.AVT;
 							option++;
 						}
+						if(ans.contains("SIZE")){
+							size = Long.parseLong(spl[spl.length-1].split("=")[1]);
+							option++;
+						}
 						Entity e = getSnapCol().getEntity(spl[1], getCurrentSnapNumber());
 						if(e == null){
 							System.out.println("Snapshot not found");
@@ -203,7 +213,7 @@ public class LinksWindows implements Serializable {
 										DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
 										if(type==null)
 											type = t.getTypeToDraw();
-											typeChart.put(t, type);
+										typeChart.put(t, type);
 										atts.add(datt);
 									}
 									if(!ans.contains("NOSYNCHR")){
@@ -215,7 +225,7 @@ public class LinksWindows implements Serializable {
 									charts.add(tmpMap);
 								}
 								else
-									draw(e,100,atts,type);
+									draw(e,size,atts,type);
 							}
 
 						}
@@ -227,6 +237,26 @@ public class LinksWindows implements Serializable {
 
 	}
 
+	/**
+	 * Method used to draw a charts with a
+	 * @param e
+	 * @param type
+	 * @param size
+	 */
+	public void constructDraw(Entity e, AttributeStyle type,long size){
+		Map<Entity,List<String>> tmpMap = new HashMap<Entity,List<String>>();
+		ArrayList<String> tmpList = new ArrayList<String>();
+		for(String s : e.getAttributes().keySet()){
+			for (Attribute t : e.getAttributes().get(s)) {
+				if(type==null)
+					type = t.getTypeToDraw();
+				typeChart.put(t, type);
+			}
+			tmpList.add(s);
+		}
+		tmpMap.put(e, tmpList);
+		charts.add(tmpMap);
+	}
 	/**
 	 * Get the snapshot collection.
 	 * 
@@ -332,21 +362,42 @@ public class LinksWindows implements Serializable {
 						graph.getSnapCol().getMaxNum() - 1), 1));
 			}
 		});
-		lblNext.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png")));
+		ImageIcon iNext = new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png"));;
+		lblNext.setIcon(iNext);
 		toolBar_1.add(lblNext);
 
-		lblMoving = new JLabel("Moving   : NO ");
+		lblMoving = new JLabel("");
+		
+		lblMoving.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/moving.png")).getImage().getScaledInstance(iNext.getIconWidth(), iNext.getIconHeight(), Image.SCALE_DEFAULT)));
 		lblMoving.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				moving = !moving;
-				if(moving)
-					lblMoving.setText("Moving : OK ");
+				if(moving){
+					frame.setCursor(new Cursor(Cursor.HAND_CURSOR));
+					drawing = false;
+				}
 				else
-					lblMoving.setText("Moving : NO ");
+					frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}
 		});
 		toolBar_1.add(lblMoving);
+
+		lblDraw = new JLabel("");
+		lblDraw.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/draw.png")));
+		lblDraw.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				drawing = !drawing;
+				if(drawing){
+					frame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+					moving = false;
+				}
+				else
+					frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			}
+		});
+		toolBar_1.add(lblDraw);
 
 		JLabel lblSpeed = new JLabel("Speed:");
 		toolBar_1.add(lblSpeed);
@@ -606,6 +657,10 @@ public class LinksWindows implements Serializable {
 		return this.moving;
 	}
 
+	public boolean getDrawing(){
+		return this.drawing;
+	}
+
 	/**
 	 * Draw a chart which was asked by a command line
 	 * @param a
@@ -640,8 +695,9 @@ public class LinksWindows implements Serializable {
 								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
 					}
 					if (style == AttributeStyle.BAR) {
-						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-								ChartType.BAR).add(s, timei, (Double) theAttribute.getValue());
+						if(theAttribute.getValue().getClass() != String.class)
+							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+									ChartType.BAR).add(s, timei, (Double) theAttribute.getValue());
 					}
 					if (style == AttributeStyle.AVRT) {
 						Double tab[] = (Double[]) theAttribute.getValue();
