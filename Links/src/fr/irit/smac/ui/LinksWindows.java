@@ -4,11 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -22,6 +27,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import org.graphstream.graph.Graph;
@@ -224,7 +231,7 @@ public class LinksWindows implements Serializable {
 									tmpMap.put(e, tmpList);
 									charts.add(tmpMap);
 								}
-								else
+								if(ans.contains("NOSYNCHR") || lblPlay.isEnabled())
 									draw(e,size,atts,type);
 							}
 
@@ -246,16 +253,23 @@ public class LinksWindows implements Serializable {
 	public void constructDraw(Entity e, AttributeStyle type,long size){
 		Map<Entity,List<String>> tmpMap = new HashMap<Entity,List<String>>();
 		ArrayList<String> tmpList = new ArrayList<String>();
+		ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
 		for(String s : e.getAttributes().keySet()){
 			for (Attribute t : e.getAttributes().get(s)) {
+				DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
 				if(type==null)
 					type = t.getTypeToDraw();
+				atts.add(datt);
 				typeChart.put(t, type);
 			}
 			tmpList.add(s);
 		}
-		tmpMap.put(e, tmpList);
-		charts.add(tmpMap);
+		if(isSynch){
+			tmpMap.put(e, tmpList);
+			charts.add(tmpMap);
+		}
+		else
+			draw(e,100,atts,AttributeStyle.BAR);
 	}
 	/**
 	 * Get the snapshot collection.
@@ -367,7 +381,7 @@ public class LinksWindows implements Serializable {
 		toolBar_1.add(lblNext);
 
 		lblMoving = new JLabel("");
-		
+
 		lblMoving.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/moving.png")).getImage().getScaledInstance(iNext.getIconWidth(), iNext.getIconHeight(), Image.SCALE_DEFAULT)));
 		lblMoving.addMouseListener(new MouseAdapter() {
 			@Override
@@ -399,20 +413,38 @@ public class LinksWindows implements Serializable {
 		});
 		toolBar_1.add(lblDraw);
 
-		JLabel lblSpeed = new JLabel("Speed:");
+		JButton lblSpeed = new JButton("Speed:");
+
+		lblSpeed.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				txtSpeed.setEnabled(!txtSpeed.isEnabled());
+			}
+		});
+		
 		toolBar_1.add(lblSpeed);
 
 		txtSpeed = new JTextField();
 		txtSpeed.setHorizontalAlignment(SwingConstants.LEFT);
 		txtSpeed.setText("250");
+		txtSpeed.setEnabled(false);
 		toolBar_1.add(txtSpeed);
 		txtSpeed.setColumns(10);
 
-		JLabel lblFrameRate = new JLabel("Frame Rate:");
+		JButton lblFrameRate = new JButton("Frame Rate:");
+		
+		lblFrameRate.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				txtFramerate.setEnabled(!txtFramerate.isEnabled());
+			}
+		});
+		
 		toolBar_1.add(lblFrameRate);
 
 		txtFramerate = new JTextField();
 		txtFramerate.setText("1");
+		txtFramerate.setEnabled(false);
 		toolBar_1.add(txtFramerate);
 		txtFramerate.setColumns(10);
 
@@ -423,6 +455,64 @@ public class LinksWindows implements Serializable {
 		graphPanel = new JPanel();
 		frame.getContentPane().add(graphPanel, BorderLayout.CENTER);
 		graphPanel.setLayout(new BorderLayout(0, 0));
+
+		//Give the shortcut
+		KeyboardFocusManager.getCurrentKeyboardFocusManager()
+		.addKeyEventDispatcher(new KeyEventDispatcher(){
+			public boolean dispatchKeyEvent(KeyEvent e){
+				if(e.getID() == KeyEvent.KEY_PRESSED)
+				{
+					switch(e.getKeyCode()){
+					case KeyEvent.VK_P:
+						if(lblPlay.isEnabled())
+							onPlayClick();
+						break;
+					case KeyEvent.VK_S:
+						if(lblStop.isEnabled())
+							onPauseClick();
+						break;
+					case KeyEvent.VK_D:
+						drawing = !drawing;
+						if(drawing){
+							frame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+						}
+						else
+							frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+						break;
+					case KeyEvent.VK_M:
+						moving = !moving;
+						if(moving){
+							frame.setCursor(new Cursor(Cursor.HAND_CURSOR));
+							drawing = false;
+						}
+						else
+							frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+						break;
+					case KeyEvent.VK_UP:
+						switchToSnap(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
+								graph.getSnapCol().getMaxNum() - 1), 1));
+						break;
+					case KeyEvent.VK_DOWN:
+						switchToSnap(Math.max(1, currentSnap - Integer.valueOf(txtFramerate.getText())));
+						notifyJump(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
+								graph.getSnapCol().getMaxNum() - 1), 1));
+						break;
+					case KeyEvent.VK_C:
+						isSynch = !isSynch;
+						lblSynch.setEnabled(isSynch);
+						break;
+					case KeyEvent.VK_I:
+						if (!isInfoWindowsOpened) {
+							isInfoWindowsOpened = true;
+							info = new InfoWindow(myWindow);
+						}
+						break;
+					default:
+						break;
+					}
+				}
+				return false;}});
+
 		generateGraph();
 	}
 
@@ -659,6 +749,11 @@ public class LinksWindows implements Serializable {
 
 	public boolean getDrawing(){
 		return this.drawing;
+	}
+	
+	public void isDraw(){
+		if(this.lblPlay.isEnabled())
+			notifyDraw();
 	}
 
 	/**

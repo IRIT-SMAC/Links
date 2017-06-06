@@ -51,6 +51,7 @@ public class ClicksPipe extends Thread implements ViewerListener{
 	public void buttonReleased(String id) {
 		if(this.links.getDrawing()){
 			this.links.constructDraw(links.getDisplayedGraph().getSnapCol().getEntity(id,links.getCurrentSnapNumber()),AttributeStyle.BAR,100);
+			this.links.isDraw();
 		}
 		if(!this.links.getMoving()){
 			AgentVizFrame f = new AgentVizFrame(links.getDisplayedGraph().getSnapCol().getEntity(id,links.getCurrentSnapNumber()),links.getSnapCol(),links);
