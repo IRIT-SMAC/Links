@@ -341,7 +341,7 @@ public class Links {
 			try{
 				linksWindow.addSnapshot(s);
 			}catch(NoSuchElementException exc){
-				linksWindow.addSnapshot(s);
+				addSnapshot(s);
 			}
 		}
 	}
@@ -419,55 +419,6 @@ public class Links {
 	 */
 	public void createNewLinksWindows(String xpName, String linkToCss) {
 		linksWindow = new LinksWindows(xpName, linkToCss, this);
-		/*Thread t = new Thread(){
-			public void run(){
-				System.out.println("Enter : 'NBSNAP for the number of snapshot'");
-				System.out.println("Enter : 'SHOW <nameEntity> <Attribute1> <Attribute2> <AttributeN> <YES/NO>(synchronization)' to show the graph (in case of blank put the name between simple quote");
-				Scanner sc = new Scanner(System.in);
-				while(true){
-					String ans = sc.nextLine();
-					if(ans.equals("NBSNAP")){
-						System.out.println("The number of snapshot is : " + linksWindow.getSnapCol().getMaxNum());
-					}
-					if(ans.contains("SHOW ")){
-						Map<Entity,List<String>> tmpMap = new HashMap<Entity,List<String>>();
-						ArrayList<String> tmpList = new ArrayList<String>();
-						String[] spl = ans.split(" (?=(?:[^\']*\'[^\']*\')*[^\']*$)");
-						for(int i =0; i<spl.length;i++){
-							if(spl[i].contains("'"))
-								spl[i] = spl[i].split("'")[1];
-						}
-						Entity e = linksWindow.getSnapCol().getEntity(spl[1], linksWindow.getCurrentSnapNumber());
-						if(e == null){
-							System.out.println("Snapshot not found");
-						}
-						else{
-							ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
-							for(int i = 2; i < spl.length-1; i++){
-								String s = spl[i];
-								//for (String s : e.getAttributes().keySet()) {
-								System.out.println(s);
-								for (Attribute t : e.getAttributes().get(s)) {
-									System.out.println(t.toString());
-									atts.add(
-											new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t));
-								}
-								if(spl[spl.length-1].equals("YES")){
-									tmpList.add(s);
-								}
-							}
-							draw(e,100,atts);
-							if(spl[spl.length-1].equals("YES")){
-								tmpMap.put(e, tmpList);
-								charts.add(tmpMap);
-							}
-						}
-					}
-				}
-			}
-		};
-		t.start();*/
-
 	}
 
 	/**
