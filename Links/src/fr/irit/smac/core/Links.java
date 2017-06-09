@@ -100,7 +100,7 @@ public class Links {
 
 	private XpChooser xpChooser;
 
-	
+
 
 	/**
 	 * Main Launch to start the standalone application.
@@ -336,14 +336,17 @@ public class Links {
 	 * @param s
 	 *            The snapshot to add.
 	 */
-	public void addSnapshot(Snapshot s) {
+	public synchronized void addSnapshot(Snapshot s) {
 		if (linksWindow != null) {
 			try{
 				linksWindow.addSnapshot(s);
-			}catch(NoSuchElementException exc){
-				addSnapshot(s);
+			}catch(NoSuchElementException | NullPointerException exc){
 			}
 		}
+		/*try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
+		}*/
 	}
 
 	/**

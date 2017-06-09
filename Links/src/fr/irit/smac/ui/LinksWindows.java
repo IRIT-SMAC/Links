@@ -48,6 +48,7 @@ import org.graphstream.ui.view.Viewer;
 import fr.irit.smac.attributes.AVTAttribute;
 import fr.irit.smac.attributes.DrawableAttribute;
 import fr.irit.smac.attributes.DrawableAttribute.Type;
+import fr.irit.smac.attributes.StringAttribute;
 import fr.irit.smac.core.AutoPlayThread;
 import fr.irit.smac.core.DisplayedGraph;
 import fr.irit.smac.core.Links;
@@ -125,6 +126,8 @@ public class LinksWindows implements Serializable {
 	private long lastSnapNumDrawn = 0;
 	private JLabel lblDraw;
 
+	private Map<DrawableAttribute,ILxPlotChart> listLxPlot;
+
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
@@ -139,6 +142,7 @@ public class LinksWindows implements Serializable {
 	public LinksWindows(String xpName, String linkToCss, Links links) {
 		charts = new ArrayList<Map<Entity,List<String>>>();
 		typeChart = new HashMap<Attribute,AttributeStyle>();
+		this.listLxPlot = new HashMap<DrawableAttribute,ILxPlotChart>();
 		linksRef = links;
 		this.xpName = xpName;
 		this.linkToCss = linkToCss;
@@ -227,11 +231,15 @@ public class LinksWindows implements Serializable {
 									else
 									{
 										for (Attribute t : e.getAttributes().get(s)) {
+											AttributeStyle style = null;
 											DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
 											if(type==null)
-												type = t.getTypeToDraw();
-											typeChart.put(t, type);
+												style = t.getTypeToDraw();
+											else
+												style = type;
+											typeChart.put(t, style);
 											atts.add(datt);
+											listLxPlot.put(datt,null);
 										}
 										if(!ans.contains("NOSYNCHR")){
 											tmpList.add(s);
@@ -241,8 +249,7 @@ public class LinksWindows implements Serializable {
 										tmpMap.put(e, tmpList);
 										charts.add(tmpMap);
 									}
-									if(ans.contains("NOSYNCHR") || lblPlay.isEnabled())
-										draw(e,size,atts,type);
+									draw(e,size,atts,type);
 								}
 							}
 
@@ -255,8 +262,9 @@ public class LinksWindows implements Serializable {
 
 	}
 
+	//TODO
 	/**
-	 * Method used to draw a charts with a
+	 * Method used to draw a charts with a click
 	 * @param e
 	 * @param type
 	 * @param size
@@ -267,20 +275,22 @@ public class LinksWindows implements Serializable {
 		ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
 		for(String s : e.getAttributes().keySet()){
 			for (Attribute t : e.getAttributes().get(s)) {
-				DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
-				if(type==null)
-					type = t.getTypeToDraw();
-				atts.add(datt);
-				typeChart.put(t, type);
+				if(!(t.getValue() instanceof String)){
+					AttributeStyle style = t.getTypeToDraw();
+					DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
+					if(type !=null)
+						style = type;
+					atts.add(datt);
+					typeChart.put(t, style);
+				}
+				tmpList.add(s);
 			}
-			tmpList.add(s);
 		}
 		if(isSynch && synchr){
 			tmpMap.put(e, tmpList);
-			charts.add(tmpMap);
 		}
-		else
-			draw(e,100,atts,AttributeStyle.BAR);
+		charts.add(tmpMap);
+		draw(e,100,atts,null);
 	}
 	/**
 	 * Get the snapshot collection.
@@ -706,7 +716,7 @@ public class LinksWindows implements Serializable {
 	 * @param s
 	 *            The snapshot to be added.
 	 */
-	public void addSnapshot(Snapshot s) {
+	public synchronized void addSnapshot(Snapshot s) {
 		for(AgentVizFrame a : this.listAgent){
 			boolean alive = false;
 			for(Entity e : s.getEntityList()){
@@ -790,7 +800,7 @@ public class LinksWindows implements Serializable {
 	 * @param atts
 	 * 		All the attribute to represent
 	 */
-	public void draw(Entity a,long drawSizeLong,  ArrayList<DrawableAttribute> atts,AttributeStyle style) {
+	public synchronized void draw(Entity a,long drawSizeLong,  ArrayList<DrawableAttribute> atts,AttributeStyle type) {
 		long max = this.getCurrentSnapNumber();
 		long u;
 		if (this.getFrameSpeed() > 0) {
@@ -806,18 +816,25 @@ public class LinksWindows implements Serializable {
 			}
 			if (a != null) {
 				for (DrawableAttribute t : atts) {
+					AttributeStyle style = null;
 					String s = t.getAttribute().getName();
 					Attribute theAttribute = t.getAttribute();
-					if(style == null)
-						style = theAttribute.getTypeToDraw();
+					if(type == null)
+						style = typeChart.get(theAttribute);
+					else
+						style = type;
 					if (style == AttributeStyle.LINEAR || style == null) {
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
 								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
+						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
+								ChartType.LINE));
 					}
 					if (style == AttributeStyle.BAR) {
 						if(theAttribute.getValue().getClass() != String.class)
 							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
 									ChartType.BAR).add(s, timei, (Double) theAttribute.getValue());
+						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+								ChartType.BAR));
 					}
 					if (style == AttributeStyle.AVRT) {
 						Double tab[] = (Double[]) theAttribute.getValue();
@@ -846,6 +863,9 @@ public class LinksWindows implements Serializable {
 							LxPlot.getChart(
 									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
 									ChartType.LINE).add(s + "UPPER", timei, tab[5]);
+							this.listLxPlot.put(t,LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE));
 						}
 					}
 					if (style == AttributeStyle.AVT) {
@@ -853,6 +873,8 @@ public class LinksWindows implements Serializable {
 								ChartType.LINE).add(s + "Value", timei, (Double) theAttribute.getValue());
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
 								ChartType.LINE).add(s + "Delta", timei, ((AVTAttribute) theAttribute).getDelta());
+						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
+								ChartType.LINE));
 					}
 				}
 			}
@@ -860,6 +882,7 @@ public class LinksWindows implements Serializable {
 	}
 
 	//TODO
+	//Pourquoi tous le temps en bar
 	/**
 	 * Method use to refresh all chats who are synchr
 	 */
@@ -867,14 +890,28 @@ public class LinksWindows implements Serializable {
 		for(Map<Entity,List<String>> h : this.charts){
 			for(Entity e : h.keySet()){
 				ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
-				AttributeStyle style = AttributeStyle.LINEAR;
+				AttributeStyle style = null;
 				for(String s : h.get(e)){
+					ArrayList<Attribute> listTmp = new ArrayList<Attribute>();
 					for (Attribute t : e.getAttributes().get(s)) {
-						DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
-						style = typeChart.get(t);
-						atts.add(datt);
+						if(!(t instanceof StringAttribute)){
+							DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
+							boolean alive = false;
+							for(DrawableAttribute da : this.listLxPlot.keySet()){
+								if(da.getAttribute().getName().equals(datt.getAttribute().getName()))
+									if(datt.getAttribute().getTypeToDraw() == da.getAttribute().getTypeToDraw())
+										if(listLxPlot.get(da) != null){
+									alive = true;
+								}
+							}
+							if(alive)
+								atts.add(datt);
+							else
+								listTmp.add(t);
+						}
 					}
-
+					for(Attribute t : listTmp)
+						e.getAttributes().get(s).remove(t);
 				}
 				draw(e,100,atts,style);
 			}

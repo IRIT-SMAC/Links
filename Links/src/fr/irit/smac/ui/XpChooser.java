@@ -228,6 +228,21 @@ public class XpChooser extends JFrame {
 		JLabel lblTxt = new JLabel("Select or create your experiment");
 		lblTxt.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblTxt, BorderLayout.SOUTH);
+
+		list.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseClicked(MouseEvent e){
+				if(e.getClickCount() == 2){
+					if (list.getSelectedValue() != null) {
+						String xpName = (String) list.getSelectedValue();
+						if (xpName != null) {
+							String linkToCss = Links.getCssFilePathFromXpName(xpName);
+							linksRef.createNewLinksWindows(xpName, linkToCss);
+						}
+					}
+				}
+			}
+		});
 	}
 
 	public void redrawList() {
