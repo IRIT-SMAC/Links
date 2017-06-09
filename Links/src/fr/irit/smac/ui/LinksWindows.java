@@ -516,11 +516,11 @@ public class LinksWindows implements Serializable {
 						else
 							frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 						break;
-					case KeyEvent.VK_UP:
+					case KeyEvent.VK_N:
 						switchToSnap(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
 								graph.getSnapCol().getMaxNum() - 1), 1));
 						break;
-					case KeyEvent.VK_DOWN:
+					case KeyEvent.VK_B:
 						switchToSnap(Math.max(1, currentSnap - Integer.valueOf(txtFramerate.getText())));
 						notifyJump(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
 								graph.getSnapCol().getMaxNum() - 1), 1));
@@ -789,6 +789,10 @@ public class LinksWindows implements Serializable {
 	public void isDraw(){
 		if(this.lblPlay.isEnabled())
 			notifyDraw();
+	}
+	
+	public void close(){
+		this.frame.dispose();
 	}
 
 	/**

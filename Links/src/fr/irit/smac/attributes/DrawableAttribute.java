@@ -38,4 +38,5 @@ public class DrawableAttribute {
 	public Attribute getAttribute() {
 		return t;
 	}
+
 }

@@ -56,7 +56,7 @@ public class DisplayedGraph implements Serializable {
 	 * Load a graph from the snapshot number. 
 	 * @param snapNumber The number of the snapshot to be displayed.
 	 */
-	public void loadGraph(long snapNumber) {
+	public synchronized void loadGraph(long snapNumber) {
 		currentSnapNumber = snapNumber;
 		Snapshot s = snapColl.getSnaptshot(snapNumber);
 

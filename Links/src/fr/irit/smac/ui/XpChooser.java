@@ -138,6 +138,7 @@ public class XpChooser extends JFrame {
 
 				if (dialogResult == JOptionPane.YES_OPTION) {
 					String xpName = (String) list.getSelectedValue();
+					linksRef.deleteWindow();
 					drop(xpName);
 				}
 
@@ -147,6 +148,15 @@ public class XpChooser extends JFrame {
 		toolBar.add(lblErase);
 		lblNewLabel.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/edit.png")));
 		toolBar.add(lblNewLabel);
+		
+		JLabel lblSave = new JLabel("Save ");
+		lblSave.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				save((String) list.getSelectedValue());
+			}
+		});
+		toolBar.add(lblSave);
 		lblPlay.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/play.png")));
 		toolBar.add(lblPlay);
 
@@ -261,4 +271,9 @@ public class XpChooser extends JFrame {
 		list.setModel(v);
 	}
 
+	//TODO
+	public void save(String xpName){
+		
+	}
+	
 }

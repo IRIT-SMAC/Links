@@ -336,17 +336,19 @@ public class Links {
 	 * @param s
 	 *            The snapshot to add.
 	 */
-	public synchronized void addSnapshot(Snapshot s) {
-		if (linksWindow != null) {
+	public void addSnapshot(Snapshot s) {
+		if (linksWindow != null && s != null) {
 			try{
 				linksWindow.addSnapshot(s);
-			}catch(NoSuchElementException | NullPointerException exc){
+			}
+			catch(Exception e){
+				linksWindow.addSnapshot(s);
 			}
 		}
-		/*try {
+		try {
 			Thread.sleep(50);
 		} catch (InterruptedException e) {
-		}*/
+		}
 	}
 
 	/**
@@ -380,6 +382,10 @@ public class Links {
 	 */
 	public void deleteExperiment(String xpName) {
 		xpChooser.delete(xpName);
+	}
+	
+	public void deleteWindow(){
+		this.linksWindow.close();
 	}
 
 	/**

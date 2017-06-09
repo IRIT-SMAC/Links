@@ -11,9 +11,12 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
@@ -34,6 +37,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.view.Viewer;
@@ -109,6 +113,7 @@ public class AgentVizFrame extends JFrame {
 	private long lastSnapNumDrawn = 0;
 	private JPanel panel;
 	private JLabel lblNewLabel;
+	
 
 
 	/**
@@ -383,6 +388,7 @@ public class AgentVizFrame extends JFrame {
 	private void updateTreeList() {
 		if(entity != null){
 			setTitle(entity.getName() + " Vizualization tool"+ "   Type : "+ entity.getType());
+			TreePath[] path = attributeTree.getSelectionPaths();
 
 			//We use reload if we have to create entity or relation
 			boolean needReload = false;
@@ -449,16 +455,6 @@ public class AgentVizFrame extends JFrame {
 
 			}
 
-
-			/*for(String s : this.entity.getAttributes().keySet()){
-			if(this.entity.getAttributes().keySet().size() != entityNode.getChildCount()){
-				for(int i = entityNode.getChildCount()-1; i>= 0;i--){
-					if(!(this.entity.getAttributes().keySet().contains(entityNode.getChildAt(i).toString())))
-						model.removeNodeFromParent((MutableTreeNode) entityNode.getChildAt(i));	
-				}
-			}
-		}*/
-
 			//DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
 			if(root.getChildCount()<2){
 				DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
@@ -483,7 +479,6 @@ public class AgentVizFrame extends JFrame {
 				}
 				if(!(exist)){
 					DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(r.getName());
-					//relNode.add(newCarac);
 					model.insertNodeInto(newCarac, relNode, relNode.getChildCount());
 					for (String s : r.getAttributes().keySet()) {
 						for (Attribute t : r.getAttributes().get(s)) {
@@ -493,6 +488,9 @@ public class AgentVizFrame extends JFrame {
 					}
 				}
 			}
+			
+			attributeTree.getSelectionModel().addSelectionPaths(path);
+			
 
 			if(needReload)
 				model.reload();
