@@ -3,19 +3,31 @@ package fr.irit.smac.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,17 +38,29 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
+import fr.irit.smac.attributes.AVTAttribute;
+import fr.irit.smac.attributes.DrawableAttribute;
+import fr.irit.smac.attributes.DrawableAttribute.Type;
+import fr.irit.smac.attributes.StringAttribute;
 import fr.irit.smac.core.AutoPlayThread;
 import fr.irit.smac.core.DisplayedGraph;
 import fr.irit.smac.core.Links;
+import fr.irit.smac.lxplot.LxPlot;
+import fr.irit.smac.lxplot.commons.ChartType;
+import fr.irit.smac.lxplot.interfaces.ILxPlotChart;
+import fr.irit.smac.lxplot.server.LxPlotChart;
+import fr.irit.smac.model.Attribute;
+import fr.irit.smac.model.Entity;
 import fr.irit.smac.model.Snapshot;
 import fr.irit.smac.model.SnapshotsCollection;
+import fr.irit.smac.model.Attribute.AttributeStyle;
 
 /**
  * LinksWindows: This class
@@ -83,8 +107,10 @@ public class LinksWindows implements Serializable {
 	private boolean isInfoWindowsOpened = false;
 
 	private final AutoPlayThread autoPlayThread;
-	
+
 	private boolean moving;
+
+	private boolean drawing = false;
 
 	private JLabel lblStop;
 	private JTextField txtSpeed;
@@ -95,6 +121,13 @@ public class LinksWindows implements Serializable {
 
 	private InfoWindow info;
 	private JLabel lblMoving;
+	private List<Map<Entity,List<String>>> charts;
+	private Map<Attribute,AttributeStyle> typeChart;
+	private long lastSnapNumDrawn = 0;
+	private JLabel lblDraw;
+
+	private Map<DrawableAttribute,ILxPlotChart> listLxPlot;
+
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
@@ -107,6 +140,9 @@ public class LinksWindows implements Serializable {
 	 *            A reference to the main application.
 	 */
 	public LinksWindows(String xpName, String linkToCss, Links links) {
+		charts = new ArrayList<Map<Entity,List<String>>>();
+		typeChart = new HashMap<Attribute,AttributeStyle>();
+		this.listLxPlot = new HashMap<DrawableAttribute,ILxPlotChart>();
 		linksRef = links;
 		this.xpName = xpName;
 		this.linkToCss = linkToCss;
@@ -126,8 +162,136 @@ public class LinksWindows implements Serializable {
 				switchToSnap(1);
 			}
 		}
+
+		//TODO
+		/**
+		 * Thread used to understand the user's input
+		 */
+		Thread t = new Thread(){
+			public void run(){
+				System.out.println("Enter : 'NBSNAP for the number of snapshot'");
+				System.out.println("Enter : 'SHOW <nameEntity> <Attribute1> <Attribute2> <AttributeN> <NOSYNCHR> <BAR/LIN/AVRT/AVT> <SIZE=N>' to show the graph (in case of blank put the name between simple quote)");
+				System.out.println("Example : SHOW 'entity 1' attr1 'attr 2' BAR SIZE=300");
+				System.out.println("NOSYNCHR is an option if you don't want that the synchronisation of the chart");
+				System.out.println("DEFAULT : LIN (or the style of the Attribute if it set) and Size=100");
+				Scanner sc = new Scanner(System.in);
+				while(true){
+					int option = 0;
+					long size = 100;
+					String ans = sc.nextLine();
+					if(ans.equals("NBSNAP")){
+						System.out.println("The number of snapshot is : " + getSnapCol().getMaxNum());
+					}
+					if(ans.contains("SHOW ")){
+						if(ans.contains("NOSYNCHR"))
+							option++;
+						Map<Entity,List<String>> tmpMap = new HashMap<Entity,List<String>>();
+						ArrayList<String> tmpList = new ArrayList<String>();
+						String[] spl = ans.split(" (?=(?:[^\']*\'[^\']*\')*[^\']*$)");
+						for(int i =0; i<spl.length;i++){
+							if(spl[i].contains("'"))
+								spl[i] = spl[i].split("'")[1];
+						}
+						AttributeStyle type = null;
+						if(ans.contains("BAR")){
+							type = AttributeStyle.BAR;
+							option++;
+						}
+						if(ans.contains("LIN")){
+							type = AttributeStyle.LINEAR;
+							option++;
+						}
+						if(ans.contains("AVRT")){
+							type = AttributeStyle.AVRT;
+							option++;
+						}
+						if(ans.contains("AVT")){
+							type = AttributeStyle.AVT;
+							option++;
+						}
+						if(ans.contains("SIZE")){
+							size = Long.parseLong(spl[spl.length-1].split("=")[1]);
+							option++;
+						}
+						Entity e = getSnapCol().getEntity(spl[1], getCurrentSnapNumber());
+						if(e == null){
+							System.out.println("Snapshot not found");
+						}
+						else{
+							ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
+							if(spl.length-option == 2){
+								constructDraw(e,type,size,!ans.contains("NOSYNCHR"));
+							}
+							else{
+								for(int i = 2; i < spl.length-option; i++){
+									String s = spl[i];
+									if(e.getAttributes().get(s) == null){
+										System.out.println("Attribut "+s+" not found");
+									}
+									else
+									{
+										for (Attribute t : e.getAttributes().get(s)) {
+											AttributeStyle style = null;
+											DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
+											if(type==null)
+												style = t.getTypeToDraw();
+											else
+												style = type;
+											typeChart.put(t, style);
+											atts.add(datt);
+											listLxPlot.put(datt,null);
+										}
+										if(!ans.contains("NOSYNCHR")){
+											tmpList.add(s);
+										}
+									}
+									if(!ans.contains("NOSYNCHR")){
+										tmpMap.put(e, tmpList);
+										charts.add(tmpMap);
+									}
+									draw(e,size,atts,type);
+								}
+							}
+
+						}
+					}
+				}
+			}
+		};
+		t.start();
+
 	}
 
+	//TODO
+	/**
+	 * Method used to draw a charts with a click
+	 * @param e
+	 * @param type
+	 * @param size
+	 */
+	public void constructDraw(Entity e, AttributeStyle type,long size,boolean synchr){
+		Map<Entity,List<String>> tmpMap = new HashMap<Entity,List<String>>();
+		ArrayList<String> tmpList = new ArrayList<String>();
+		ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
+		for(String s : e.getAttributes().keySet()){
+			for (Attribute t : e.getAttributes().get(s)) {
+				if(!(t.getValue() instanceof String)){
+					AttributeStyle style = t.getTypeToDraw();
+					DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
+					if(type !=null)
+						style = type;
+					atts.add(datt);
+					typeChart.put(t, style);
+				}
+				tmpList.add(s);
+			}
+		}
+		if(isSynch && synchr){
+			tmpMap.put(e, tmpList);
+		}
+		charts.add(tmpMap);
+		draw(e,100,atts,null);
+	}
 	/**
 	 * Get the snapshot collection.
 	 * 
@@ -190,8 +354,15 @@ public class LinksWindows implements Serializable {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
 				if (!isInfoWindowsOpened) {
+					if(info != null)
+						info.setVisible(true);
+					else
+						info = new InfoWindow(myWindow);
 					isInfoWindowsOpened = true;
-					info = new InfoWindow(myWindow);
+				}
+				else{
+					info.setVisible(false);
+					isInfoWindowsOpened = false;
 				}
 			}
 		});
@@ -233,36 +404,75 @@ public class LinksWindows implements Serializable {
 						graph.getSnapCol().getMaxNum() - 1), 1));
 			}
 		});
-		lblNext.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png")));
+		ImageIcon iNext = new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png"));;
+		lblNext.setIcon(iNext);
 		toolBar_1.add(lblNext);
-		
-		lblMoving = new JLabel("Moving   : NO ");
+
+		lblMoving = new JLabel("");
+
+		lblMoving.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/moving.png")).getImage().getScaledInstance(iNext.getIconWidth(), iNext.getIconHeight(), Image.SCALE_DEFAULT)));
 		lblMoving.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				moving = !moving;
-				if(moving)
-					lblMoving.setText("Moving : OK ");
+				if(moving){
+					frame.setCursor(new Cursor(Cursor.HAND_CURSOR));
+					drawing = false;
+				}
 				else
-					lblMoving.setText("Moving : NO ");
+					frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}
 		});
 		toolBar_1.add(lblMoving);
 
-		JLabel lblSpeed = new JLabel("Speed:");
+		lblDraw = new JLabel("");
+		lblDraw.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/draw.png")));
+		lblDraw.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				drawing = !drawing;
+				if(drawing){
+					frame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+					moving = false;
+				}
+				else
+					frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			}
+		});
+		toolBar_1.add(lblDraw);
+
+		JButton lblSpeed = new JButton("Speed:");
+
+		lblSpeed.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				txtSpeed.setEnabled(!txtSpeed.isEnabled());
+			}
+		});
+
 		toolBar_1.add(lblSpeed);
 
 		txtSpeed = new JTextField();
 		txtSpeed.setHorizontalAlignment(SwingConstants.LEFT);
 		txtSpeed.setText("250");
+		txtSpeed.setEnabled(false);
 		toolBar_1.add(txtSpeed);
 		txtSpeed.setColumns(10);
 
-		JLabel lblFrameRate = new JLabel("Frame Rate:");
+		JButton lblFrameRate = new JButton("Frame Rate:");
+
+		lblFrameRate.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				txtFramerate.setEnabled(!txtFramerate.isEnabled());
+			}
+		});
+
 		toolBar_1.add(lblFrameRate);
 
 		txtFramerate = new JTextField();
 		txtFramerate.setText("1");
+		txtFramerate.setEnabled(false);
 		toolBar_1.add(txtFramerate);
 		txtFramerate.setColumns(10);
 
@@ -273,6 +483,71 @@ public class LinksWindows implements Serializable {
 		graphPanel = new JPanel();
 		frame.getContentPane().add(graphPanel, BorderLayout.CENTER);
 		graphPanel.setLayout(new BorderLayout(0, 0));
+
+		//Give the shortcut
+		KeyboardFocusManager.getCurrentKeyboardFocusManager()
+		.addKeyEventDispatcher(new KeyEventDispatcher(){
+			public boolean dispatchKeyEvent(KeyEvent e){
+				if(e.getID() == KeyEvent.KEY_PRESSED)
+				{
+					switch(e.getKeyCode()){
+					case KeyEvent.VK_P:
+						if(lblPlay.isEnabled())
+							onPlayClick();
+						break;
+					case KeyEvent.VK_S:
+						if(lblStop.isEnabled())
+							onPauseClick();
+						break;
+					case KeyEvent.VK_D:
+						drawing = !drawing;
+						if(drawing){
+							frame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+						}
+						else
+							frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+						break;
+					case KeyEvent.VK_M:
+						moving = !moving;
+						if(moving){
+							frame.setCursor(new Cursor(Cursor.HAND_CURSOR));
+							drawing = false;
+						}
+						else
+							frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+						break;
+					case KeyEvent.VK_N:
+						switchToSnap(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
+								graph.getSnapCol().getMaxNum() - 1), 1));
+						break;
+					case KeyEvent.VK_B:
+						switchToSnap(Math.max(1, currentSnap - Integer.valueOf(txtFramerate.getText())));
+						notifyJump(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
+								graph.getSnapCol().getMaxNum() - 1), 1));
+						break;
+					case KeyEvent.VK_C:
+						isSynch = !isSynch;
+						lblSynch.setEnabled(isSynch);
+						break;
+					case KeyEvent.VK_I:
+						if (!isInfoWindowsOpened) {
+							if(info != null)
+								info.setVisible(true);
+							else
+								info = new InfoWindow(myWindow);
+							isInfoWindowsOpened = true;
+						}
+						else{
+							info.setVisible(false);
+							isInfoWindowsOpened = false;
+						}
+						break;
+					default:
+						break;
+					}
+				}
+				return false;}});
+
 		generateGraph();
 	}
 
@@ -307,6 +582,7 @@ public class LinksWindows implements Serializable {
 		graph.loadGraph(number);
 		setSnapNumber(number);
 		notifyJump(number);
+		notifyDraw();
 		this.currentSnap = number;
 	}
 
@@ -403,6 +679,7 @@ public class LinksWindows implements Serializable {
 		}
 		for (AgentVizFrame a : toRemove) {
 			listAgent.remove(a);
+			a.getDefaultCloseOperation();
 		}
 		toRemove = new ArrayList<AgentVizFrame>();
 
@@ -439,7 +716,32 @@ public class LinksWindows implements Serializable {
 	 * @param s
 	 *            The snapshot to be added.
 	 */
-	public void addSnapshot(Snapshot s) {
+	public synchronized void addSnapshot(Snapshot s) {
+		for(AgentVizFrame a : this.listAgent){
+			boolean alive = false;
+			for(Entity e : s.getEntityList()){
+				if(a.getName().equals(e.getName()))
+					alive = true;
+			}
+			if(!alive)
+				a.dispose();
+		}
+		ArrayList<Map<Entity,List<String>>> removeList = new ArrayList<Map<Entity,List<String>>>();
+		for(Map<Entity,List<String>> l : this.charts){
+			for(Entity chart : l.keySet()){
+				boolean alive = false;
+				for(Entity e : s.getEntityList()){
+					if(e.getName().equals(chart.getName()))
+						alive = true;
+				}
+				//TODO
+				if(!alive){
+					removeList.add(l);
+				}
+			}
+		}
+		for(Map<Entity,List<String>> l :removeList)
+			this.charts.remove(l);
 		graph.getSnapCol().addSnapshot(s);
 	}
 
@@ -475,9 +777,149 @@ public class LinksWindows implements Serializable {
 	public String getXpName() {
 		return xpName;
 	}
-	
+
 	public boolean getMoving(){
 		return this.moving;
 	}
+
+	public boolean getDrawing(){
+		return this.drawing;
+	}
+
+	public void isDraw(){
+		if(this.lblPlay.isEnabled())
+			notifyDraw();
+	}
 	
+	public void close(){
+		this.frame.dispose();
+	}
+
+	/**
+	 * Draw a chart which was asked by a command line
+	 * @param a
+	 * 		The entity which correspond
+	 * @param drawSizeLong
+	 * 			The size
+	 * @param atts
+	 * 		All the attribute to represent
+	 */
+	public synchronized void draw(Entity a,long drawSizeLong,  ArrayList<DrawableAttribute> atts,AttributeStyle type) {
+		long max = this.getCurrentSnapNumber();
+		long u;
+		if (this.getFrameSpeed() > 0) {
+			u = Math.max(this.lastSnapNumDrawn, Math.max(1, this.getCurrentSnapNumber() - drawSizeLong));
+		} else {
+			u = Math.min(this.lastSnapNumDrawn, Math.max(1, this.getCurrentSnapNumber() - drawSizeLong));
+		}
+
+		for (long i = u; i <= max; i++) {
+			long timei = i;
+			if (drawSizeLong != 0) {
+				timei = i % drawSizeLong;
+			}
+			if (a != null) {
+				for (DrawableAttribute t : atts) {
+					AttributeStyle style = null;
+					String s = t.getAttribute().getName();
+					Attribute theAttribute = t.getAttribute();
+					if(type == null)
+						style = typeChart.get(theAttribute);
+					else
+						style = type;
+					if (style == AttributeStyle.LINEAR || style == null) {
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
+								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
+						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
+								ChartType.LINE));
+					}
+					if (style == AttributeStyle.BAR) {
+						if(theAttribute.getValue().getClass() != String.class)
+							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+									ChartType.BAR).add(s, timei, (Double) theAttribute.getValue());
+						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+								ChartType.BAR));
+					}
+					if (style == AttributeStyle.AVRT) {
+						Double tab[] = (Double[]) theAttribute.getValue();
+						for (Double val : tab) {
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "LOWER", timei, tab[0]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTDownLower", timei, tab[1] - tab[2]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTDownValue", timei, tab[1]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTDownUpper", timei, tab[1] + tab[2]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTUpLower", timei, tab[3] - tab[4]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTUpValue", timei, tab[3]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "AVTUpUpper", timei, tab[3] + tab[4]);
+							LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE).add(s + "UPPER", timei, tab[5]);
+							this.listLxPlot.put(t,LxPlot.getChart(
+									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
+									ChartType.LINE));
+						}
+					}
+					if (style == AttributeStyle.AVT) {
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
+								ChartType.LINE).add(s + "Value", timei, (Double) theAttribute.getValue());
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
+								ChartType.LINE).add(s + "Delta", timei, ((AVTAttribute) theAttribute).getDelta());
+						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
+								ChartType.LINE));
+					}
+				}
+			}
+		}
+	}
+
+	//TODO
+	//Pourquoi tous le temps en bar
+	/**
+	 * Method use to refresh all chats who are synchr
+	 */
+	public void notifyDraw(){
+		for(Map<Entity,List<String>> h : this.charts){
+			for(Entity e : h.keySet()){
+				ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
+				AttributeStyle style = null;
+				for(String s : h.get(e)){
+					ArrayList<Attribute> listTmp = new ArrayList<Attribute>();
+					for (Attribute t : e.getAttributes().get(s)) {
+						if(!(t instanceof StringAttribute)){
+							DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
+							boolean alive = false;
+							for(DrawableAttribute da : this.listLxPlot.keySet()){
+								if(da.getAttribute().getName().equals(datt.getAttribute().getName()))
+									if(datt.getAttribute().getTypeToDraw() == da.getAttribute().getTypeToDraw())
+										if(listLxPlot.get(da) != null){
+									alive = true;
+								}
+							}
+							if(alive)
+								atts.add(datt);
+							else
+								listTmp.add(t);
+						}
+					}
+					for(Attribute t : listTmp)
+						e.getAttributes().get(s).remove(t);
+				}
+				draw(e,100,atts,style);
+			}
+		}
+	}
+
 }

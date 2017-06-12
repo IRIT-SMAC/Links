@@ -138,6 +138,7 @@ public class XpChooser extends JFrame {
 
 				if (dialogResult == JOptionPane.YES_OPTION) {
 					String xpName = (String) list.getSelectedValue();
+					linksRef.deleteWindow();
 					drop(xpName);
 				}
 
@@ -147,6 +148,15 @@ public class XpChooser extends JFrame {
 		toolBar.add(lblErase);
 		lblNewLabel.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/edit.png")));
 		toolBar.add(lblNewLabel);
+		
+		JLabel lblSave = new JLabel("Save ");
+		lblSave.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				save((String) list.getSelectedValue());
+			}
+		});
+		toolBar.add(lblSave);
 		lblPlay.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/play.png")));
 		toolBar.add(lblPlay);
 
@@ -228,6 +238,21 @@ public class XpChooser extends JFrame {
 		JLabel lblTxt = new JLabel("Select or create your experiment");
 		lblTxt.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblTxt, BorderLayout.SOUTH);
+
+		list.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseClicked(MouseEvent e){
+				if(e.getClickCount() == 2){
+					if (list.getSelectedValue() != null) {
+						String xpName = (String) list.getSelectedValue();
+						if (xpName != null) {
+							String linkToCss = Links.getCssFilePathFromXpName(xpName);
+							linksRef.createNewLinksWindows(xpName, linkToCss);
+						}
+					}
+				}
+			}
+		});
 	}
 
 	public void redrawList() {
@@ -246,4 +271,9 @@ public class XpChooser extends JFrame {
 		list.setModel(v);
 	}
 
+	//TODO
+	public void save(String xpName){
+		
+	}
+	
 }

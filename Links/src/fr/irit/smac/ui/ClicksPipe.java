@@ -6,6 +6,8 @@ import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
 
+import fr.irit.smac.model.Attribute.AttributeStyle;
+
 public class ClicksPipe extends Thread implements ViewerListener{
 	protected boolean loop = true;
 
@@ -47,6 +49,10 @@ public class ClicksPipe extends Thread implements ViewerListener{
 	}
 
 	public void buttonReleased(String id) {
+		if(this.links.getDrawing()){
+			this.links.constructDraw(links.getDisplayedGraph().getSnapCol().getEntity(id,links.getCurrentSnapNumber()),null,100,true);
+			//this.links.isDraw();
+		}
 		if(!this.links.getMoving()){
 			AgentVizFrame f = new AgentVizFrame(links.getDisplayedGraph().getSnapCol().getEntity(id,links.getCurrentSnapNumber()),links.getSnapCol(),links);
 			links.registerObserver(f);

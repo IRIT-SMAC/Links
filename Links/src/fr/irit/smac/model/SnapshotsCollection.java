@@ -10,7 +10,9 @@ import org.bson.Document;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 
 import fr.irit.smac.attributes.AVRTAttribute;
@@ -244,4 +246,17 @@ public class SnapshotsCollection implements Serializable {
 	public void resetNumber() {
 		maxNum=1;
 	}
+	
+	public void test(){
+
+		FindIterable<Document> i = collection.find();
+		MongoCursor<Document> iter = i.iterator();
+		boolean entFind = false;
+		while(iter.hasNext() && !entFind){
+			Document d = iter.next();
+			entFind = d.toString().contains("0"+"=Document{{Type=Entity");
+			System.out.println(d);
+		}
+	}
+	
 }

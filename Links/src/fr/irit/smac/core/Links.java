@@ -10,8 +10,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -28,7 +34,17 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
+import fr.irit.smac.attributes.AVTAttribute;
+import fr.irit.smac.attributes.DrawableAttribute;
+import fr.irit.smac.attributes.DrawableAttribute.Type;
+import fr.irit.smac.lxplot.LxPlot;
+import fr.irit.smac.lxplot.commons.ChartType;
+import fr.irit.smac.lxplot.server.LxPlotChart;
+import fr.irit.smac.model.Attribute;
+import fr.irit.smac.model.Entity;
+import fr.irit.smac.model.Relation;
 import fr.irit.smac.model.Snapshot;
+import fr.irit.smac.model.Attribute.AttributeStyle;
 import fr.irit.smac.ui.LinksWindows;
 import fr.irit.smac.ui.XpChooser;
 
@@ -68,12 +84,13 @@ public class Links {
 	public static MongoDatabase database;
 
 	/**
-	 * The mongoPath to know it path if we want to execute it
+	 * The mongoPath if we want to execute it
 	 */
 	public String mongoPath;
-	/*public static String mongoPath = "C:"+File.separator+"Program Files"+File.separator+"MongoDB"+File.separator+"Server"
-			+File.separator+"3.4"+File.separator+"bin"+File.separator+"mongod.exe";*/
-	
+
+	/**
+	 * The file which will store the path of mongoDB
+	 */
 	private String resMong = "setMongo.txt";
 
 	/**
@@ -82,6 +99,8 @@ public class Links {
 	private LinksWindows linksWindow;
 
 	private XpChooser xpChooser;
+
+
 
 	/**
 	 * Main Launch to start the standalone application.
@@ -255,7 +274,7 @@ public class Links {
 			if(mongoPath == null){
 				JOptionPane.showMessageDialog(xpChooser, "Can you give the path to mongod.exe ?");
 				// création de la boîte de dialogue
-				JFileChooser dialogue = new JFileChooser("Veuillez indiquer mongod.exe");
+				JFileChooser dialogue = new JFileChooser("Give the path to mongod.exe");
 
 				// affichage
 				dialogue.showOpenDialog(null);
@@ -318,8 +337,17 @@ public class Links {
 	 *            The snapshot to add.
 	 */
 	public void addSnapshot(Snapshot s) {
-		if (linksWindow != null) {
-			linksWindow.addSnapshot(s);
+		if (linksWindow != null && s != null) {
+			try{
+				linksWindow.addSnapshot(s);
+			}
+			catch(Exception e){
+				linksWindow.addSnapshot(s);
+			}
+		}
+		try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
 		}
 	}
 
@@ -355,6 +383,10 @@ public class Links {
 	public void deleteExperiment(String xpName) {
 		xpChooser.delete(xpName);
 	}
+	
+	public void deleteWindow(){
+		this.linksWindow.close();
+	}
 
 	/**
 	 * Test if an experiment with the given name has been created.
@@ -386,11 +418,11 @@ public class Links {
 	}
 
 	/**
-	 * Initialize the vizualization windows on the specficied experiment using
+	 * Initialize the visualization windows on the specificied experiment using
 	 * the specified CSS file.
 	 * 
 	 * @param xpName
-	 *            The name of the experiment to vizualize.
+	 *            The name of the experiment to visualize.
 	 * @param linkToCss
 	 *            The path to the CSS file.
 	 */
@@ -432,5 +464,6 @@ public class Links {
 		it.next(); // Skip second
 		return it.next().getValue().toString();
 	}
+
 
 }
