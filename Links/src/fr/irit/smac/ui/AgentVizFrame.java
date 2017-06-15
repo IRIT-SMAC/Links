@@ -84,7 +84,7 @@ public class AgentVizFrame extends JFrame {
 
 	private boolean neigh = false;
 
-	private long drawSizeLong = 100;
+	private long drawSizeLong = 50;
 
 	private Graph g;
 
@@ -525,7 +525,7 @@ public class AgentVizFrame extends JFrame {
 		}
 	}
 
-	public void draw() {
+	public synchronized void draw() {
 		Entity a;
 		long max = this.currentFrameNum;
 		if (drawSizeLong == 0) {
