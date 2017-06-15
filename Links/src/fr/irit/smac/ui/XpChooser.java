@@ -100,15 +100,17 @@ public class XpChooser extends JFrame {
 			public void mouseReleased(MouseEvent arg0) {
 				if (arg0.getSource().equals(lblRemove)) {
 					int dialogButton = JOptionPane.YES_NO_OPTION;
-					int dialogResult = JOptionPane.showConfirmDialog(null,
-							"Would You Like to Completly Delete the Experiment Entitled : " + list.getSelectedValue()
-							+ " ?",
-							"Warning", dialogButton);
+
+					List<String> xps = list.getSelectedValuesList();
+					String choice = "Would You Like to Completly Delete the Experiment Entitled : \n";
+					for(String xpName: xps){
+						choice += xpName + "\n";
+					}
+					choice += " ?";
+					int dialogResult = JOptionPane.showConfirmDialog(null,choice, "Warning",dialogButton);
 					if (dialogResult == JOptionPane.YES_OPTION) {
-						String xpName = (String) list.getSelectedValue();
-						if (xpName != null) {
+						for(String xpName : xps)
 							destroyExperiment(xpName);
-						}
 					}
 				}
 			}
@@ -151,14 +153,19 @@ public class XpChooser extends JFrame {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
 				int dialogButton = JOptionPane.YES_NO_OPTION;
-				int dialogResult = JOptionPane.showConfirmDialog(null,
-						"Would You Like to Drop the Experiment Entitled : " + list.getSelectedValue() + " ?", "Warning",
-						dialogButton);
+				List<String> xps = list.getSelectedValuesList();
+				String choice = "Would You Like to Drop the Experiment Entitled : \n";
+				for(String xpName: xps){
+					choice += xpName + "\n";
+				}
+				choice += " ?";
+				int dialogResult = JOptionPane.showConfirmDialog(null,choice, "Warning",dialogButton);
 
 				if (dialogResult == JOptionPane.YES_OPTION) {
-					String xpName = (String) list.getSelectedValue();
+					//String xpName = (String) list.getSelectedValue();
 					linksRef.deleteWindow();
-					drop(xpName);
+					for(String xpName : xps)
+						drop(xpName);
 				}
 
 			}
@@ -264,7 +271,7 @@ public class XpChooser extends JFrame {
 
 		list = new JList<String>(v);
 		list.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		contentPane.add(list, BorderLayout.CENTER);
 
 		JLabel lblTxt = new JLabel("Select or create your experiment");
