@@ -151,7 +151,7 @@ public class Links {
 			createExperiment(xpName);
 		}
 
-		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName));
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class Links {
 			createExperiment(xpName);
 		}
 
-		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName));
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
 	}
 
 	/**
@@ -195,6 +195,62 @@ public class Links {
 		lireMongoPath();
 		initMongoConnection(addr);
 		xpChooser = new XpChooser(this);
+	}
+	
+	/**
+	 * Creates a new Links instance connection to the localhost and default port
+	 * of MongoDB. This constructor intializes the experiment to the name passed
+	 * in parameter.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment to use. If an experiment with this
+	 *            name already exists, the application restore the previously
+	 *            loaded data.
+	 * @param visible
+	 * 			  The visibility of the experience's frame.
+	 * 
+	 */
+	public Links(String xpName,boolean visible) {
+		setLookAndFeel();
+		lireMongoPath();
+		initMongoConnection();
+
+		xpChooser = new XpChooser(this);
+
+		if (!existsExperiment(xpName)) {
+			createExperiment(xpName);
+		}
+
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),visible);
+	}
+	
+	/**
+	 * Creates a new Links instance connection to the specified address of
+	 * MongoDB. This constructor intialise the experiment to the name passed in
+	 * parameter.
+	 * 
+	 * @param addr
+	 *            The ServerAddress of the MongoDB database.
+	 * @param xpName
+	 *            The name of the experiment to use. If an experiment with this
+	 *            name already exists, the application restore the previously
+	 *            loaded data.
+	 * @param visible
+	 * 			  The visibility of the experience's frame.
+	 * 
+	 */
+	public Links(ServerAddress addr, String xpName,boolean visible) {
+		setLookAndFeel();	
+		lireMongoPath();
+		initMongoConnection();
+
+		xpChooser = new XpChooser(this);
+
+		if (!existsExperiment(xpName)) {
+			createExperiment(xpName);
+		}
+
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),visible);
 	}
 
 	/**
@@ -469,8 +525,8 @@ public class Links {
 	 * @param linkToCss
 	 *            The path to the CSS file.
 	 */
-	public void createNewLinksWindows(String xpName, String linkToCss) {
-		linksWindow = new LinksWindows(xpName, linkToCss, this);
+	public void createNewLinksWindows(String xpName, String linkToCss,boolean visible) {
+		linksWindow = new LinksWindows(xpName, linkToCss, this,visible);
 	}
 
 	/**

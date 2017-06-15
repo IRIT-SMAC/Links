@@ -124,7 +124,7 @@ public class XpChooser extends JFrame {
 					String xpName = (String) list.getSelectedValue();
 					if (xpName != null) {
 						String linkToCss = Links.getCssFilePathFromXpName(xpName);
-						links.createNewLinksWindows(xpName, linkToCss);
+						links.createNewLinksWindows(xpName, linkToCss,true);
 					}
 				}
 			}
@@ -279,7 +279,7 @@ public class XpChooser extends JFrame {
 						String xpName = (String) list.getSelectedValue();
 						if (xpName != null) {
 							String linkToCss = Links.getCssFilePathFromXpName(xpName);
-							linksRef.createNewLinksWindows(xpName, linkToCss);
+							linksRef.createNewLinksWindows(xpName, linkToCss,true);
 						}
 					}
 				}
@@ -436,7 +436,7 @@ public class XpChooser extends JFrame {
 		}
 		this.create(xpName);
 		String linkToCss = Links.getCssFilePathFromXpName(xpName);
-		linksRef.createNewLinksWindows(xpName, linkToCss);
+		linksRef.createNewLinksWindows(xpName, linkToCss,true);
 		try
 		{
 			BufferedReader sourceFile = new BufferedReader(new FileReader(loadPath));

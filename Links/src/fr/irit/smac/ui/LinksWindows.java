@@ -139,7 +139,7 @@ public class LinksWindows implements Serializable {
 	 * @param links
 	 *            A reference to the main application.
 	 */
-	public LinksWindows(String xpName, String linkToCss, Links links) {
+	public LinksWindows(String xpName, String linkToCss, Links links, boolean visible) {
 		charts = new ArrayList<Map<Entity,List<String>>>();
 		typeChart = new HashMap<Attribute,AttributeStyle>();
 		this.listLxPlot = new HashMap<DrawableAttribute,ILxPlotChart>();
@@ -156,7 +156,7 @@ public class LinksWindows implements Serializable {
 		graph = new DisplayedGraph(snapCol, linkToCss);
 
 		initialize();
-		this.frame.setVisible(true);
+		this.frame.setVisible(visible);
 		if (snapCol != null) {
 			if (snapCol.getSnaptshot(1) != null) {
 				switchToSnap(1);
