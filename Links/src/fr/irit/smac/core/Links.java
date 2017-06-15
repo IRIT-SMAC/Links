@@ -65,7 +65,7 @@ public class Links {
 	/**
 	 * Name of the MongoDB data base used by the application.
 	 */
-	private static final String dataBaseName = "LinksDataBase";
+	public static final String dataBaseName = "LinksDataBase";
 
 	/**
 	 * Name of the MongoDB collection used by the application to list the
@@ -273,10 +273,10 @@ public class Links {
 		if(osName.contains("win")){
 			if(mongoPath == null){
 				JOptionPane.showMessageDialog(xpChooser, "Can you give the path to mongod.exe ?");
-				// création de la boîte de dialogue
+				// creation
 				JFileChooser dialogue = new JFileChooser("Give the path to mongod.exe");
 
-				// affichage
+				// showing
 				dialogue.showOpenDialog(null);
 				try {
 					if (dialogue.getSelectedFile() == null){
@@ -385,7 +385,8 @@ public class Links {
 	}
 	
 	public void deleteWindow(){
-		this.linksWindow.close();
+		if(this.linksWindow != null)
+			this.linksWindow.close();
 	}
 
 	/**
@@ -465,5 +466,8 @@ public class Links {
 		return it.next().getValue().toString();
 	}
 
+	public String getMongoPath(){
+		return mongoPath;
+	}
 
 }

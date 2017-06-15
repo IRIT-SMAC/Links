@@ -734,7 +734,6 @@ public class LinksWindows implements Serializable {
 					if(e.getName().equals(chart.getName()))
 						alive = true;
 				}
-				//TODO
 				if(!alive){
 					removeList.add(l);
 				}
