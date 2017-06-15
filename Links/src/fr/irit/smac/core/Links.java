@@ -89,6 +89,11 @@ public class Links {
 	public String mongoPath;
 
 	/**
+	 * The path of the config
+	 */
+	public String mongoConfig;
+
+	/**
 	 * The file which will store the path of mongoDB
 	 */
 	private String resMong = "setMongo.txt";
@@ -199,10 +204,9 @@ public class Links {
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(resMong));
-			String line;
-			while ((line = br.readLine()) != null) {
-				mongoPath = line;
-			}
+			mongoPath = br.readLine();
+			mongoConfig = br.readLine();
+
 			br.close();
 		} catch (Exception e) {
 			try {
@@ -285,14 +289,51 @@ public class Links {
 					mongoPath = dialogue.getSelectedFile().toString();
 				} catch (Exception e) {
 					e.printStackTrace();
-					System.err.println("BufferedWriter error");
+					System.err.println("Dialogue mongoPath error");
+				}
+			}
+			if(mongoConfig == null){
+				Object[] options = {"Yes","Use default"};
+				int n = JOptionPane.showOptionDialog(xpChooser,
+						"Can you give the path to the config of mongo or use default ",
+						"Configuration",
+						JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE,
+						null,
+						options,
+						options[1]);
+				if(n == 0){
+					// creation
+					JFileChooser dialogue = new JFileChooser("Give the path to the config of mongo ");
+
+					// showing
+					dialogue.showOpenDialog(null);
+					try {
+						if (dialogue.getSelectedFile() == null){
+							System.exit(0);
+						}
+						mongoConfig = dialogue.getSelectedFile().toString();
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.err.println("Dialogue mongoConfig error");
+					}
+				}
+				else{
+					mongoConfig = "DEFAULT";
 				}
 			}
 			//Execute on Windows
 			try{
-				String[] commande = {"cmd.exe","/c",mongoPath};
-				ProcessBuilder pb = new ProcessBuilder(commande);
-				Process p = pb.start();
+				if(mongoConfig.equals("DEFAULT")){
+					String[] commande = {"cmd.exe","/c",mongoPath};
+					ProcessBuilder pb = new ProcessBuilder(commande);
+					Process p = pb.start();
+				}
+				else{
+					String[] commande = {"cmd.exe","/c",mongoPath+" --config "+mongoConfig};
+					ProcessBuilder pb = new ProcessBuilder(commande);
+					Process p = pb.start();
+				}
 			}
 			catch(Exception e){
 				e.printStackTrace();
@@ -314,7 +355,8 @@ public class Links {
 
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(resMong));
-			bw.write(mongoPath);
+			bw.write(mongoPath+"\n");
+			bw.write(mongoConfig);
 			bw.close();
 		}
 		catch(IOException e){
@@ -383,7 +425,7 @@ public class Links {
 	public void deleteExperiment(String xpName) {
 		xpChooser.delete(xpName);
 	}
-	
+
 	public void deleteWindow(){
 		if(this.linksWindow != null)
 			this.linksWindow.close();

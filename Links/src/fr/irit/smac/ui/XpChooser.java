@@ -2,6 +2,7 @@ package fr.irit.smac.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -130,11 +131,11 @@ public class XpChooser extends JFrame {
 
 		});
 
-		JLabel lblNewLabel = new JLabel("");
-		lblNewLabel.addMouseListener(new MouseAdapter() {
+		JLabel lblEdit = new JLabel("");
+		lblEdit.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if (e.getSource().equals(lblNewLabel)) {
+				if (e.getSource().equals(lblEdit)) {
 					if (list.getSelectedValue() != null) {
 						String xpName = (String) list.getSelectedValue();
 						if (xpName != null) {
@@ -164,10 +165,13 @@ public class XpChooser extends JFrame {
 		});
 		lblErase.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/eraser.png")));
 		toolBar.add(lblErase);
-		lblNewLabel.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/edit.png")));
-		toolBar.add(lblNewLabel);
+		lblEdit.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/edit.png")));
+		toolBar.add(lblEdit);
 
-		JLabel lblSave = new JLabel("Save ");
+		ImageIcon iErase = new ImageIcon(LinksWindows.class.getResource("/icons/eraser.png"));;
+
+		JLabel lblSave = new JLabel();
+		lblSave.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/save.png")).getImage().getScaledInstance(iErase.getIconWidth(), iErase.getIconHeight(), Image.SCALE_DEFAULT)));
 		lblSave.addMouseListener(new MouseAdapter(){
 			@Override
 			public void mouseReleased(MouseEvent e){
@@ -176,7 +180,8 @@ public class XpChooser extends JFrame {
 		});
 		toolBar.add(lblSave);
 
-		JLabel lblLoad = new JLabel("Load ");
+		JLabel lblLoad = new JLabel();
+		lblLoad.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/file.png")).getImage().getScaledInstance(iErase.getIconWidth(), iErase.getIconHeight(), Image.SCALE_DEFAULT)));
 		lblLoad.addMouseListener(new MouseAdapter(){
 			@Override
 			public void mouseReleased(MouseEvent e){
