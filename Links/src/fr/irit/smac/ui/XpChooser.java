@@ -46,6 +46,7 @@ import com.mongodb.client.model.Filters;
 import fr.irit.smac.core.Links;
 import fr.irit.smac.model.Attribute.AttributeStyle;
 import fr.irit.smac.model.Entity;
+import fr.irit.smac.model.Relation;
 import fr.irit.smac.model.Snapshot;
 import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 
@@ -440,7 +441,6 @@ public class XpChooser extends JFrame {
 			//For each line
 			while((line = sourceFile.readLine())!= null)
 			{
-				System.out.println(line);
 				//We split by a quote
 				String[] lineSplit = line.split(",");
 				if(i > 1)
@@ -467,6 +467,7 @@ public class XpChooser extends JFrame {
 				}
 				i++;
 			}
+			sourceFile.close();
 		}
 		catch (FileNotFoundException e)
 		{
@@ -636,9 +637,9 @@ public class XpChooser extends JFrame {
 		return ret;
 	}
 
-	//TODO 
 	//Relation can have attribute
 	private int constructRelation(String[] lineSplit, int j, Snapshot s){
+		int nbAcc = 1;
 		j++;
 		//We get the name
 		ArrayList<String >spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
@@ -664,8 +665,87 @@ public class XpChooser extends JFrame {
 		//We get the class
 		spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
 		String rclass = spl.get(1);
+		
+		Relation r = s.addRelation(a, b, name, bdir, rclass);
+		
 
-		s.addRelation(a, b, name, bdir, rclass);
+		//we search for all the attribute
+		if(!lineSplit[j].contains("}")){
+			
+			boolean eend = false;
+			j++;
+			while(!eend){
+
+				//We get the attribute
+				spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
+				String att = spl.get(0);
+
+				boolean aend = false;
+				boolean fir = true;
+				while(!aend){
+					nbAcc += matchBraces(lineSplit[j]);
+					spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
+					//We get the name
+					String aname = null;
+					if(fir)
+						aname = spl.get(1);
+					else
+						aname = spl.get(0);
+
+					//We get the attributeStyle
+					String style = null;
+					if(fir)
+						style = spl.get(3);
+					else
+						style = spl.get(2);
+					AttributeStyle astyle =null;
+					switch(style.trim()){
+					case "BAR":
+						astyle = AttributeStyle.BAR;
+						break;
+					case "AVRT":
+						astyle = AttributeStyle.AVRT;
+						break;
+					case "AVT":
+						astyle = AttributeStyle.AVT;
+						break;
+					case "STRING":
+						astyle = AttributeStyle.STRING;
+					default:
+						astyle = AttributeStyle.LINEAR;
+					}
+
+					j++;
+
+					//We get the type 
+					spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
+					String atype = spl.get(2);
+					nbAcc += matchBraces(lineSplit[j]);
+
+					//We get the value
+					String avalue = spl.get(spl.size()-1);
+
+
+					switch(atype.trim()){
+					case "Double":
+						r.addOneAttribute(att, aname, Double.parseDouble(avalue), astyle);
+						break;
+					case "String":
+						r.addOneAttribute(att, aname, avalue);
+						break;
+					default:
+						break;
+					}
+					aend = lineSplit[j].contains("}}");
+					if(nbAcc!=0)
+						j++;
+					fir = false;
+				}
+				eend = (nbAcc == 0);
+
+			}
+		}
+
 		return j;
 	}
 
