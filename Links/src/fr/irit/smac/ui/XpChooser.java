@@ -636,6 +636,8 @@ public class XpChooser extends JFrame {
 		return ret;
 	}
 
+	//TODO 
+	//Relation can have attribute
 	private int constructRelation(String[] lineSplit, int j, Snapshot s){
 		j++;
 		//We get the name

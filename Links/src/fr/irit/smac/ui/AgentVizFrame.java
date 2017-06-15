@@ -113,7 +113,7 @@ public class AgentVizFrame extends JFrame {
 	private long lastSnapNumDrawn = 0;
 	private JPanel panel;
 	private JLabel lblNewLabel;
-	
+
 
 
 	/**
@@ -289,21 +289,23 @@ public class AgentVizFrame extends JFrame {
 					/* Whole agent or relations selected */
 					if (path[i].getPath()[1].toString().contains("Relations")) {
 						for (Relation r : this.relations) {
-							for (String s : r.getAttributes().keySet()) {
-								for (Attribute t : r.getAttributes().get(s)) {
-									this.toLook.add(
-											new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
+							if(r.getAttributes() != null)
+								for (String s : r.getAttributes().keySet()) {
+									for (Attribute t : r.getAttributes().get(s)) {
+										this.toLook.add(
+												new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
+									}
 								}
-							}
 						}
 					}
 					if (path[i].getPath()[1].toString().contains("Entity")) {
-						for (String s : entity.getAttributes().keySet()) {
-							for (Attribute t : entity.getAttributes().get(s)) {
-								this.toLook.add(
-										new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
+						if(entity.getAttributes() != null)
+							for (String s : entity.getAttributes().keySet()) {
+								for (Attribute t : entity.getAttributes().get(s)) {
+									this.toLook.add(
+											new DrawableAttribute(DrawableAttribute.Type.ENTITY, entity.getName(), s, t));
+								}
 							}
-						}
 					}
 					break;
 				case 3:
@@ -312,12 +314,13 @@ public class AgentVizFrame extends JFrame {
 					if (path[i].getPath()[1].toString().contains("Relations")) {
 						Relation r = snapCol.getRelation(path[i].getPath()[2].toString(), this.currentFrameNum);
 						if(r != null && this.toLook != null){
-							for (String s : r.getAttributes().keySet()) {
-								for (Attribute t : r.getAttributes().get(s)) {
-									this.toLook
-									.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
+							if(r.getAttributes() != null)
+								for (String s : r.getAttributes().keySet()) {
+									for (Attribute t : r.getAttributes().get(s)) {
+										this.toLook
+										.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName(), s, t));
+									}
 								}
-							}
 						}
 					}
 
@@ -338,9 +341,10 @@ public class AgentVizFrame extends JFrame {
 					if (path[i].getPath()[1].toString().contains("Relations")) {
 						Relation r = snapCol.getRelation(path[i].getPath()[2].toString(), this.currentFrameNum);
 						String s = path[i].getPath()[3].toString();
-						for (Attribute t : r.getAttributes().get(s)) {
-							this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName() , s, t));
-						}
+						if(r.getAttributes() != null)
+							for (Attribute t : r.getAttributes().get(s)) {
+								this.toLook.add(new DrawableAttribute(DrawableAttribute.Type.RELATION, r.getName() , s, t));
+							}
 
 					}
 
@@ -401,59 +405,8 @@ public class AgentVizFrame extends JFrame {
 			}
 			DefaultMutableTreeNode entityNode = (DefaultMutableTreeNode) root.getFirstChild();
 
+			this.redrawTree(entityNode, this.entity.getAttributes(), model);
 			//Verify if the tree already knows the attributes
-			for (String carac : this.entity.getAttributes().keySet()) {
-				boolean exist = false;
-				int pos =0;
-				for(int i = 0; i < entityNode.getChildCount(); i++){
-					if(entityNode.getChildAt(i).toString().equals(carac)){
-						exist = true;
-						pos = i;
-					}
-				}
-				//If no we create it
-				if(!(exist)){
-					DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(carac);
-					model.insertNodeInto(newCarac, entityNode, entityNode.getChildCount());
-
-					for (Attribute t : this.entity.getAttributes().get(carac)) {
-						model.insertNodeInto(new DefaultMutableTreeNode(t.toString()), newCarac, newCarac.getChildCount());
-					}
-					model.nodeChanged(entityNode);
-				}
-				//If yes we verify if the values are the same
-				else{
-					boolean valExist = true;
-					ArrayList<Attribute> addList = new ArrayList<Attribute>();
-					for(Attribute att : this.entity.getAttributes().get(carac)){
-						boolean find = false;
-						for(int i = 0; i < entityNode.getChildAt(pos).getChildCount();i++){
-							if(entityNode.getChildAt(pos).getChildAt(i).toString().equals(att.toString()))
-								find = true;
-						}
-						if(!(find)){
-							valExist = false;
-							addList.add(att);
-						}
-					}
-					//If no we replace the old value with the new
-					if(!(valExist)){
-						for(Attribute att : addList){
-							for(int i =0; i < entityNode.getChildAt(pos).getChildCount(); i++){
-								if(entityNode.getChildAt(pos).getChildAt(i).toString().contains(att.getName())){
-									TreeNode tmp = entityNode.getChildAt(pos).getChildAt(i);
-									model.insertNodeInto(new DefaultMutableTreeNode(att), (MutableTreeNode) entityNode.getChildAt(pos), 0);
-									model.removeNodeFromParent((MutableTreeNode) tmp);
-								}
-							}
-						}
-						//TreeNode tmp = entityNode.getChildAt(pos).getChildAt(0);
-
-					}
-					model.nodeChanged(entityNode);
-				}
-
-			}
 
 			//DefaultMutableTreeNode relNode = new DefaultMutableTreeNode("Relations");
 			if(root.getChildCount()<2){
@@ -465,32 +418,39 @@ public class AgentVizFrame extends JFrame {
 			DefaultMutableTreeNode relNode = (DefaultMutableTreeNode) root.getChildAt(1);
 
 
-			for(int i =relNode.getChildCount()-1; i>= 1;i--){
-				if(!(this.relations.contains(((DefaultMutableTreeNode) relNode.getChildAt(i)).getUserObject())))
+			/*for(int i =relNode.getChildCount()-1; i>= 1;i--){
+				boolean alive = false;
+				for(Relation r : this.relations){
+					if(relNode.getChildAt(i).toString().equals(r.getName())){
+						alive = true;
+					}
+				}
+				if(!alive)
 					model.removeNodeFromParent((MutableTreeNode) relNode.getChildAt(i));
-			}
+			}*/
 
 			for (Relation r : this.relations) {
 				boolean exist = false;
-				for(int i = 0; i < relNode.getChildCount(); i++){
+				int pos = -1;
+				for(int i =0; i < relNode.getChildCount(); i++){
 					if(relNode.getChildAt(i).toString().equals(r.getName())){
 						exist = true;
+						pos = i;
 					}
 				}
-				if(!(exist)){
-					DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(r.getName());
-					model.insertNodeInto(newCarac, relNode, relNode.getChildCount());
-					for (String s : r.getAttributes().keySet()) {
-						for (Attribute t : r.getAttributes().get(s)) {
-							newCarac.add(new DefaultMutableTreeNode(t.toString()));
-							model.insertNodeInto(new DefaultMutableTreeNode(t), newCarac, newCarac.getChildCount());
-						}
-					}
+				if(exist){
+					DefaultMutableTreeNode relationNode = (DefaultMutableTreeNode) relNode.getChildAt(pos);
+					this.redrawTree(relationNode, r.getAttributes(), model);
+				}
+				else{
+					DefaultMutableTreeNode relationNode = new DefaultMutableTreeNode(r.getName());
+					model.insertNodeInto(relationNode, relNode, relNode.getChildCount());
+					this.redrawTree(relationNode, r.getAttributes(), model);
 				}
 			}
-			
+
 			attributeTree.getSelectionModel().addSelectionPaths(path);
-			
+
 
 			if(needReload)
 				model.reload();
@@ -502,6 +462,67 @@ public class AgentVizFrame extends JFrame {
 		}
 		//attributeTree.setModel(tree);
 		//attributeTree.setRootVisible(false);
+	}
+	
+	public void redrawTree(DefaultMutableTreeNode node, HashMap<String,ArrayList<Attribute>> h,DefaultTreeModel model){
+		//Verify if the tree already knows the attributes
+		for (String carac : h.keySet()) {
+			boolean exist = false;
+			int pos =0;
+			for(int i = 0; i < node.getChildCount(); i++){
+				if(node.getChildAt(i).toString().equals(carac)){
+					exist = true;
+					pos = i;
+				}
+			}
+			//If no we create it
+			if(!(exist)){
+				DefaultMutableTreeNode newCarac = new DefaultMutableTreeNode(carac);
+				model.insertNodeInto(newCarac, node, node.getChildCount());
+
+				for (Attribute t : h.get(carac)) {
+					model.insertNodeInto(new DefaultMutableTreeNode(t.toString()), newCarac, newCarac.getChildCount());
+				}
+				model.nodeChanged(node);
+			}
+			//If yes we verify if the values are the same
+			else{
+				boolean valExist = true;
+				ArrayList<Attribute> addList = new ArrayList<Attribute>();
+				for(Attribute att : h.get(carac)){
+					boolean find = false;
+					for(int i = 0; i < node.getChildAt(pos).getChildCount();i++){
+						if(node.getChildAt(pos).getChildAt(i).toString().equals(att.toString()))
+							find = true;
+					}
+					if(!(find)){
+						valExist = false;
+						addList.add(att);
+					}
+				}
+				//If no we replace the old value with the new
+				if(!(valExist)){
+					for(Attribute att : addList){
+						boolean creat = false;
+						for(int i =0; i < node.getChildAt(pos).getChildCount(); i++){
+							if(node.getChildAt(pos).getChildAt(i).toString().contains(att.getName())){
+								TreeNode tmp = node.getChildAt(pos).getChildAt(i);
+								model.insertNodeInto(new DefaultMutableTreeNode(att), (MutableTreeNode) node.getChildAt(pos), 0);
+								model.removeNodeFromParent((MutableTreeNode) tmp);
+								creat = true;
+							}
+						}
+						if(!creat)
+							model.insertNodeInto(new DefaultMutableTreeNode(att), (MutableTreeNode) node.getChildAt(pos), node.getChildAt(pos).getChildCount());
+
+					}
+					//TreeNode tmp = entityNode.getChildAt(pos).getChildAt(0);
+
+				}
+				model.nodeChanged(node);
+			}
+
+		}
 	}
 
 	public void draw() {
@@ -622,7 +643,7 @@ public class AgentVizFrame extends JFrame {
 		currentFrameNum = num;
 		lblBotTxt.setText(txt);
 	}
-	
+
 	public String getName(){
 		return this.aname;
 	}
