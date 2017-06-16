@@ -381,12 +381,12 @@ public class Links {
 			//Execute on Windows
 			try{
 				if(mongoConfig.equals("DEFAULT")){
-					String[] commande = {"cmd.exe","/c",mongoPath};
+					String[] commande = {"\""+mongoPath+"\""};
 					ProcessBuilder pb = new ProcessBuilder(commande);
 					Process p = pb.start();
 				}
 				else{
-					String[] commande = {"cmd.exe","/c",mongoPath+" --config "+mongoConfig};
+					String[] commande = {"\""+mongoPath+"\" --config \""+mongoConfig+"\""};
 					ProcessBuilder pb = new ProcessBuilder(commande);
 					Process p = pb.start();
 				}
