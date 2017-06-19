@@ -126,7 +126,7 @@ public class LinksWindows implements Serializable {
 	private long lastSnapNumDrawn = 0;
 	private JLabel lblDraw;
 
-	private Map<DrawableAttribute,ILxPlotChart> listLxPlot;
+	private Map<String,ILxPlotChart> listLxPlot;
 
 	private List<DrawableAttribute> tolook;
 
@@ -143,7 +143,7 @@ public class LinksWindows implements Serializable {
 	public LinksWindows(String xpName, String linkToCss, Links links, boolean visible) {
 		charts = new ArrayList<Map<Entity,List<String>>>();
 		typeChart = new HashMap<Attribute,AttributeStyle>();
-		this.listLxPlot = new HashMap<DrawableAttribute,ILxPlotChart>();
+		this.listLxPlot = new HashMap<String,ILxPlotChart>();
 		linksRef = links;
 		this.xpName = xpName;
 		this.linkToCss = linkToCss;
@@ -240,7 +240,7 @@ public class LinksWindows implements Serializable {
 												style = type;
 											typeChart.put(t, style);
 											atts.add(datt);
-											listLxPlot.put(datt,null);
+											listLxPlot.put(datt.getName()+datt.getAttribute().getName(),null);
 										}
 										if(!ans.contains("NOSYNCHR")){
 											tmpList.add(s);
@@ -850,14 +850,14 @@ public class LinksWindows implements Serializable {
 					if (style == AttributeStyle.LINEAR || style == null) {
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
 								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
-						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
+						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
 								ChartType.LINE));
 					}
 					if (style == AttributeStyle.BAR) {
 						if(theAttribute.getValue().getClass() != String.class)
 							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
 									ChartType.BAR).add(s, timei, (Double) theAttribute.getValue());
-						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
 								ChartType.BAR));
 					}
 					if (style == AttributeStyle.AVRT) {
@@ -887,7 +887,7 @@ public class LinksWindows implements Serializable {
 							LxPlot.getChart(
 									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
 									ChartType.LINE).add(s + "UPPER", timei, tab[5]);
-							this.listLxPlot.put(t,LxPlot.getChart(
+							this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(
 									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
 									ChartType.LINE));
 						}
@@ -897,7 +897,7 @@ public class LinksWindows implements Serializable {
 								ChartType.LINE).add(s + "Value", timei, (Double) theAttribute.getValue());
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
 								ChartType.LINE).add(s + "Delta", timei, ((AVTAttribute) theAttribute).getDelta());
-						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
+						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
 								ChartType.LINE));
 					}
 				}
@@ -918,17 +918,16 @@ public class LinksWindows implements Serializable {
 				for(String s : h.get(e)){
 					ArrayList<Attribute> listTmp = new ArrayList<Attribute>();
 					for (Attribute t : e.getAttributes().get(s)) {
-						System.out.println(t.getValue());
 						if(!(t instanceof StringAttribute)){
 							DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
-							boolean alive = true;
-							for(DrawableAttribute da : this.listLxPlot.keySet()){
-								if(da.getAttribute().getName().equals(datt.getAttribute().getName()))
-									if(datt.getAttribute().getTypeToDraw() == da.getAttribute().getTypeToDraw())
-										if(listLxPlot.get(da) != null){
-											alive = true;
-										}
+							boolean alive = false;
+							for(ILxPlotChart i : LxPlot.getCharts().values()){
+								System.out.println(i.toString());
 							}
+								if(LxPlot.getCharts().containsValue(this.listLxPlot.get(datt.getName()+datt.getAttribute().getName()))){
+										alive = true;
+										System.out.println("LA");
+								}
 							if(alive)
 								tolook.add(datt);
 							else
