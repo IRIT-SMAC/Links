@@ -128,6 +128,7 @@ public class LinksWindows implements Serializable {
 
 	private Map<DrawableAttribute,ILxPlotChart> listLxPlot;
 
+	private List<DrawableAttribute> tolook;
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
@@ -215,7 +216,7 @@ public class LinksWindows implements Serializable {
 						}
 						Entity e = getSnapCol().getEntity(spl[1], getCurrentSnapNumber());
 						if(e == null){
-							System.out.println("Snapshot not found");
+							System.out.println("Entity not found");
 						}
 						else{
 							ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
@@ -246,7 +247,7 @@ public class LinksWindows implements Serializable {
 										}
 									}
 									if(!ans.contains("NOSYNCHR")){
-										tmpMap.put(e, tmpList);
+										tmpMap.put(getSnapCol().getEntity(spl[1], getCurrentSnapNumber()), tmpList);
 										charts.add(tmpMap);
 									}
 									draw(e,size,atts,type);
@@ -582,8 +583,28 @@ public class LinksWindows implements Serializable {
 		graph.loadGraph(number);
 		setSnapNumber(number);
 		notifyJump(number);
+		updateCharts(number);
 		notifyDraw();
 		this.currentSnap = number;
+	}
+
+	private void updateCharts(long number) {
+		List<Map<Entity,List<String>>> tmpList = new ArrayList<Map<Entity,List<String>>>();
+		for(Map<Entity,List<String>> h : this.charts){
+			Map<Entity,List<String>> map = new HashMap<Entity,List<String>>();
+			for(Entity e : h.keySet()){
+				for(String s : e.getAttributes().keySet()){
+					for(Attribute t : e.getAttributes().get(s)){
+						
+					}
+				}
+				Entity e1 = getSnapCol().getEntity(e.getName(), number);
+				List<String> list = h.get(e);
+				map.put(e1, list);
+			}
+			tmpList.add(map);
+		}
+		this.charts = tmpList;
 	}
 
 	/**
@@ -789,7 +810,7 @@ public class LinksWindows implements Serializable {
 		if(this.lblPlay.isEnabled())
 			notifyDraw();
 	}
-	
+
 	public void close(){
 		this.frame.dispose();
 	}
@@ -803,7 +824,7 @@ public class LinksWindows implements Serializable {
 	 * @param atts
 	 * 		All the attribute to represent
 	 */
-	public synchronized void draw(Entity a,long drawSizeLong,  ArrayList<DrawableAttribute> atts,AttributeStyle type) {
+	public synchronized void draw(Entity a,long drawSizeLong,  List<DrawableAttribute> atts,AttributeStyle type) {
 		long max = this.getCurrentSnapNumber();
 		long u;
 		if (this.getFrameSpeed() > 0) {
@@ -882,33 +903,34 @@ public class LinksWindows implements Serializable {
 				}
 			}
 		}
+		this.lastSnapNumDrawn = this.getCurrentSnapNumber();
 	}
 
 	//TODO
-	//Pourquoi tous le temps en bar
 	/**
-	 * Method use to refresh all chats who are synchr
+	 * Method use to refresh all charts who are synchr
 	 */
 	public void notifyDraw(){
 		for(Map<Entity,List<String>> h : this.charts){
 			for(Entity e : h.keySet()){
-				ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
+				tolook = new ArrayList<DrawableAttribute>();
 				AttributeStyle style = null;
 				for(String s : h.get(e)){
 					ArrayList<Attribute> listTmp = new ArrayList<Attribute>();
 					for (Attribute t : e.getAttributes().get(s)) {
+						System.out.println(t.getValue());
 						if(!(t instanceof StringAttribute)){
 							DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
-							boolean alive = false;
+							boolean alive = true;
 							for(DrawableAttribute da : this.listLxPlot.keySet()){
 								if(da.getAttribute().getName().equals(datt.getAttribute().getName()))
 									if(datt.getAttribute().getTypeToDraw() == da.getAttribute().getTypeToDraw())
 										if(listLxPlot.get(da) != null){
-									alive = true;
-								}
+											alive = true;
+										}
 							}
 							if(alive)
-								atts.add(datt);
+								tolook.add(datt);
 							else
 								listTmp.add(t);
 						}
@@ -916,7 +938,7 @@ public class LinksWindows implements Serializable {
 					for(Attribute t : listTmp)
 						e.getAttributes().get(s).remove(t);
 				}
-				draw(e,100,atts,style);
+				draw(e,100,tolook,style);
 			}
 		}
 	}
