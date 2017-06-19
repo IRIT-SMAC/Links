@@ -127,6 +127,7 @@ public class Links {
 		lireMongoPath();
 		initMongoConnection();
 		xpChooser = new XpChooser(this);
+		xpChooser.redrawList();
 	}
 
 	/**
@@ -152,6 +153,7 @@ public class Links {
 		}
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
+		xpChooser.redrawList();
 	}
 
 	/**
@@ -179,6 +181,7 @@ public class Links {
 		}
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
+		xpChooser.redrawList();
 	}
 
 	/**
@@ -195,6 +198,7 @@ public class Links {
 		lireMongoPath();
 		initMongoConnection(addr);
 		xpChooser = new XpChooser(this);
+		xpChooser.redrawList();
 	}
 	
 	/**
@@ -222,6 +226,7 @@ public class Links {
 		}
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),visible);
+		xpChooser.redrawList();
 	}
 	
 	/**
@@ -251,6 +256,7 @@ public class Links {
 		}
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),visible);
+		xpChooser.redrawList();
 	}
 
 	/**
