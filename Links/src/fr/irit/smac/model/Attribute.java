@@ -11,7 +11,7 @@ public abstract class Attribute implements Serializable{
 	 *
 	 */
 	public enum AttributeStyle implements Serializable{
-		LINEAR, BAR, AVRT, AVT, STRING;
+		LINEAR, BAR, AVRT, AVT, STRING, PIE;
 	};
 
 	/**
@@ -78,7 +78,6 @@ public abstract class Attribute implements Serializable{
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
 	}
 
@@ -95,11 +94,6 @@ public abstract class Attribute implements Serializable{
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
 			return false;
 		return true;
 	}

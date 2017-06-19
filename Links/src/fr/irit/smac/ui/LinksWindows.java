@@ -46,6 +46,7 @@ import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
 import fr.irit.smac.attributes.AVTAttribute;
+import fr.irit.smac.attributes.DoubleAttribute;
 import fr.irit.smac.attributes.DrawableAttribute;
 import fr.irit.smac.attributes.DrawableAttribute.Type;
 import fr.irit.smac.attributes.StringAttribute;
@@ -210,6 +211,10 @@ public class LinksWindows implements Serializable {
 							type = AttributeStyle.AVT;
 							option++;
 						}
+						if(ans.contains("PIE")){
+							type = AttributeStyle.PIE;
+							option++;
+						}
 						if(ans.contains("SIZE")){
 							size = Long.parseLong(spl[spl.length-1].split("=")[1]);
 							option++;
@@ -234,10 +239,13 @@ public class LinksWindows implements Serializable {
 										for (Attribute t : e.getAttributes().get(s)) {
 											AttributeStyle style = null;
 											DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
-											if(type==null)
+											if(type==null){
 												style = t.getTypeToDraw();
-											else
+											}
+											else{
 												style = type;
+												((DoubleAttribute) t).setTypeToDraw(type);
+											}
 											typeChart.put(t, style);
 											atts.add(datt);
 											listLxPlot.put(datt.getName()+datt.getAttribute().getName(),null);
@@ -843,11 +851,18 @@ public class LinksWindows implements Serializable {
 					AttributeStyle style = null;
 					String s = t.getAttribute().getName();
 					Attribute theAttribute = t.getAttribute();
-					if(type == null)
+					if(typeChart.get(theAttribute) == null)
+						style = theAttribute.getTypeToDraw();
+					else{
 						style = typeChart.get(theAttribute);
-					else
-						style = type;
+					}
 					if (style == AttributeStyle.LINEAR || style == null) {
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
+								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
+						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
+								ChartType.LINE));
+					}
+					if (style == AttributeStyle.PIE) {
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
 								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
 						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
@@ -921,12 +936,8 @@ public class LinksWindows implements Serializable {
 						if(!(t instanceof StringAttribute)){
 							DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
 							boolean alive = false;
-							for(ILxPlotChart i : LxPlot.getCharts().values()){
-								System.out.println(i.toString());
-							}
 								if(LxPlot.getCharts().containsValue(this.listLxPlot.get(datt.getName()+datt.getAttribute().getName()))){
 										alive = true;
-										System.out.println("LA");
 								}
 							if(alive)
 								tolook.add(datt);
