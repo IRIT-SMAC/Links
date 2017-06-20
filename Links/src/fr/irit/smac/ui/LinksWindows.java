@@ -122,7 +122,6 @@ public class LinksWindows implements Serializable {
 	private JTextField txtSpeed;
 	private JTextField txtFramerate;
 	private Links linksRef;
-	private JFileChooser fc = new JFileChooser();
 	private JLabel lblInfo;
 
 	private InfoWindow info;
@@ -923,11 +922,15 @@ public class LinksWindows implements Serializable {
 								ChartType.PIE));
 					}
 					if (style == AttributeStyle.BAR) {
-						if(theAttribute.getValue().getClass() != String.class)
+						if(theAttribute.getValue().getClass() != String.class){
+							Entity b = this.getSnapshotsCollection().getSnaptshot(this.currentSnap-1).getEntity(a.getName());
 							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-									ChartType.BAR).add(s, timei, (Double) theAttribute.getValue());
-						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-								ChartType.BAR));
+									ChartType.BAR).close();
+							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+									ChartType.BAR).add(s, u-2, (Double) b.getAttributesWithName(theAttribute.getName()).getValue());
+							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+									ChartType.BAR).add(s, u-1, (Double) theAttribute.getValue());
+						}
 					}
 					if (style == AttributeStyle.AVRT) {
 						Double tab[] = (Double[]) theAttribute.getValue();

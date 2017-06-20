@@ -161,7 +161,6 @@ public class RelationsVizFrame extends JFrame {
 		this.toLook = new ArrayList<DrawableAttribute>();
 		if(treePaths != null){
 			for(int i = 0; i < treePaths.length;i++){
-				System.out.println(treePaths[i].toString());
 				switch(treePaths[i].getPath().length){
 				case 2:
 					if (treePaths[i].getPath()[1].toString().contains("RELATIONS")) {
@@ -177,9 +176,7 @@ public class RelationsVizFrame extends JFrame {
 					}
 					break;
 				case 3:
-					System.out.println("LA");
 					if (treePaths[i].getPath()[1].toString().contains("RELATIONS")) {
-						System.out.println(treePaths[i].getPath()[2].toString());
 						Relation r = this.linksWindow.getSnapshotsCollection().
 								getRelation(treePaths[i].getPath()[2].toString(), this.linksWindow.getCurrentSnapNumber());
 						if(r.getAttributes() != null)
