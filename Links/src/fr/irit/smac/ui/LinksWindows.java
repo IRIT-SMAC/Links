@@ -16,6 +16,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
@@ -113,6 +114,8 @@ public class LinksWindows implements Serializable {
 
 	private boolean drawing = false;
 	
+	private double zoomFocus = 1.0;
+	
 	private RelationsVizFrame relationsWindow;
 
 	private JLabel lblStop;
@@ -133,6 +136,8 @@ public class LinksWindows implements Serializable {
 
 	private List<DrawableAttribute> tolook;
 	private JLabel lblLinks;
+	private JLabel lblZoomPlus;
+	private JLabel lblZoomMinus;
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
@@ -474,6 +479,24 @@ public class LinksWindows implements Serializable {
 				txtSpeed.setEnabled(!txtSpeed.isEnabled());
 			}
 		});
+		
+		lblZoomPlus = new JLabel("Zoom+ ");
+		lblZoomPlus.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				zoomPlus();
+			}
+		});
+		toolBar_1.add(lblZoomPlus);
+		
+		lblZoomMinus = new JLabel("Zoom - ");
+		lblZoomMinus.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				zoomMinus();
+			}
+		});
+		toolBar_1.add(lblZoomMinus);
 
 		toolBar_1.add(lblSpeed);
 
@@ -507,6 +530,8 @@ public class LinksWindows implements Serializable {
 		setSnapNumber(0);
 
 		graphPanel = new JPanel();
+		graphPanel.addMouseListener(new MouseAdapter() {
+		});
 		frame.getContentPane().add(graphPanel, BorderLayout.CENTER);
 		graphPanel.setLayout(new BorderLayout(0, 0));
 
@@ -567,6 +592,16 @@ public class LinksWindows implements Serializable {
 							info.setVisible(false);
 							isInfoWindowsOpened = false;
 						}
+						break;
+					case KeyEvent.VK_L:
+						if(relationsWindow != null)
+							relationsWindow.notifyJump();
+						break;
+					case KeyEvent.VK_Z:
+						zoomPlus();
+						break;
+					case KeyEvent.VK_A:
+						zoomMinus();
 						break;
 					default:
 						break;
@@ -970,6 +1005,20 @@ public class LinksWindows implements Serializable {
 				draw(e,100,tolook,style);
 			}
 		}
+	}
+
+	public void zoomPlus() {
+		if(zoomFocus !=0.1)
+			zoomFocus -= 0.05;
+		view.getCamera().setViewPercent(zoomFocus);
+		
+	}
+
+	public void zoomMinus() {
+		if(zoomFocus !=1)
+			zoomFocus += 0.05;
+			view.getCamera().setViewPercent(zoomFocus);
+		
 	}
 
 }
