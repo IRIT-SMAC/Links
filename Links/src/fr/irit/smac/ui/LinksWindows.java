@@ -112,6 +112,8 @@ public class LinksWindows implements Serializable {
 	private boolean moving;
 
 	private boolean drawing = false;
+	
+	private RelationsVizFrame relationsWindow;
 
 	private JLabel lblStop;
 	private JTextField txtSpeed;
@@ -130,6 +132,7 @@ public class LinksWindows implements Serializable {
 	private Map<String,ILxPlotChart> listLxPlot;
 
 	private List<DrawableAttribute> tolook;
+	private JLabel lblLinks;
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
@@ -377,6 +380,19 @@ public class LinksWindows implements Serializable {
 		});
 		lblInfo.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/question.png")));
 		toolBar_1.add(lblInfo);
+		
+		lblLinks = new JLabel("");
+		
+	 
+		lblLinks.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				if(relationsWindow == null)
+					relationsWindow = new RelationsVizFrame(myWindow);
+			}
+		});
+		toolBar_1.add(lblLinks);
+		
 		lblSynch.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/synchronization.png")));
 		toolBar_1.add(lblSynch);
 		toolBar_1.add(lblPlay);
@@ -478,6 +494,7 @@ public class LinksWindows implements Serializable {
 		});
 
 		toolBar_1.add(lblFrameRate);
+		lblLinks.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/line.png")).getImage().getScaledInstance(iNext.getIconWidth(), iNext.getIconHeight(), Image.SCALE_DEFAULT)));
 
 		txtFramerate = new JTextField();
 		txtFramerate.setText("1");
@@ -717,6 +734,8 @@ public class LinksWindows implements Serializable {
 				info.buildText();
 			}
 		}
+		if(this.relationsWindow != null)
+			this.relationsWindow.notifyJump();
 	}
 
 	/**
@@ -863,10 +882,10 @@ public class LinksWindows implements Serializable {
 								ChartType.LINE));
 					}
 					if (style == AttributeStyle.PIE) {
-						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
-								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " pie",
+								ChartType.PIE).add(s, timei, (Double) theAttribute.getValue());
 						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
-								ChartType.LINE));
+								ChartType.PIE));
 					}
 					if (style == AttributeStyle.BAR) {
 						if(theAttribute.getValue().getClass() != String.class)
