@@ -56,10 +56,10 @@ public class DisplayedGraph implements Serializable {
 	 * Load a graph from the snapshot number. 
 	 * @param snapNumber The number of the snapshot to be displayed.
 	 */
-	public synchronized void loadGraph(long snapNumber) {
+	public synchronized boolean loadGraph(long snapNumber) {
 		currentSnapNumber = snapNumber;
 		Snapshot s = snapColl.getSnaptshot(snapNumber);
-
+		boolean ret = true;
 		if (s != null) {
 			/* Retrait des noeuds */
 			Iterator<Node> it = graph.getNodeIterator();
@@ -86,9 +86,19 @@ public class DisplayedGraph implements Serializable {
 					graph.addNode(a.getName());
 					graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
 					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
+					if(a.getCoorX() != -10000 && a.getCoorY() != -10000){
+						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
+						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
+						ret = false;
+					}
 				} else {
 					if (!n.getAttribute("ui.class").equals(a.getType())) {
 						n.setAttribute("ui.class", a.getType());
+					}
+					if(a.getCoorX() != -10000 && a.getCoorY() != -10000){
+						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
+						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
+						ret = false;
 					}
 				}
 			}
@@ -105,9 +115,11 @@ public class DisplayedGraph implements Serializable {
 				}
 			}
 		}
+		return ret;
 	}
 	
-	public void viewSnapshot(Snapshot s){
+	public boolean viewSnapshot(Snapshot s){
+		boolean ret = true;
 		if (s != null) {
 			/* Retrait des noeuds */
 			Iterator<Node> it = graph.getNodeIterator();
@@ -134,9 +146,19 @@ public class DisplayedGraph implements Serializable {
 					graph.addNode(a.getName());
 					graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
 					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
+					if(a.getCoorX() != -10000 && a.getCoorY() != -10000){
+						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
+						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
+						ret = false;
+					}
 				} else {
 					if (!n.getAttribute("ui.class").equals(a.getType())) {
 						n.setAttribute("ui.class", a.getType());
+					}
+					if(a.getCoorX() != -10000 && a.getCoorY() != -10000){
+						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
+						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
+						ret = false;
 					}
 				}
 			}
@@ -153,6 +175,7 @@ public class DisplayedGraph implements Serializable {
 				}
 			}
 		}
+		return ret;
 	}
 
 	/**

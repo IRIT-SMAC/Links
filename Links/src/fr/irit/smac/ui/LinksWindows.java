@@ -639,7 +639,9 @@ public class LinksWindows implements Serializable {
 	 *            The number of the snapshot to be displayed.
 	 */
 	public void switchToSnap(long number) {
-		graph.loadGraph(number);
+		boolean res = graph.loadGraph(number);
+		if(!res)
+			this.viewer.disableAutoLayout();
 		setSnapNumber(number);
 		notifyJump(number);
 		updateCharts(number);
