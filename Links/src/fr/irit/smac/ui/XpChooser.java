@@ -1,6 +1,7 @@
 package fr.irit.smac.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
@@ -33,12 +34,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.JToolBar.Separator;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.bson.Document;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Mongo;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -51,6 +56,8 @@ import fr.irit.smac.model.Entity;
 import fr.irit.smac.model.Relation;
 import fr.irit.smac.model.Snapshot;
 import jdk.nashorn.internal.runtime.regexp.joni.Regex;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 
 public class XpChooser extends JFrame {
 
@@ -58,6 +65,7 @@ public class XpChooser extends JFrame {
 	private JList<String> list;
 	private Links linksRef;
 	private NewXpWindows xpWindows;
+	private JTextField textField;
 
 	/**
 	 * Create the frame.
@@ -94,6 +102,7 @@ public class XpChooser extends JFrame {
 		});
 		lblAdd.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/plus.png")));
 		toolBar.add(lblAdd);
+		toolBar.addSeparator(new Dimension(5,25));
 
 		JLabel lblRemove = new JLabel("");
 		lblRemove.addMouseListener(new MouseAdapter() {
@@ -118,6 +127,7 @@ public class XpChooser extends JFrame {
 		});
 		lblRemove.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/minus.png")));
 		toolBar.add(lblRemove);
+		toolBar.addSeparator(new Dimension(5,25));
 
 		JLabel lblPlay = new JLabel("");
 		lblPlay.addMouseListener(new MouseAdapter() {
@@ -173,8 +183,10 @@ public class XpChooser extends JFrame {
 		});
 		lblErase.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/eraser.png")));
 		toolBar.add(lblErase);
+		toolBar.addSeparator(new Dimension(5,25));
 		lblEdit.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/edit.png")));
 		toolBar.add(lblEdit);
+		toolBar.addSeparator(new Dimension(5,25));
 
 		ImageIcon iErase = new ImageIcon(LinksWindows.class.getResource("/icons/eraser.png"));;
 
@@ -187,6 +199,7 @@ public class XpChooser extends JFrame {
 			}
 		});
 		toolBar.add(lblSave);
+		toolBar.addSeparator(new Dimension(5,25));
 
 		JLabel lblLoad = new JLabel();
 		lblLoad.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/file.png")).getImage().getScaledInstance(iErase.getIconWidth(), iErase.getIconHeight(), Image.SCALE_DEFAULT)));
@@ -197,12 +210,38 @@ public class XpChooser extends JFrame {
 			}
 		});
 		toolBar.add(lblLoad);
+		toolBar.addSeparator(new Dimension(5,25));
 		lblPlay.setIcon(new ImageIcon(XpChooser.class.getResource("/icons/play.png")));
 		toolBar.add(lblPlay);
+		toolBar.addSeparator(new Dimension(5,25));
+
+		JLabel lblSaveDesc = new JLabel("Save desc");
+		lblSaveDesc.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e){
+				saveDesc();
+			}
+		});
+		toolBar.add(lblSaveDesc);
+		toolBar.addSeparator(new Dimension(5,25));
 
 		list = new JList();
 		init();
 		this.setVisible(true);
+	}
+
+	//TODO
+	protected void saveDesc() {
+		String s = textField.getText();
+		MongoCollection<Document> collection = Links.database.getCollection(list.getSelectedValue());
+		Document doc = collection.find(Filters.eq("LinksDescriptionXP","The description")).first();
+		Document newDocument = new Document("LinksDescriptionXP", "The description").append("Desc : ", "DescriptionOfXP "+s);
+		if (doc != null){
+			collection.findOneAndReplace(new BasicDBObject().append("LinksDescriptionXP","The description"), newDocument);
+		}
+		else
+			collection.insertOne(newDocument);
+
 	}
 
 	public void delete(String xpName) {
@@ -270,14 +309,45 @@ public class XpChooser extends JFrame {
 			v.addElement(xpName);
 		}
 
+
+
 		list = new JList<String>(v);
 		list.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		contentPane.add(list, BorderLayout.CENTER);
+		list.addListSelectionListener(new ListSelectionListener() {
+			//TODO
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if(list.getSelectedValue() != null){
+					MongoCollection<Document> collection = Links.database.getCollection(list.getSelectedValue());
+					Document doc = collection.find(Filters.eq("LinksDescriptionXP","The description")).first();
+					if (doc == null){
+						textField.setText("NULL");
+					}
+					else{
+						Iterator<Entry<String, Object>> it = doc.entrySet().iterator();
+						//We need to iterate 3 times
+						it.next();
+						it.next();
+						textField.setText(it.next().getValue().toString());
+					}
+
+				}
+			}
+		});
 
 		JLabel lblTxt = new JLabel("Select or create your experiment");
 		lblTxt.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblTxt, BorderLayout.SOUTH);
+
+		JSplitPane splitPane = new JSplitPane();
+		splitPane.setResizeWeight(0.5);
+		contentPane.add(splitPane, BorderLayout.CENTER);
+
+		splitPane.setLeftComponent(list);
+
+		textField = new JTextField();
+		splitPane.setRightComponent(textField);
 
 		list.addMouseListener(new MouseAdapter(){
 			@Override
@@ -340,65 +410,68 @@ public class XpChooser extends JFrame {
 			System.out.println("No Selection ");
 		}
 
+		if(chooser.getSelectedFile() != null){
+			savePath = chooser.getSelectedFile().toString()+File.separator+xpName+".csv";
 
-		savePath = chooser.getSelectedFile().toString()+File.separator+xpName+".csv";
-
-		//We get the fields of the experience
-		while(curs.hasNext()){
-			String line = curs.next().toString();
-			System.out.println(line);
-			//The first line is not interesting
-			if(!first){
-				String[] lineSplit = line.split(" ");
-				for(int i = 2; i< lineSplit.length; i++){
-					int nbAcc = 0;
-					String base = lineSplit[i];
-					String field = base.split("=")[0];
-					boolean exist = false;
-					for(String s : fields){
-						if(s.equals(field))
-							exist = true;
-					}
-					if(!exist){
-						fields.add(base.split("=")[0]);
-					}
-					if(base.contains("{{"))
-						nbAcc=nbAcc+2;
-					while(nbAcc >0){
-						i++;
-						String tmpF = lineSplit[i];
-						int lengF = 0;
-						while((lengF=tmpF.indexOf("{",lengF)) > 0){
-							nbAcc++;
-							lengF++;
+			//We get the fields of the experience
+			while(curs.hasNext()){
+				String line = curs.next().toString();
+				if(line.contains("LinksDescriptionXP")){
+					fields.add("Desc : ");
+				}
+				//The first line is not interesting
+				if(!first && !line.contains("LinksDescriptionXP")){
+					String[] lineSplit = line.split(" ");
+					for(int i = 2; i< lineSplit.length; i++){
+						int nbAcc = 0;
+						String base = lineSplit[i];
+						String field = base.split("=")[0];
+						boolean exist = false;
+						for(String s : fields){
+							if(s.equals(field))
+								exist = true;
 						}
-						String tmpB = lineSplit[i];
-						int lengB = 0;
-						while((lengB = tmpB.indexOf("}",lengB)) > 0){
-							nbAcc--;
-							lengB++;
+						if(!exist){
+							fields.add(base.split("=")[0]);
+						}
+						if(base.contains("{{"))
+							nbAcc=nbAcc+2;
+						while(nbAcc >0){
+							i++;
+							String tmpF = lineSplit[i];
+							int lengF = 0;
+							while((lengF=tmpF.indexOf("{",lengF)) > 0){
+								nbAcc++;
+								lengF++;
+							}
+							String tmpB = lineSplit[i];
+							int lengB = 0;
+							while((lengB = tmpB.indexOf("}",lengB)) > 0){
+								nbAcc--;
+								lengB++;
+							}
 						}
 					}
 				}
+				else
+					first = !first;
 			}
-			else
-				first = !first;
-		}
-		String sFields = "_id,snapNum";
-		for(String s : fields){
-			sFields += ",\""+s+"\"";
-		}
-		//Execution of mongoexport
-		Runtime runtime = Runtime.getRuntime();
-		String[] mongoPath = linksRef.getMongoPath().split("mongod");
-		String query="\""+mongoPath[0]+"mongoexport\" --host localhost --db LinksDataBase --collection " +xpName+
-				" --type=csv --fields " + sFields +" --out \""+savePath+"\"";
-		Process process = null;
-		try{
-			process = runtime.exec(query);
-		}catch(Exception e){
-			e.printStackTrace();
-			System.err.println("Error runtime");
+			String sFields = "_id,snapNum";
+			for(String s : fields){
+				sFields += ",\""+s+"\"";
+			}
+			//Execution of mongoexport
+			Runtime runtime = Runtime.getRuntime();
+			String[] mongoPath = linksRef.getMongoPath().split("mongod");
+			String query="\""+mongoPath[0]+"mongoexport\" --host localhost --db LinksDataBase --collection " +xpName+
+					" --type=csv --fields " + sFields +" --out \""+savePath+"\"";
+			Process process = null;
+			try{
+				process = runtime.exec(query);
+			}catch(Exception e){
+				e.printStackTrace();
+				System.err.println("Error runtime");
+			}
 		}
 	}
 
@@ -410,16 +483,9 @@ public class XpChooser extends JFrame {
 		JFileChooser chooser = new JFileChooser();
 		chooser.showOpenDialog(null);
 		String loadPath = null;
-		try {
-			if (chooser.getSelectedFile() == null){
-				System.exit(0);
-			}
-			loadPath = chooser.getSelectedFile().toString();
+		if (chooser.getSelectedFile() != null){
+		loadPath = chooser.getSelectedFile().toString();
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("BufferedWriter error");
-		}
 		String[] loadSplit = loadPath.split("\\\\");
 		String xpName = loadSplit[loadSplit.length-1];
 		xpName = xpName.split("\\.")[0];
@@ -454,33 +520,49 @@ public class XpChooser extends JFrame {
 			//For each line
 			while((line = sourceFile.readLine())!= null)
 			{
-				//We split by a quote
-				String[] lineSplit = line.split(",");
-				if(i > 1)
-				{
-					//Creation of the new Snapshot
-					Snapshot s = new Snapshot();
-					//for each part splitted
-					for(int j = 2; j < lineSplit.length-1;j++){
-						if(!lineSplit[j].equals("")){
-							int nbAcc = 1;
-							String base = lineSplit[j];
-							//We get the type
-							String[] baseSplit = base.split(":|\"|\\{");
-							String type = baseSplit[baseSplit.length-1];
-							if(type.equals("Entity")){
-								j = constructEntity(lineSplit, j, s, type, things);
-							}
-							else{
-								j = constructRelation(lineSplit, j, s);
+				if(line.contains("DescriptionOfXP")){
+					String[] lineSplit = line.split(",|=|\\}");
+					ArrayList<String> tmp = this.eraseEmpty(lineSplit);
+					String s = tmp.get(tmp.size()-1);
+					MongoCollection<Document> collection = Links.database.getCollection(xpName);
+					Document doc = collection.find(Filters.eq("LinksDescriptionXP","The description")).first();
+					Document newDocument = new Document("LinksDescriptionXP", "The description").append("Desc : ", "DescriptionOfXP "+s);
+					if (doc != null){
+						collection.findOneAndReplace(new BasicDBObject().append("LinksDescriptionXP","The description"), newDocument);
+					}
+					else
+						collection.insertOne(newDocument);
+				}
+				else{
+					//We split by a quote
+					String[] lineSplit = line.split(",");
+					if(i > 1)
+					{
+						//Creation of the new Snapshot
+						Snapshot s = new Snapshot();
+						//for each part splitted
+						for(int j = 2; j < lineSplit.length-1;j++){
+							if(!lineSplit[j].equals("")){
+								int nbAcc = 1;
+								String base = lineSplit[j];
+								//We get the type
+								String[] baseSplit = base.split(":|\"|\\{");
+								String type = baseSplit[baseSplit.length-1];
+								if(type.equals("Entity")){
+									j = constructEntity(lineSplit, j, s, type, things);
+								}
+								else{
+									j = constructRelation(lineSplit, j, s);
+								}
 							}
 						}
+						this.linksRef.addSnapshot(s);
 					}
-					this.linksRef.addSnapshot(s);
+					i++;
 				}
-				i++;
 			}
 			sourceFile.close();
+
 		}
 		catch (FileNotFoundException e)
 		{
@@ -540,6 +622,7 @@ public class XpChooser extends JFrame {
 			System.err.println("Error runtime");
 		}*/
 		redrawList();
+		}
 	}
 
 	private int constructEntity(String[] lineSplit, int j, Snapshot s, String type, Map<String,String> things){
@@ -556,17 +639,17 @@ public class XpChooser extends JFrame {
 		//We get the class
 		spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
 		String eclass = spl.get(spl.size()-1);
-		
+
 		j++;
 		//We get the coorX
 		spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
 		double coorx = Double.parseDouble(spl.get(spl.size()-1));
-		
+
 		j++;
 		//We get the coorY
 		spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
 		double coory = Double.parseDouble(spl.get(spl.size()-1));
-		
+
 		//If the entity does not exist we add it
 		if(things.get(name)==null){
 			things.put(name, name);
@@ -577,7 +660,7 @@ public class XpChooser extends JFrame {
 			entity = s.addEntity(name, eclass);
 		else
 			entity = s.addEntity(name, eclass,coorx,coory);
-			
+
 		//we search for all the attribute
 		if(!lineSplit[j].contains("}")){
 			boolean eend = false;
@@ -693,13 +776,13 @@ public class XpChooser extends JFrame {
 		//We get the class
 		spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
 		String rclass = spl.get(1);
-		
+
 		Relation r = s.addRelation(a, b, name, bdir, rclass);
-		
+
 
 		//we search for all the attribute
 		if(!lineSplit[j].contains("}")){
-			
+
 			boolean eend = false;
 			j++;
 			while(!eend){
