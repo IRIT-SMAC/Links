@@ -57,6 +57,7 @@ import fr.irit.smac.model.Relation;
 import fr.irit.smac.model.Snapshot;
 import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class XpChooser extends JFrame {
@@ -65,7 +66,7 @@ public class XpChooser extends JFrame {
 	private JList<String> list;
 	private Links linksRef;
 	private NewXpWindows xpWindows;
-	private JTextField textField;
+	private JTextArea textField;
 
 	/**
 	 * Create the frame.
@@ -83,7 +84,7 @@ public class XpChooser extends JFrame {
 		});
 		this.linksRef = links;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 280, 250);
+		setBounds(400, 400, 400, 400);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -346,7 +347,8 @@ public class XpChooser extends JFrame {
 
 		splitPane.setLeftComponent(list);
 
-		textField = new JTextField();
+		textField = new JTextArea();
+		textField.setLineWrap(true);
 		splitPane.setRightComponent(textField);
 
 		list.addMouseListener(new MouseAdapter(){
