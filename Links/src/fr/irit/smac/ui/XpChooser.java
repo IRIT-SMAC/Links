@@ -556,13 +556,28 @@ public class XpChooser extends JFrame {
 		//We get the class
 		spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
 		String eclass = spl.get(spl.size()-1);
+		
+		j++;
+		//We get the coorX
+		spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
+		double coorx = Double.parseDouble(spl.get(spl.size()-1));
+		
+		j++;
+		//We get the coorY
+		spl = eraseEmpty(lineSplit[j].split(":|\"|\\[|\\]|\\{|\\}|="));
+		double coory = Double.parseDouble(spl.get(spl.size()-1));
+		
 		//If the entity does not exist we add it
 		if(things.get(name)==null){
 			things.put(name, name);
 		}
 		nbAcc += matchBraces(lineSplit[j]);
-
-		Entity entity = s.addEntity(name, eclass);
+		Entity entity ;
+		if(coorx == -10000 && coory == -10000)
+			entity = s.addEntity(name, eclass);
+		else
+			entity = s.addEntity(name, eclass,coorx,coory);
+			
 		//we search for all the attribute
 		if(!lineSplit[j].contains("}")){
 			boolean eend = false;

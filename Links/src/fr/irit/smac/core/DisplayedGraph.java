@@ -23,6 +23,7 @@ public class DisplayedGraph implements Serializable {
 	private Graph graph;
 	private SnapshotsCollection snapColl;
 	private long currentSnapNumber;
+	private boolean autoLayout = true;
 
 	/**
 	 * Create a new DisplayedGraph.
@@ -90,6 +91,12 @@ public class DisplayedGraph implements Serializable {
 						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
 						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
 						ret = false;
+						autoLayout = false;
+					}
+					else{
+						if(!autoLayout)
+							graph.getNode(a.getName()).setAttribute("x", 0);
+							graph.getNode(a.getName()).setAttribute("y", 0);
 					}
 				} else {
 					if (!n.getAttribute("ui.class").equals(a.getType())) {
@@ -99,6 +106,12 @@ public class DisplayedGraph implements Serializable {
 						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
 						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
 						ret = false;
+						autoLayout = false;
+					}
+					else{
+						if(!autoLayout)
+							graph.getNode(a.getName()).setAttribute("x", 0);
+							graph.getNode(a.getName()).setAttribute("y", 0);
 					}
 				}
 			}
@@ -150,6 +163,12 @@ public class DisplayedGraph implements Serializable {
 						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
 						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
 						ret = false;
+						autoLayout = false;
+					}
+					else{
+						if(!autoLayout)
+							graph.getNode(a.getName()).setAttribute("x", 0);
+							graph.getNode(a.getName()).setAttribute("y", 0);
 					}
 				} else {
 					if (!n.getAttribute("ui.class").equals(a.getType())) {
@@ -159,6 +178,12 @@ public class DisplayedGraph implements Serializable {
 						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
 						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
 						ret = false;
+						autoLayout = false;
+					}
+					else{
+						if(!autoLayout)
+							graph.getNode(a.getName()).setAttribute("x", 0);
+							graph.getNode(a.getName()).setAttribute("y", 0);
 					}
 				}
 			}
