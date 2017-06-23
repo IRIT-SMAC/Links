@@ -87,31 +87,33 @@ public class DisplayedGraph implements Serializable {
 					graph.addNode(a.getName());
 					graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
 					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
-					if(a.getCoorX() != -10000 && a.getCoorY() != -10000){
+					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
 						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
 						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
 						ret = false;
 						autoLayout = false;
 					}
 					else{
-						if(!autoLayout)
+						if(!autoLayout){
 							graph.getNode(a.getName()).setAttribute("x", 0);
 							graph.getNode(a.getName()).setAttribute("y", 0);
+						}
 					}
 				} else {
 					if (!n.getAttribute("ui.class").equals(a.getType())) {
 						n.setAttribute("ui.class", a.getType());
 					}
-					if(a.getCoorX() != -10000 && a.getCoorY() != -10000){
+					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
 						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
 						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
 						ret = false;
 						autoLayout = false;
 					}
 					else{
-						if(!autoLayout)
+						if(!autoLayout){
 							graph.getNode(a.getName()).setAttribute("x", 0);
 							graph.getNode(a.getName()).setAttribute("y", 0);
+						}
 					}
 				}
 			}
@@ -159,31 +161,33 @@ public class DisplayedGraph implements Serializable {
 					graph.addNode(a.getName());
 					graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
 					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
-					if(a.getCoorX() != -10000 && a.getCoorY() != -10000){
+					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
 						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
 						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
 						ret = false;
 						autoLayout = false;
 					}
 					else{
-						if(!autoLayout)
+						if(!autoLayout){
 							graph.getNode(a.getName()).setAttribute("x", 0);
 							graph.getNode(a.getName()).setAttribute("y", 0);
+						}
 					}
 				} else {
 					if (!n.getAttribute("ui.class").equals(a.getType())) {
 						n.setAttribute("ui.class", a.getType());
 					}
-					if(a.getCoorX() != -10000 && a.getCoorY() != -10000){
+					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
 						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
 						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
 						ret = false;
 						autoLayout = false;
 					}
 					else{
-						if(!autoLayout)
+						if(!autoLayout){
 							graph.getNode(a.getName()).setAttribute("x", 0);
 							graph.getNode(a.getName()).setAttribute("y", 0);
+						}
 					}
 				}
 			}
