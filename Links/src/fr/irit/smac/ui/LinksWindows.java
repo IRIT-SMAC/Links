@@ -41,6 +41,8 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.view.View;
@@ -63,6 +65,7 @@ import fr.irit.smac.model.Entity;
 import fr.irit.smac.model.Snapshot;
 import fr.irit.smac.model.SnapshotsCollection;
 import fr.irit.smac.model.Attribute.AttributeStyle;
+import javax.swing.JSlider;
 
 /**
  * LinksWindows: This class
@@ -137,6 +140,9 @@ public class LinksWindows implements Serializable {
 	private JLabel lblLinks;
 	private JLabel lblZoomPlus;
 	private JLabel lblZoomMinus;
+	private JLabel lblResetZoom;
+	private JLabel lblResetSnap;
+	private JSlider slider;
 
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
@@ -384,6 +390,7 @@ public class LinksWindows implements Serializable {
 		});
 		lblInfo.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/question.png")));
 		toolBar_1.add(lblInfo);
+		toolBar_1.addSeparator();
 		
 		lblLinks = new JLabel("");
 		
@@ -396,10 +403,13 @@ public class LinksWindows implements Serializable {
 			}
 		});
 		toolBar_1.add(lblLinks);
+		toolBar_1.addSeparator();
 		
 		lblSynch.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/synchronization.png")));
 		toolBar_1.add(lblSynch);
+		toolBar_1.addSeparator();
 		toolBar_1.add(lblPlay);
+		toolBar_1.addSeparator();
 		lblPlay.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/play.png")));
 
 		lblStop = new JLabel("");
@@ -412,6 +422,7 @@ public class LinksWindows implements Serializable {
 		lblStop.setEnabled(false);
 		lblStop.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/stop.png")));
 		toolBar_1.add(lblStop);
+		toolBar_1.addSeparator();
 
 		JLabel lblPrev = new JLabel("");
 		lblPrev.addMouseListener(new MouseAdapter() {
@@ -424,6 +435,7 @@ public class LinksWindows implements Serializable {
 		});
 		lblPrev.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/backL.png")));
 		toolBar_1.add(lblPrev);
+		toolBar_1.addSeparator();
 
 		JLabel lblNext = new JLabel("");
 		lblNext.addMouseListener(new MouseAdapter() {
@@ -436,6 +448,7 @@ public class LinksWindows implements Serializable {
 		ImageIcon iNext = new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png"));;
 		lblNext.setIcon(iNext);
 		toolBar_1.add(lblNext);
+		toolBar_1.addSeparator();
 
 		lblMoving = new JLabel("");
 
@@ -453,6 +466,7 @@ public class LinksWindows implements Serializable {
 			}
 		});
 		toolBar_1.add(lblMoving);
+		toolBar_1.addSeparator();
 
 		lblDraw = new JLabel("");
 		lblDraw.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/draw.png")));
@@ -469,6 +483,7 @@ public class LinksWindows implements Serializable {
 			}
 		});
 		toolBar_1.add(lblDraw);
+		toolBar_1.addSeparator();
 
 		JButton lblSpeed = new JButton("Speed:");
 
@@ -487,6 +502,7 @@ public class LinksWindows implements Serializable {
 			}
 		});
 		toolBar_1.add(lblZoomPlus);
+		toolBar_1.addSeparator();
 		
 		lblZoomMinus = new JLabel("Zoom - ");
 		lblZoomMinus.addMouseListener(new MouseAdapter(){
@@ -496,6 +512,28 @@ public class LinksWindows implements Serializable {
 			}
 		});
 		toolBar_1.add(lblZoomMinus);
+		toolBar_1.addSeparator();
+		
+		lblResetZoom = new JLabel("ResetZoom");
+		lblResetZoom.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e){
+				zoomFocus = 1;
+				view.getCamera().setViewPercent(zoomFocus);
+			}
+		});
+		toolBar_1.add(lblResetZoom);
+		toolBar_1.addSeparator();
+		
+		lblResetSnap = new JLabel("ResetSnap");
+		lblResetSnap.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e){
+				switchToSnap(1);
+			}
+		});
+		toolBar_1.add(lblResetSnap);
+		toolBar_1.addSeparator();
 
 		toolBar_1.add(lblSpeed);
 
@@ -533,6 +571,20 @@ public class LinksWindows implements Serializable {
 		});
 		frame.getContentPane().add(graphPanel, BorderLayout.CENTER);
 		graphPanel.setLayout(new BorderLayout(0, 0));
+		
+		slider = new JSlider();
+		slider.setValue(100);
+		slider.addChangeListener(new ChangeListener() {
+			//TODO
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				System.out.println(slider.getValue());
+				zoomFocus = slider.getValue()/100.0;
+				System.out.println(zoomFocus);
+				view.getCamera().setViewPercent(zoomFocus);
+			}
+		});
+		graphPanel.add(slider, BorderLayout.SOUTH);
 
 		//Give the shortcut
 		KeyboardFocusManager.getCurrentKeyboardFocusManager()
@@ -827,7 +879,24 @@ public class LinksWindows implements Serializable {
 			this.charts.remove(l);
 		graph.getSnapCol().addSnapshot(s);
 	}
-
+	
+	private void removeEntities(Snapshot s){
+		ArrayList<Map<Entity,List<String>>> removeList = new ArrayList<Map<Entity,List<String>>>();
+		for(Map<Entity,List<String>> l : this.charts){
+			for(Entity chart : l.keySet()){
+				boolean alive = false;
+				for(Entity e : s.getEntityList()){
+					if(e.getName().equals(chart.getName()))
+						alive = true;
+				}
+				if(!alive){
+					removeList.add(l);
+				}
+			}
+		}
+		for(Map<Entity,List<String>> l :removeList)
+			this.charts.remove(l);
+	}
 	/**
 	 * Get the highest snapshot num.
 	 * 
