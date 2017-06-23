@@ -927,11 +927,11 @@ public class LinksWindows implements Serializable {
 						if(theAttribute.getValue().getClass() != String.class){
 							Entity b = this.getSnapshotsCollection().getSnaptshot(this.currentSnap-1).getEntity(a.getName());
 							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-									ChartType.BAR).close();
+									ChartType.BAR).add(s+1, 0, (Double) b.getAttributesWithName(theAttribute.getName()).getValue());
 							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-									ChartType.BAR).add(s, u-2, (Double) b.getAttributesWithName(theAttribute.getName()).getValue());
-							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-									ChartType.BAR).add(s, u-1, (Double) theAttribute.getValue());
+									ChartType.BAR).add(s+2, 1, (Double) theAttribute.getValue());
+							this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+									ChartType.BAR));
 						}
 					}
 					if (style == AttributeStyle.AVRT) {
