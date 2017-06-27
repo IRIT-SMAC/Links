@@ -45,7 +45,6 @@ public class ClicksPipe extends Thread implements ViewerListener{
 	}
 
 	public void buttonPushed(String id) {
-
 	}
 
 	public void buttonReleased(String id) {

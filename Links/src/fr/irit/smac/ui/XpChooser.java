@@ -323,7 +323,7 @@ public class XpChooser extends JFrame {
 					MongoCollection<Document> collection = Links.database.getCollection(list.getSelectedValue());
 					Document doc = collection.find(Filters.eq("LinksDescriptionXP","The description")).first();
 					if (doc == null){
-						textField.setText("NULL");
+						textField.setText("");
 					}
 					else{
 						Iterator<Entry<String, Object>> it = doc.entrySet().iterator();

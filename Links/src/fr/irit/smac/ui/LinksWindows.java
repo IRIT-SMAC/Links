@@ -17,6 +17,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
@@ -45,6 +47,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.graphstream.graph.Graph;
+import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
@@ -66,6 +69,7 @@ import fr.irit.smac.model.Snapshot;
 import fr.irit.smac.model.SnapshotsCollection;
 import fr.irit.smac.model.Attribute.AttributeStyle;
 import javax.swing.JSlider;
+import javax.swing.JSeparator;
 
 /**
  * LinksWindows: This class
@@ -111,14 +115,18 @@ public class LinksWindows implements Serializable {
 
 	private boolean isInfoWindowsOpened = false;
 
+	private boolean mouseMove = false;
+	
+	private boolean loop = false;
+
 	private final AutoPlayThread autoPlayThread;
 
 	private boolean moving;
 
 	private boolean drawing = false;
-	
-	private double zoomFocus = 1.0;
-	
+
+	private Double zoomFocus = 1.0;
+
 	private RelationsVizFrame relationsWindow;
 
 	private JLabel lblStop;
@@ -143,7 +151,9 @@ public class LinksWindows implements Serializable {
 	private JLabel lblResetZoom;
 	private JLabel lblResetSnap;
 	private JSlider slider;
-
+	private JSeparator separator;
+	private JButton btnLoop;
+	
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
 	 * 
@@ -178,7 +188,6 @@ public class LinksWindows implements Serializable {
 			}
 		}
 
-		//TODO
 		/**
 		 * Thread used to understand the user's input
 		 */
@@ -284,7 +293,6 @@ public class LinksWindows implements Serializable {
 
 	}
 
-	//TODO
 	/**
 	 * Method used to draw a charts with a click
 	 * @param e
@@ -391,20 +399,21 @@ public class LinksWindows implements Serializable {
 		lblInfo.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/question.png")));
 		toolBar_1.add(lblInfo);
 		toolBar_1.addSeparator();
-		
+
 		lblLinks = new JLabel("");
-		
-	 
+
+
 		lblLinks.addMouseListener(new MouseAdapter(){
 			@Override
 			public void mouseReleased(MouseEvent e){
 				if(relationsWindow == null)
 					relationsWindow = new RelationsVizFrame(myWindow);
+					relationsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			}
 		});
 		toolBar_1.add(lblLinks);
 		toolBar_1.addSeparator();
-		
+
 		lblSynch.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/synchronization.png")));
 		toolBar_1.add(lblSynch);
 		toolBar_1.addSeparator();
@@ -465,6 +474,28 @@ public class LinksWindows implements Serializable {
 					frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}
 		});
+		
+		btnLoop = new JButton("Loop ");
+		btnLoop.setForeground(Color.BLACK);
+		btnLoop.setFont(btnLoop.getFont().deriveFont(Font.BOLD));
+		btnLoop.setBackground(Color.RED);
+		btnLoop.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				loop = !loop;
+				if(loop){
+					btnLoop.setBackground(Color.GREEN);
+				}
+				else
+					btnLoop.setBackground(Color.RED);
+			}
+			
+		});
+		toolBar_1.add(btnLoop);
+		
+		separator = new JSeparator();
+		toolBar_1.add(separator);
 		toolBar_1.add(lblMoving);
 		toolBar_1.addSeparator();
 
@@ -493,7 +524,7 @@ public class LinksWindows implements Serializable {
 				txtSpeed.setEnabled(!txtSpeed.isEnabled());
 			}
 		});
-		
+
 		lblZoomPlus = new JLabel("Zoom+ ");
 		lblZoomPlus.addMouseListener(new MouseAdapter(){
 			@Override
@@ -503,7 +534,7 @@ public class LinksWindows implements Serializable {
 		});
 		toolBar_1.add(lblZoomPlus);
 		toolBar_1.addSeparator();
-		
+
 		lblZoomMinus = new JLabel("Zoom - ");
 		lblZoomMinus.addMouseListener(new MouseAdapter(){
 			@Override
@@ -513,18 +544,20 @@ public class LinksWindows implements Serializable {
 		});
 		toolBar_1.add(lblZoomMinus);
 		toolBar_1.addSeparator();
-		
+
 		lblResetZoom = new JLabel("ResetZoom");
 		lblResetZoom.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e){
-				zoomFocus = 1;
+				zoomFocus = 1.0;
 				view.getCamera().setViewPercent(zoomFocus);
+				view.getCamera().setViewCenter(1, 1, 0);
+				slider.setValue(100);
 			}
 		});
 		toolBar_1.add(lblResetZoom);
 		toolBar_1.addSeparator();
-		
+
 		lblResetSnap = new JLabel("ResetSnap");
 		lblResetSnap.addMouseListener(new MouseAdapter() {
 			@Override
@@ -571,16 +604,13 @@ public class LinksWindows implements Serializable {
 		});
 		frame.getContentPane().add(graphPanel, BorderLayout.CENTER);
 		graphPanel.setLayout(new BorderLayout(0, 0));
-		
+
 		slider = new JSlider();
 		slider.setValue(100);
 		slider.addChangeListener(new ChangeListener() {
-			//TODO
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				System.out.println(slider.getValue());
 				zoomFocus = slider.getValue()/100.0;
-				System.out.println(zoomFocus);
 				view.getCamera().setViewPercent(zoomFocus);
 			}
 		});
@@ -659,8 +689,46 @@ public class LinksWindows implements Serializable {
 					}
 				}
 				return false;}});
-
 		generateGraph();
+		//TODO
+		view.addMouseListener(new ViewMouseListener());
+		graphPanel.addMouseWheelListener(new MouseWheelListener(){
+
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				if(e.getWheelRotation() < 0 ){
+					zoomPlus();
+				}
+				else{
+					zoomMinus();
+				}
+			}
+
+		});
+	}
+	private class ViewMouseListener extends MouseAdapter{
+		double x = 0;
+		double y = 0;
+		//TODO
+		@Override
+		public void mousePressed(MouseEvent e){
+			x = e.getX();
+			y = e.getY();
+			mouseMove = false;
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e){
+			double ratio = view.getCamera().getMetrics().ratioPx2Gu;
+			double orx = view.getCamera().getViewCenter().x*2.0;
+			double ory = view.getCamera().getViewCenter().y*2.0;
+			if(x != e.getX() && y !=e.getY()){
+				double newx = (e.getX()+x+1)/(2.0*ratio);
+				double newy = (e.getY()+y+1)/(2.0*ratio);
+				view.getCamera().setViewCenter(newx,newy, 0);
+				//zoomPlus();
+			}
+		}
 	}
 
 	/**
@@ -691,6 +759,8 @@ public class LinksWindows implements Serializable {
 	 *            The number of the snapshot to be displayed.
 	 */
 	public void switchToSnap(long number) {
+		if(this.currentSnap == this.getMaxSnapNumber()-1 && loop)
+			number = 0;
 		boolean res = graph.loadGraph(number);
 		if(!res)
 			this.viewer.disableAutoLayout();
@@ -708,7 +778,7 @@ public class LinksWindows implements Serializable {
 			for(Entity e : h.keySet()){
 				for(String s : e.getAttributes().keySet()){
 					for(Attribute t : e.getAttributes().get(s)){
-						
+
 					}
 				}
 				Entity e1 = getSnapCol().getEntity(e.getName(), number);
@@ -745,6 +815,15 @@ public class LinksWindows implements Serializable {
 	 */
 	public long getCurrentSnapNumber() {
 		return this.currentSnap;
+	}
+	
+	/**
+	 * Get the value of loop
+	 * 
+	 * @return loop
+	 */
+	public boolean getLoop(){
+		return this.loop;
 	}
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
@@ -879,7 +958,7 @@ public class LinksWindows implements Serializable {
 			this.charts.remove(l);
 		graph.getSnapCol().addSnapshot(s);
 	}
-	
+
 	private void removeEntities(Snapshot s){
 		ArrayList<Map<Entity,List<String>>> removeList = new ArrayList<Map<Entity,List<String>>>();
 		for(Map<Entity,List<String>> l : this.charts){
@@ -924,6 +1003,10 @@ public class LinksWindows implements Serializable {
 
 	public Viewer getViewer() {
 		return viewer;
+	}
+
+	public View getView() {
+		return view;
 	}
 
 	public String getXpName() {
@@ -1049,7 +1132,6 @@ public class LinksWindows implements Serializable {
 		this.lastSnapNumDrawn = this.getCurrentSnapNumber();
 	}
 
-	//TODO
 	/**
 	 * Method use to refresh all charts who are synchr
 	 */
@@ -1064,9 +1146,9 @@ public class LinksWindows implements Serializable {
 						if(!(t instanceof StringAttribute)){
 							DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
 							boolean alive = false;
-								if(LxPlot.getCharts().containsValue(this.listLxPlot.get(datt.getName()+datt.getAttribute().getName()))){
-										alive = true;
-								}
+							if(LxPlot.getCharts().containsValue(this.listLxPlot.get(datt.getName()+datt.getAttribute().getName()))){
+								alive = true;
+							}
 							if(alive)
 								tolook.add(datt);
 							else
@@ -1085,14 +1167,18 @@ public class LinksWindows implements Serializable {
 		if(zoomFocus !=0.1)
 			zoomFocus -= 0.05;
 		view.getCamera().setViewPercent(zoomFocus);
-		
+		Double sl = zoomFocus*100;
+		this.slider.setValue(sl.intValue());
+
 	}
 
 	public void zoomMinus() {
 		if(zoomFocus !=1)
 			zoomFocus += 0.05;
-			view.getCamera().setViewPercent(zoomFocus);
-		
+		view.getCamera().setViewPercent(zoomFocus);
+		Double sl = zoomFocus*100;
+		slider.setValue(sl.intValue());
+
 	}
 
 }
