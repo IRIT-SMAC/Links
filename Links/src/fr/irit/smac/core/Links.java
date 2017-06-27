@@ -65,7 +65,7 @@ public class Links {
 	/**
 	 * Name of the MongoDB data base used by the application.
 	 */
-	private static final String dataBaseName = "LinksDataBase";
+	public static final String dataBaseName = "LinksDataBase";
 
 	/**
 	 * Name of the MongoDB collection used by the application to list the
@@ -87,6 +87,11 @@ public class Links {
 	 * The mongoPath if we want to execute it
 	 */
 	public String mongoPath;
+
+	/**
+	 * The path of the config
+	 */
+	public String mongoConfig;
 
 	/**
 	 * The file which will store the path of mongoDB
@@ -122,6 +127,7 @@ public class Links {
 		lireMongoPath();
 		initMongoConnection();
 		xpChooser = new XpChooser(this);
+		xpChooser.redrawList();
 	}
 
 	/**
@@ -146,7 +152,8 @@ public class Links {
 			createExperiment(xpName);
 		}
 
-		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName));
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
+		xpChooser.redrawList();
 	}
 
 	/**
@@ -173,7 +180,8 @@ public class Links {
 			createExperiment(xpName);
 		}
 
-		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName));
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
+		xpChooser.redrawList();
 	}
 
 	/**
@@ -190,6 +198,65 @@ public class Links {
 		lireMongoPath();
 		initMongoConnection(addr);
 		xpChooser = new XpChooser(this);
+		xpChooser.redrawList();
+	}
+	
+	/**
+	 * Creates a new Links instance connection to the localhost and default port
+	 * of MongoDB. This constructor intializes the experiment to the name passed
+	 * in parameter.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment to use. If an experiment with this
+	 *            name already exists, the application restore the previously
+	 *            loaded data.
+	 * @param visible
+	 * 			  The visibility of the experience's frame.
+	 * 
+	 */
+	public Links(String xpName,boolean visible) {
+		setLookAndFeel();
+		lireMongoPath();
+		initMongoConnection();
+
+		xpChooser = new XpChooser(this);
+
+		if (!existsExperiment(xpName)) {
+			createExperiment(xpName);
+		}
+
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),visible);
+		xpChooser.redrawList();
+	}
+	
+	/**
+	 * Creates a new Links instance connection to the specified address of
+	 * MongoDB. This constructor intialise the experiment to the name passed in
+	 * parameter.
+	 * 
+	 * @param addr
+	 *            The ServerAddress of the MongoDB database.
+	 * @param xpName
+	 *            The name of the experiment to use. If an experiment with this
+	 *            name already exists, the application restore the previously
+	 *            loaded data.
+	 * @param visible
+	 * 			  The visibility of the experience's frame.
+	 * 
+	 */
+	public Links(ServerAddress addr, String xpName,boolean visible) {
+		setLookAndFeel();	
+		lireMongoPath();
+		initMongoConnection();
+
+		xpChooser = new XpChooser(this);
+
+		if (!existsExperiment(xpName)) {
+			createExperiment(xpName);
+		}
+
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),visible);
+		xpChooser.redrawList();
 	}
 
 	/**
@@ -199,10 +266,9 @@ public class Links {
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(resMong));
-			String line;
-			while ((line = br.readLine()) != null) {
-				mongoPath = line;
-			}
+			mongoPath = br.readLine();
+			mongoConfig = br.readLine();
+
 			br.close();
 		} catch (Exception e) {
 			try {
@@ -273,10 +339,10 @@ public class Links {
 		if(osName.contains("win")){
 			if(mongoPath == null){
 				JOptionPane.showMessageDialog(xpChooser, "Can you give the path to mongod.exe ?");
-				// création de la boîte de dialogue
+				// creation
 				JFileChooser dialogue = new JFileChooser("Give the path to mongod.exe");
 
-				// affichage
+				// showing
 				dialogue.showOpenDialog(null);
 				try {
 					if (dialogue.getSelectedFile() == null){
@@ -285,14 +351,51 @@ public class Links {
 					mongoPath = dialogue.getSelectedFile().toString();
 				} catch (Exception e) {
 					e.printStackTrace();
-					System.err.println("BufferedWriter error");
+					System.err.println("Dialogue mongoPath error");
+				}
+			}
+			if(mongoConfig == null){
+				Object[] options = {"Yes","Use default"};
+				int n = JOptionPane.showOptionDialog(xpChooser,
+						"Can you give the path to the config of mongo or use default ",
+						"Configuration",
+						JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE,
+						null,
+						options,
+						options[1]);
+				if(n == 0){
+					// creation
+					JFileChooser dialogue = new JFileChooser("Give the path to the config of mongo ");
+
+					// showing
+					dialogue.showOpenDialog(null);
+					try {
+						if (dialogue.getSelectedFile() == null){
+							System.exit(0);
+						}
+						mongoConfig = dialogue.getSelectedFile().toString();
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.err.println("Dialogue mongoConfig error");
+					}
+				}
+				else{
+					mongoConfig = "DEFAULT";
 				}
 			}
 			//Execute on Windows
 			try{
-				String[] commande = {"cmd.exe","/c",mongoPath};
-				ProcessBuilder pb = new ProcessBuilder(commande);
-				Process p = pb.start();
+				if(mongoConfig.equals("DEFAULT")){
+					String[] commande = {"\""+mongoPath+"\""};
+					ProcessBuilder pb = new ProcessBuilder(commande);
+					Process p = pb.start();
+				}
+				else{
+					String[] commande = {"\""+mongoPath+"\" --config \""+mongoConfig+"\""};
+					ProcessBuilder pb = new ProcessBuilder(commande);
+					Process p = pb.start();
+				}
 			}
 			catch(Exception e){
 				e.printStackTrace();
@@ -314,7 +417,8 @@ public class Links {
 
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(resMong));
-			bw.write(mongoPath);
+			bw.write(mongoPath+"\n");
+			bw.write(mongoConfig);
 			bw.close();
 		}
 		catch(IOException e){
@@ -383,9 +487,10 @@ public class Links {
 	public void deleteExperiment(String xpName) {
 		xpChooser.delete(xpName);
 	}
-	
+
 	public void deleteWindow(){
-		this.linksWindow.close();
+		if(this.linksWindow != null)
+			this.linksWindow.close();
 	}
 
 	/**
@@ -426,8 +531,8 @@ public class Links {
 	 * @param linkToCss
 	 *            The path to the CSS file.
 	 */
-	public void createNewLinksWindows(String xpName, String linkToCss) {
-		linksWindow = new LinksWindows(xpName, linkToCss, this);
+	public void createNewLinksWindows(String xpName, String linkToCss,boolean visible) {
+		linksWindow = new LinksWindows(xpName, linkToCss, this,visible);
 	}
 
 	/**
@@ -465,5 +570,8 @@ public class Links {
 		return it.next().getValue().toString();
 	}
 
+	public String getMongoPath(){
+		return mongoPath;
+	}
 
 }
