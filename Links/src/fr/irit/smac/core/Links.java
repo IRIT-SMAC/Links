@@ -289,6 +289,36 @@ public class Links {
 	}
 	
 	/**
+	 * Creates a new Links instance connection to the localhost and default port
+	 * of MongoDB. This constructor intializes the experiment to the name passed
+	 * in parameter.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment to use. If an experiment with this
+	 *            name already exists, the application restore the previously
+	 *            loaded data.
+	 * @param visible
+	 * 			  The visibility of the experience's frame.
+	 * 
+	 * @Param pathCss
+	 * 		  The path to the css file
+	 */
+	public Links(String xpName,boolean visible, String pathCss) {
+		setLookAndFeel();
+		lireMongoPath();
+		initMongoConnection();
+
+		xpChooser = new XpChooser(this);
+
+		if (!existsExperiment(xpName)) {
+			createExperiment(xpName,pathCss);
+		}
+
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),visible);
+		xpChooser.redrawList();
+	}
+	
+	/**
 	 * Creates a new Links instance connection to the specified address of
 	 * MongoDB. This constructor intialise the experiment to the name passed in
 	 * parameter.
