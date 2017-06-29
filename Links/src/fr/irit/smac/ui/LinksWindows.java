@@ -196,7 +196,7 @@ public class LinksWindows implements Serializable {
 				System.out.println("Enter : 'NBSNAP for the number of snapshot'");
 				System.out.println("Enter : 'SHOW <nameEntity> <Attribute1> <Attribute2> <AttributeN> <NOSYNCHR> <BAR/LIN/AVRT/AVT> <SIZE=N>' to show the graph (in case of blank put the name between simple quote)");
 				System.out.println("Example : SHOW 'entity 1' attr1 'attr 2' BAR SIZE=300");
-				System.out.println("NOSYNCHR is an option if you don't want that the synchronisation of the chart");
+				System.out.println("NOSYNCHR is an option if you don't want the synchronisation of the chart");
 				System.out.println("DEFAULT : LIN (or the style of the Attribute if it set) and Size=100");
 				Scanner sc = new Scanner(System.in);
 				while(true){
@@ -690,7 +690,6 @@ public class LinksWindows implements Serializable {
 				}
 				return false;}});
 		generateGraph();
-		//TODO
 		view.addMouseListener(new ViewMouseListener());
 		graphPanel.addMouseWheelListener(new MouseWheelListener(){
 
@@ -709,7 +708,6 @@ public class LinksWindows implements Serializable {
 	private class ViewMouseListener extends MouseAdapter{
 		double x = 0;
 		double y = 0;
-		//TODO
 		@Override
 		public void mousePressed(MouseEvent e){
 			x = e.getX();
@@ -760,7 +758,7 @@ public class LinksWindows implements Serializable {
 	 */
 	public void switchToSnap(long number) {
 		if(this.currentSnap == this.getMaxSnapNumber()-1 && loop)
-			number = 0;
+			number = 1;
 		boolean res = graph.loadGraph(number);
 		if(!res)
 			this.viewer.disableAutoLayout();
@@ -769,6 +767,7 @@ public class LinksWindows implements Serializable {
 		updateCharts(number);
 		notifyDraw();
 		this.currentSnap = number;
+		
 	}
 
 	private void updateCharts(long number) {
