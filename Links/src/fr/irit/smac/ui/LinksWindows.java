@@ -712,20 +712,19 @@ public class LinksWindows implements Serializable {
 		public void mousePressed(MouseEvent e){
 			x = e.getX();
 			y = e.getY();
-			mouseMove = false;
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e){
-			/*double ratio = view.getCamera().getMetrics().ratioPx2Gu;
+			double ratio = view.getCamera().getMetrics().ratioPx2Gu;
 			double orx = view.getCamera().getViewCenter().x*2.0;
 			double ory = view.getCamera().getViewCenter().y*2.0;
-			if(x != e.getX() && y !=e.getY() && !moving){
+			if(x != e.getX() && y !=e.getY() && !moving && !mouseMove){
 				double newx = (e.getX()+x+1)/(2.0*ratio);
 				double newy = (e.getY()+y+1)/(2.0*ratio);
 				view.getCamera().setViewCenter(newx,newy, 0);
 				//zoomPlus();
-			}*/
+			}
 		}
 	}
 
@@ -1162,6 +1161,9 @@ public class LinksWindows implements Serializable {
 		}
 	}
 
+	/**
+	 * Method used to zoom forward
+	 */
 	public void zoomPlus() {
 		if(zoomFocus !=0.1)
 			zoomFocus -= 0.05;
@@ -1171,6 +1173,9 @@ public class LinksWindows implements Serializable {
 
 	}
 
+	/**
+	 * Method used to zoom backward
+	 */
 	public void zoomMinus() {
 		if(zoomFocus !=1)
 			zoomFocus += 0.05;
@@ -1178,6 +1183,10 @@ public class LinksWindows implements Serializable {
 		Double sl = zoomFocus*100;
 		slider.setValue(sl.intValue());
 
+	}
+	
+	public void setMouseMove(boolean mouseMove){
+		this.mouseMove = mouseMove;
 	}
 
 }
