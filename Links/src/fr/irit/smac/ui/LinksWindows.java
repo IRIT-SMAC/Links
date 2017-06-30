@@ -717,15 +717,15 @@ public class LinksWindows implements Serializable {
 
 		@Override
 		public void mouseReleased(MouseEvent e){
-			double ratio = view.getCamera().getMetrics().ratioPx2Gu;
+			/*double ratio = view.getCamera().getMetrics().ratioPx2Gu;
 			double orx = view.getCamera().getViewCenter().x*2.0;
 			double ory = view.getCamera().getViewCenter().y*2.0;
-			if(x != e.getX() && y !=e.getY()){
+			if(x != e.getX() && y !=e.getY() && !moving){
 				double newx = (e.getX()+x+1)/(2.0*ratio);
 				double newy = (e.getY()+y+1)/(2.0*ratio);
 				view.getCamera().setViewCenter(newx,newy, 0);
 				//zoomPlus();
-			}
+			}*/
 		}
 	}
 
