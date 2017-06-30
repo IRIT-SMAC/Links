@@ -47,7 +47,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.graphstream.graph.Graph;
+import org.graphstream.ui.geom.Point3;
 import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants;
+import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants.Units;
+import org.graphstream.ui.graphicGraph.stylesheet.Value;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
@@ -706,24 +709,22 @@ public class LinksWindows implements Serializable {
 		});
 	}
 	private class ViewMouseListener extends MouseAdapter{
-		double x = 0;
-		double y = 0;
+		Point3 point = null;
 		@Override
 		public void mousePressed(MouseEvent e){
-			x = e.getX();
-			y = e.getY();
+			point = view.getCamera().transformPxToGu(e.getX(), e.getY());
+			System.out.println(point);
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e){
 			double ratio = view.getCamera().getMetrics().ratioPx2Gu;
-			double orx = view.getCamera().getViewCenter().x*2.0;
-			double ory = view.getCamera().getViewCenter().y*2.0;
-			if(x != e.getX() && y !=e.getY() && !moving && !mouseMove){
-				double newx = (e.getX()+x+1)/(2.0*ratio);
-				double newy = (e.getY()+y+1)/(2.0*ratio);
+			Point3 orx = view.getCamera().transformPxToGu(e.getX(), e.getY());
+			if((point.x != orx.x || point.y !=orx.y) && !moving && !mouseMove){
+				double newx =(point.x+orx.x)/2;
+				double newy =(point.y+orx.y)/2;
 				view.getCamera().setViewCenter(newx,newy, 0);
-				//zoomPlus();
+				zoomPlus();
 			}
 		}
 	}
