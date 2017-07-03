@@ -565,6 +565,7 @@ public class LinksWindows implements Serializable {
 		lblResetSnap.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e){
+				for(int i =0; i < 5;i++)
 				switchToSnap(1);
 			}
 		});

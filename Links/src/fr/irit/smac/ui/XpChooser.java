@@ -627,6 +627,21 @@ public class XpChooser extends JFrame {
 		}
 	}
 
+	/**
+	 * Method use to construct an entity
+	 * @param lineSplit
+	 * 			The tab of String
+	 * @param j
+	 * 			The index
+	 * @param s
+	 * 			The Snapshot
+	 * @param type
+	 * 			The type
+	 * @param things
+	 * 			The map with the entities
+	 * @return j
+	 * 			The index
+	 */
 	private int constructEntity(String[] lineSplit, int j, Snapshot s, String type, Map<String,String> things){
 
 		int nbAcc = 1;
@@ -750,7 +765,17 @@ public class XpChooser extends JFrame {
 		return ret;
 	}
 
-	//Relation can have attribute
+	/**
+	 * Method use to construct the relations
+	 * @param lineSplit
+	 * 			The tab with the fields
+	 * @param j
+	 * 		the index
+	 * @param s
+	 * 		The snapshot
+	 * @return j
+	 * 		the index
+	 */
 	private int constructRelation(String[] lineSplit, int j, Snapshot s){
 		int nbAcc = 1;
 		j++;
@@ -862,6 +887,14 @@ public class XpChooser extends JFrame {
 		return j;
 	}
 
+	/**
+	 * Count the number of braces
+	 * 
+	 * @param s
+	 * 			The string
+	 * @return nbAcc
+	 * 			Then umber of braces
+	 */
 	private int matchBraces(String s) {
 		String tmpF = s;
 		int nbAcc = 0;
