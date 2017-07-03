@@ -195,7 +195,6 @@ public class DisplayedGraph implements Serializable {
 					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
 					for(String str : a.getAttributes().keySet()){
 						for(Attribute att : a.getAttributes().get(str)){
-							System.out.println("Entity : "+a.toString()+  " Value :"+att.getValue());
 							if(att.getValue() instanceof Double){
 								/*if(((Double)att.getValue()) > 100)
 									graph.getNode(a.getName()).addAttribute("ui.color", 1);
@@ -223,7 +222,6 @@ public class DisplayedGraph implements Serializable {
 					}
 					for(String str : a.getAttributes().keySet()){
 						for(Attribute att : a.getAttributes().get(str)){
-							System.out.println("Entity : "+a.toString()+  " Value :"+att.getValue());
 							if(att.getValue() instanceof Double){
 								/*if(((Double)att.getValue()) > 100)
 									graph.getNode(a.getName()).setAttribute("ui.color", 1);

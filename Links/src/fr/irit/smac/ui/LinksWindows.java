@@ -713,7 +713,6 @@ public class LinksWindows implements Serializable {
 		@Override
 		public void mousePressed(MouseEvent e){
 			point = view.getCamera().transformPxToGu(e.getX(), e.getY());
-			System.out.println(point);
 		}
 
 		@Override
