@@ -26,7 +26,7 @@ import javafx.collections.transformation.SortedList;
  *
  */
 public class DisplayedGraph implements Serializable {
-	
+
 	private static final long serialVersionUID = -7697345043271592254L;
 	private Graph graph;
 	private SnapshotsCollection snapColl;
@@ -48,7 +48,7 @@ public class DisplayedGraph implements Serializable {
 		currentSnapNumber = 0;
 		this.snapColl = snapColl;
 	}
-	
+
 	public void resetSnapNumber(){
 		currentSnapNumber = 0;
 		snapColl.resetNumber();
@@ -121,19 +121,19 @@ public class DisplayedGraph implements Serializable {
 						}
 					}
 				} else {
-						n.setAttribute("ui.class", a.getType());
-						for(String str : a.getAttributes().keySet()){
-							for(Attribute att : a.getAttributes().get(str)){
-								if(att.getValue() instanceof Double){
-									/*if(((Double)att.getValue()) > 100)
+					n.setAttribute("ui.class", a.getType());
+					for(String str : a.getAttributes().keySet()){
+						for(Attribute att : a.getAttributes().get(str)){
+							if(att.getValue() instanceof Double){
+								/*if(((Double)att.getValue()) > 100)
 										graph.getNode(a.getName()).setAttribute("ui.color", 1);
 									else
 										graph.getNode(a.getName()).setAttribute("ui.color", ((Double)att.getValue())/100);	*/
-									mapValues.put(a, (Double)att.getValue());
-								}
+								mapValues.put(a, (Double)att.getValue());
 							}
 						}
-					
+					}
+
 					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
 						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
 						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
@@ -164,7 +164,7 @@ public class DisplayedGraph implements Serializable {
 		refreshColor();
 		return ret;
 	}
-	
+
 	public boolean viewSnapshot(Snapshot s){
 		boolean ret = true;
 		if (s != null) {
@@ -302,25 +302,27 @@ public class DisplayedGraph implements Serializable {
 			}
 		}
 	}
-	
+
 	private void refreshColor(){
 		SortedSet<Double> set = new TreeSet<Double>();
 		set.addAll(this.mapValues.values());
-		double quo = 100/set.size();
-		double size = 30/set.size()+5;
-		for(Entity a : this.mapValues.keySet()){
-			double ind = 0;
-			boolean found = false;
-			for(Double d : set){
-				if(this.mapValues.get(a) == d && !found){
-					graph.getNode(a.getName()).setAttribute("ui.color", ind*quo/100.0);
-					graph.getNode(a.getName()).setAttribute("ui.size", ind*size);
-					found = true;
+		if(set.size() > 0){
+			double quo = 100/set.size();
+			double size = 30/set.size()+5;
+			for(Entity a : this.mapValues.keySet()){
+				double ind = 0;
+				boolean found = false;
+				for(Double d : set){
+					if(this.mapValues.get(a) == d && !found){
+						graph.getNode(a.getName()).setAttribute("ui.color", ind*quo/100.0);
+						graph.getNode(a.getName()).setAttribute("ui.size", ind*size);
+						found = true;
+					}
+					else
+						ind++;
 				}
-				else
-					ind++;
 			}
 		}
 	}
-	
+
 }
