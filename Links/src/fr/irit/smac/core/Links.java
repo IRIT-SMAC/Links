@@ -386,8 +386,8 @@ public class Links {
 	 */
 	public Graph getGraph() {
 		if (linksWindow != null) {
-			return linksWindow.getDisplayedGraph().getGraph();
-			//return this.windows.get(currentXP).getDisplayedGraph().getGraph();
+			//return linksWindow.getDisplayedGraph().getGraph();
+			return this.windows.get(currentXP).getDisplayedGraph().getGraph();
 		} else {
 			return null;
 		}
@@ -401,7 +401,6 @@ public class Links {
 	public Viewer getGraphView() {
 		if (linksWindow != null) {
 			return linksWindow.getViewer();
-			//return this.windows.get(currentXP).getViewer();
 		} else {
 			return null;
 		}
@@ -542,6 +541,7 @@ public class Links {
 	 *            The snapshot to add.
 	 */
 	public void addSnapshot(Snapshot s) {
+		linksWindow = this.windows.get(currentXP);
 		if (linksWindow != null && s != null) {
 			try{
 				linksWindow.addSnapshot(s);
@@ -550,6 +550,32 @@ public class Links {
 			catch(Exception e){
 				linksWindow.addSnapshot(s);
 				//this.windows.get(currentXP).addSnapshot(s);
+			}
+		}
+		try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
+		}
+	}
+	
+	/**
+	 * Add a new Snapshot to the model. The number of this snapshot is
+	 * automatically choose.
+	 * 
+	 * @param s
+	 *            The snapshot to add.
+	 */
+	public void addSnapshot(Snapshot s, String xpName) {
+		if(windows.get(xpName) == null){
+			this.createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName), true);
+		}
+		linksWindow = windows.get(xpName);
+		if (linksWindow != null && s != null) {
+			try{
+				linksWindow.addSnapshot(s);
+			}
+			catch(Exception e){
+				linksWindow.addSnapshot(s);
 			}
 		}
 		try {
@@ -566,8 +592,8 @@ public class Links {
 	 */
 	public void viewSnapshot(Snapshot s) {
 		if (linksWindow != null) {
-			linksWindow.getDisplayedGraph().viewSnapshot(s);
-			//this.windows.get(currentXP).getDisplayedGraph().viewSnapshot(s);
+			//linksWindow.getDisplayedGraph().viewSnapshot(s);
+			this.windows.get(currentXP).getDisplayedGraph().viewSnapshot(s);
 		}
 	}
 
@@ -636,7 +662,9 @@ public class Links {
 	 */
 	public void dropExperiment(String xpName) {
 		xpChooser.drop(xpName);
-		linksWindow.getDisplayedGraph().resetSnapNumber();
+		//linksWindow.getDisplayedGraph().resetSnapNumber();
+		if(this.windows.get(xpName) != null)
+		this.windows.get(xpName).getDisplayedGraph().resetSnapNumber();
 	}
 
 	/**
@@ -650,15 +678,15 @@ public class Links {
 	 */
 	public void createNewLinksWindows(String xpName, String linkToCss,boolean visible) {
 		this.currentXP = xpName;
-		//this.windows.put(xpName,new LinksWindows(xpName, linkToCss, this,visible));
-		this.linksWindow = new LinksWindows(xpName, linkToCss, this,visible);
+		this.windows.put(xpName,new LinksWindows(xpName, linkToCss, this,visible));
+		//this.linksWindow = new LinksWindows(xpName, linkToCss, this,visible);
 	}
 
 	/**
 	 * Release memory when a vizualisation windows is closed.
 	 */
 	public void informClose() {
-		//this.windows.remove(currentXP);
+		this.windows.remove(currentXP);
 		this.linksWindow = null;
 	}
 
