@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
@@ -33,6 +34,7 @@ public class DisplayedGraph implements Serializable {
 	private long currentSnapNumber;
 	private boolean autoLayout = true;
 	private Map<Entity,Double> mapValues;
+	private ReentrantLock lock = new ReentrantLock();
 
 	/**
 	 * Create a new DisplayedGraph.
@@ -94,9 +96,9 @@ public class DisplayedGraph implements Serializable {
 			for (Entity a : s.getEntityList()) {
 				Node n = graph.getNode(a.getName());
 				if (n == null) {
-					graph.addNode(a.getName());
-					graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
-					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
+					Node na = graph.addNode(a.getName());
+					na.addAttribute("ui.class", a.getType());
+					na.addAttribute("ui.label", a.getName());
 					for(String str : a.getAttributes().keySet()){
 						for(Attribute att : a.getAttributes().get(str)){
 							if(att.getValue() instanceof Double){
@@ -303,7 +305,7 @@ public class DisplayedGraph implements Serializable {
 		}
 	}
 
-	private void refreshColor(){
+	private synchronized void refreshColor(){
 		SortedSet<Double> set = new TreeSet<Double>();
 		set.addAll(this.mapValues.values());
 		if(set.size() > 0){
@@ -314,8 +316,9 @@ public class DisplayedGraph implements Serializable {
 				boolean found = false;
 				for(Double d : set){
 					if(this.mapValues.get(a) == d && !found){
-						graph.getNode(a.getName()).setAttribute("ui.color", ind*quo/100.0);
-						graph.getNode(a.getName()).setAttribute("ui.size", ind*size);
+						Node na = graph.getNode(a.getName());
+						na.setAttribute("ui.color", ind*quo/100.0);
+						na.setAttribute("ui.size", ind*size);
 						found = true;
 					}
 					else

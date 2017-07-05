@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
@@ -60,7 +62,7 @@ import fr.irit.smac.ui.XpChooser;
  * @author Bob
  *
  */
-public class Links {
+public class Links implements Serializable{
 
 	/**
 	 * Name of the MongoDB data base used by the application.
@@ -548,6 +550,7 @@ public class Links {
 				//this.windows.get(currentXP).addSnapshot(s);
 			}
 			catch(Exception e){
+				e.printStackTrace();
 				linksWindow.addSnapshot(s);
 				//this.windows.get(currentXP).addSnapshot(s);
 			}
@@ -721,5 +724,6 @@ public class Links {
 	public String getMongoPath(){
 		return mongoPath;
 	}
+	
 
 }

@@ -290,8 +290,10 @@ public class XpChooser extends JFrame {
 
 	public void drop(String xpName) {
 		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
-		collection2.drop();
-		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+		if(collection2 != null){
+			collection2.drop();
+			collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+		}
 	}
 
 	protected void destroyExperiment(String xpName) {

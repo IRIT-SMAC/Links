@@ -1,5 +1,7 @@
 package fr.irit.smac.ui;
 
+import java.io.Serializable;
+
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.view.Viewer;
@@ -8,7 +10,12 @@ import org.graphstream.ui.view.ViewerPipe;
 
 import fr.irit.smac.model.Attribute.AttributeStyle;
 
-public class ClicksPipe extends Thread implements ViewerListener{
+public class ClicksPipe extends Thread implements ViewerListener, Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6081772850762199542L;
+
 	protected boolean loop = true;
 
 	private Graph graph;

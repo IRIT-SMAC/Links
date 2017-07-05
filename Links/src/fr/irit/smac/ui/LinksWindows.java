@@ -12,11 +12,9 @@ import java.awt.KeyboardFocusManager;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
@@ -24,40 +22,32 @@ import java.awt.event.WindowEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Scanner;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.graphstream.graph.Graph;
 import org.graphstream.ui.geom.Point3;
-import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants;
-import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants.Units;
-import org.graphstream.ui.graphicGraph.stylesheet.Value;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
 import fr.irit.smac.attributes.AVTAttribute;
 import fr.irit.smac.attributes.DoubleAttribute;
 import fr.irit.smac.attributes.DrawableAttribute;
-import fr.irit.smac.attributes.DrawableAttribute.Type;
 import fr.irit.smac.attributes.StringAttribute;
 import fr.irit.smac.core.AutoPlayThread;
 import fr.irit.smac.core.DisplayedGraph;
@@ -65,7 +55,6 @@ import fr.irit.smac.core.Links;
 import fr.irit.smac.lxplot.LxPlot;
 import fr.irit.smac.lxplot.commons.ChartType;
 import fr.irit.smac.lxplot.interfaces.ILxPlotChart;
-import fr.irit.smac.lxplot.server.LxPlotChart;
 import fr.irit.smac.model.Attribute;
 import fr.irit.smac.model.Entity;
 import fr.irit.smac.model.Snapshot;
@@ -83,6 +72,11 @@ import javax.swing.JSeparator;
  *
  */
 public class LinksWindows implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -562874670782175594L;
 
 	public String xpName;
 
@@ -119,7 +113,7 @@ public class LinksWindows implements Serializable {
 	private boolean isInfoWindowsOpened = false;
 
 	private boolean mouseMove = false;
-	
+
 	private boolean loop = false;
 
 	private final AutoPlayThread autoPlayThread;
@@ -156,7 +150,10 @@ public class LinksWindows implements Serializable {
 	private JSlider slider;
 	private JSeparator separator;
 	private JButton btnLoop;
-	
+
+	private Queue<DisplayedGraph> graphQueue = new LinkedList<DisplayedGraph>();
+	private Queue<Long> numberQueue = new LinkedList<Long>();
+
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
 	 * 
@@ -190,6 +187,30 @@ public class LinksWindows implements Serializable {
 				switchToSnap(1);
 			}
 		}
+
+		Thread loadGraphThread = new Thread(){
+			public void run(){
+				ReentrantLock lock = new ReentrantLock();
+				while(true){
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if(!numberQueue.isEmpty()){
+						Long numb = numberQueue.poll();
+						if(numb != null){
+							synchronized(graph){
+								graph.loadGraph(numb);
+							}
+						}
+					}
+				}
+			}
+		};
+
+		loadGraphThread.start();
 
 		/**
 		 * Thread used to understand the user's input
@@ -411,7 +432,7 @@ public class LinksWindows implements Serializable {
 			public void mouseReleased(MouseEvent e){
 				if(relationsWindow == null)
 					relationsWindow = new RelationsVizFrame(myWindow);
-					relationsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				relationsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			}
 		});
 		toolBar_1.add(lblLinks);
@@ -477,7 +498,7 @@ public class LinksWindows implements Serializable {
 					frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}
 		});
-		
+
 		btnLoop = new JButton("Loop ");
 		btnLoop.setForeground(Color.BLACK);
 		btnLoop.setFont(btnLoop.getFont().deriveFont(Font.BOLD));
@@ -493,10 +514,10 @@ public class LinksWindows implements Serializable {
 				else
 					btnLoop.setBackground(Color.RED);
 			}
-			
+
 		});
 		toolBar_1.add(btnLoop);
-		
+
 		separator = new JSeparator();
 		toolBar_1.add(separator);
 		toolBar_1.add(lblMoving);
@@ -566,7 +587,7 @@ public class LinksWindows implements Serializable {
 			@Override
 			public void mouseReleased(MouseEvent e){
 				for(int i =0; i < 5;i++)
-				switchToSnap(1);
+					switchToSnap(1);
 			}
 		});
 		toolBar_1.add(lblResetSnap);
@@ -759,15 +780,19 @@ public class LinksWindows implements Serializable {
 	public void switchToSnap(long number) {
 		if(this.currentSnap == this.getMaxSnapNumber()-1 && loop)
 			number = 1;
-		boolean res = graph.loadGraph(number);
+		//TODO
+		DisplayedGraph copy = graph;
+		graphQueue.offer(copy);
+		numberQueue.offer(number);
+		/*boolean res = graph.loadGraph(number);
 		if(!res)
-			this.viewer.disableAutoLayout();
+			this.viewer.disableAutoLayout();*/
 		setSnapNumber(number);
 		notifyJump(number);
 		updateCharts(number);
 		notifyDraw();
 		this.currentSnap = number;
-		
+
 	}
 
 	private void updateCharts(long number) {
@@ -815,7 +840,7 @@ public class LinksWindows implements Serializable {
 	public long getCurrentSnapNumber() {
 		return this.currentSnap;
 	}
-	
+
 	/**
 	 * Get the value of loop
 	 * 
@@ -1185,9 +1210,9 @@ public class LinksWindows implements Serializable {
 		slider.setValue(sl.intValue());
 
 	}
-	
+
 	public void setMouseMove(boolean mouseMove){
 		this.mouseMove = mouseMove;
 	}
-
+	
 }
