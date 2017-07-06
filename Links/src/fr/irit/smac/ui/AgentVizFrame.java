@@ -67,36 +67,54 @@ public class AgentVizFrame extends JFrame {
 
 	private JLabel lblBotTxt;
 
+	/**
+	 * The Entity to visualize.
+	 */
 	private Entity entity;
 
+	/**
+	 * The snapshot collection.
+	 */
 	private SnapshotsCollection snapCol;
 
+	/**
+	 * The reference to the LinksWindows.
+	 */
 	private LinksWindows links;
 
 	private JSplitPane splitPane;
 
+	/**
+	 * Boolean of the synchronization.
+	 */
 	private boolean isSynch = true;
 
+	/**
+	 * The number of the snapshot.
+	 */
 	private long snapNum;
 	private JButton btnNewButton;
 
-	private ClicksPipe clicksPipe;
-
+	/**
+	 * The boolean of the neighbouring.
+	 */
 	private boolean neigh = false;
 
+	/**
+	 * The size long of a chart.
+	 */
 	private long drawSizeLong = 50;
 
-	private Graph g;
-
-	private Viewer viewer;
 	private JButton btnNewButton_1;
 	private JButton btnDraw;
 
-	private String treeListSlected;
 	private JTextPane txtpnLook;
 
 	private AgentVizFrame me;
 
+	/**
+	 * The list of Drawable Attribute to look for.
+	 */
 	private ArrayList<DrawableAttribute> toLook = new ArrayList<DrawableAttribute>();
 
 	private String aname;
@@ -381,7 +399,7 @@ public class AgentVizFrame extends JFrame {
 
 	/**
 	 * Method uses by LinksWindows 
-	 * Check if the synchronisation is on
+	 * Check if the synchronization is on
 	 * 	If it's on uses the method updateTreeList
 	 */
 	public void update(){
@@ -389,6 +407,9 @@ public class AgentVizFrame extends JFrame {
 			updateTreeList();
 	}
 
+	/**
+	 * Update treeList.
+	 */
 	private void updateTreeList() {
 		if(entity != null){
 			setTitle(entity.getName() + " Vizualization tool"+ "   Type : "+ entity.getType());
@@ -485,7 +506,7 @@ public class AgentVizFrame extends JFrame {
 				}
 				model.nodeChanged(node);
 			}
-			//If yes we verify if the values are the same
+			//If yes we check if the values are the same
 			else{
 				boolean valExist = true;
 				ArrayList<Attribute> addList = new ArrayList<Attribute>();
@@ -525,6 +546,9 @@ public class AgentVizFrame extends JFrame {
 		}
 	}
 
+	/**
+	 * Draw a chart thanks to LxPlot.
+	 */
 	public synchronized void draw() {
 		Entity a;
 		long max = this.currentFrameNum;
@@ -600,6 +624,9 @@ public class AgentVizFrame extends JFrame {
 		lastSnapNumDrawn = this.currentFrameNum;
 	}
 
+	/**
+	 * Write the information on the text pane.
+	 */
 	public void drawLook() {
 		String s = "";
 		Lock l = new ReentrantLock();
@@ -627,6 +654,12 @@ public class AgentVizFrame extends JFrame {
 		}
 	}
 
+	/**
+	 * Update the vizFrame.
+	 * 
+	 * @param num
+	 * 			The number of the snapshot.
+	 */
 	public void notifyJump(long num) {
 		if (isSynch) {
 			entity = snapCol.getEntity(aname, num);
@@ -641,11 +674,21 @@ public class AgentVizFrame extends JFrame {
 		}
 	}
 
+	/**
+	 * Set lblBoxTxt
+	 * @param txt
+	 * 			The text.
+	 * @param num
+	 * 			The number.
+	 */
 	public void setlblBotTxt(String txt, long num) {
 		currentFrameNum = num;
 		lblBotTxt.setText(txt);
 	}
 
+	/**
+	 * Return the name.
+	 */
 	public String getName(){
 		return this.aname;
 	}

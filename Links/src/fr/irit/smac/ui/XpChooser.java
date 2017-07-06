@@ -60,6 +60,12 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+
+/**
+ * 
+ * @author Marcillaud Guilhem
+ *
+ */
 public class XpChooser extends JFrame {
 
 	private JPanel contentPane;
@@ -231,7 +237,9 @@ public class XpChooser extends JFrame {
 		this.setVisible(true);
 	}
 
-	//TODO
+	/**
+	 * Save the decription in mongoDB.
+	 */
 	protected void saveDesc() {
 		String s = textField.getText();
 		MongoCollection<Document> collection = Links.database.getCollection(list.getSelectedValue());
@@ -245,11 +253,22 @@ public class XpChooser extends JFrame {
 
 	}
 
+	/**
+	 * Delete completely an experience.
+	 * @param xpName
+	 * 			The name of the experience.
+	 */
 	public void delete(String xpName) {
 		Links.database.getCollection(xpName).drop();
 		Links.database.getCollection(Links.collectionNameExperimentList).findOneAndDelete(Filters.eq("xpName", xpName));
 	}
 
+	/**
+	 * Create a new experience.
+	 * 
+	 * @param xpName
+	 * 			The name of the experience.
+	 */
 	public void create(String xpName) {
 		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
 		collection.deleteMany(Filters.eq("xpName", xpName));
@@ -277,6 +296,14 @@ public class XpChooser extends JFrame {
 		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
 	}
 
+	/**
+	 * Create an experience with the cssPath.
+	 * 
+	 * @param xpName
+	 * 			The name of the experience.
+	 * @param cssPath
+	 * 			The path to the css.
+	 */
 	public void create(String xpName, String cssPath) {
 		MongoCollection<Document> collection = Links.database.getCollection(Links.collectionNameExperimentList);
 		collection.deleteMany(Filters.eq("xpName", xpName));
@@ -288,6 +315,12 @@ public class XpChooser extends JFrame {
 		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
 	}
 
+	/**
+	 * Drop an experience.
+	 * 
+	 * @param xpName
+	 * 			The name of the experience.
+	 */
 	public void drop(String xpName) {
 		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
 		if(collection2 != null){
@@ -296,11 +329,20 @@ public class XpChooser extends JFrame {
 		}
 	}
 
+	/**
+	 * Delete an experience and redraw the list.
+	 * 
+	 * @param xpName
+	 * 			The name of the experience.
+	 */
 	protected void destroyExperiment(String xpName) {
 		delete(xpName);
 		this.redrawList();
 	}
 
+	/**
+	 * Initialize the frame.
+	 */
 	private void init() {
 		Vector<String> v = new Vector<String>();
 		MongoCollection<Document> maCollection = Links.database.getCollection(Links.collectionNameExperimentList);
@@ -369,6 +411,9 @@ public class XpChooser extends JFrame {
 		});
 	}
 
+	/**
+	 * Update the list of experience.
+	 */
 	public void redrawList() {
 		xpWindows = null;
 
@@ -574,57 +619,6 @@ public class XpChooser extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		/*if(base.contains("{"))
-							nbAcc=nbAcc++;
-						while(nbAcc >0){
-							j++;
-							String tmpF = lineSplit[j];
-							int lengF = 0;
-							while((lengF=tmpF.indexOf("{",lengF)) > 0){
-								nbAcc++;
-								lengF++;
-							}
-							String tmpB = lineSplit[j];
-							int lengB = 0;
-							while((lengB = tmpB.indexOf("}",lengB)) > 0){
-								nbAcc--;
-								lengB++;
-							}
-						}
-
-						if(type.equals("Entity")){
-
-						}else{
-
-						}
-						if(!entitys.containsKey(entity)){
-							fields.add(base.split("=")[0]);
-						}
-					}
-				}
-				i++;
-			}
-			sourceFile.close();                 
-		}
-		catch (FileNotFoundException e)
-		{
-			System.out.println("Le fichier est introuvable !");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		String mongoPath = linksRef.getMongoPath().split("mongod")[0];
-		String query = "\""+mongoPath+"mongoimport\" --db testImportJSCProg --collection "+xpName.split("\\.")[0]+" --type=csv --headerline --file \""+loadPath+"\"";
-		System.out.println(query);
-
-		Runtime runtime = Runtime.getRuntime();
-		Process process = null;
-
-		try{
-			process = runtime.exec(query);
-		}catch(Exception e){
-			e.printStackTrace();
-			System.err.println("Error runtime");
-		}*/
 		redrawList();
 		}
 	}
@@ -758,6 +752,14 @@ public class XpChooser extends JFrame {
 		return j;
 	}
 
+	/**
+	 * Erase the empty from a tab and put the result in a list.
+	 * 
+	 * @param split
+	 * 			The tab.
+	 * @return ret
+	 * 			An ArrayList.
+	 */
 	private ArrayList<String> eraseEmpty(String[] split) {
 		ArrayList<String> ret = new ArrayList<String>();
 		for(int i =0; i < split.length;i++){

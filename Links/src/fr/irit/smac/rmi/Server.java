@@ -8,9 +8,16 @@ import java.rmi.registry.LocateRegistry;
 
 import fr.irit.smac.core.Links;
 
+/**
+ * 
+ * @author Marcillaud Guilhem
+ * 
+ * This classes is used to create the rmiServer for Links.
+ *
+ */
 public class Server {
-	 public static void main(String[] args) {
-		    try {
+	public Server(){
+		 try {
 		      LocateRegistry.createRegistry(1099);
 
 		      System.out.println("Set of the Security Manager ...");
@@ -32,5 +39,9 @@ public class Server {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		  }
+	
+	 public static void main(String[] args) {
+		    Server s = new Server();
 		  }
 }

@@ -113,6 +113,9 @@ public class RelationsVizFrame extends JFrame {
 		this.setVisible(true);
 	}
 
+	/**
+	 * Update the frame.
+	 */
 	public void notifyJump(){
 		if(isSynch){
 			updateTreeList();
@@ -192,6 +195,9 @@ public class RelationsVizFrame extends JFrame {
 	}
 
 
+	/**
+	 * Draw the information on the textPane.
+	 */
 	public void drawLook() {
 		String s = "";
 		Lock l = new ReentrantLock();

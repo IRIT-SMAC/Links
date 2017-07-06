@@ -10,6 +10,11 @@ import org.graphstream.ui.view.ViewerPipe;
 
 import fr.irit.smac.model.Attribute.AttributeStyle;
 
+/**
+ * 
+ * @author Marcillaud Guilhem
+ *
+ */
 public class ClicksPipe extends Thread implements ViewerListener, Serializable{
 	/**
 	 * 
@@ -18,10 +23,31 @@ public class ClicksPipe extends Thread implements ViewerListener, Serializable{
 
 	protected boolean loop = true;
 
+	/**
+	 * The graph.
+	 */
 	private Graph graph;
+	
+	/**
+	 * The viewer.
+	 */
 	private  Viewer viewer;
+	
+	/**
+	 * The LinksWindow.
+	 */
 	private LinksWindows links;
 
+	/**
+	 * Manage the events of the view for the graph.
+	 * 
+	 * @param graph
+	 * 			The graph.
+	 * @param viewer
+	 * 			The viewer.
+	 * @param links
+	 * 			The LinksWindow.
+	 */
 	public ClicksPipe(Graph graph, Viewer viewer, LinksWindows links) {
 		this.graph = graph;
 		this.viewer = viewer;
@@ -30,6 +56,9 @@ public class ClicksPipe extends Thread implements ViewerListener, Serializable{
 	}
 
 
+	/**
+	 * Manage the events of the view.
+	 */
 	public void run(){
 
 		ViewerPipe fromViewer = viewer.newViewerPipe();
@@ -47,19 +76,31 @@ public class ClicksPipe extends Thread implements ViewerListener, Serializable{
 		}
 	}
 
+	/**
+	 * Trigger when the view is closed, stop the thread.
+	 */
 	public void viewClosed(String id) {
 		loop = false;
 	}
 
+	/**
+	 * Set the mouse Move of the window.
+	 */
 	public void buttonPushed(String id) {
 		this.links.setMouseMove(true);
 	}
 
+	/**
+	 * Trigger when the mouse is released on a node
+	 */
 	public void buttonReleased(String id) {
+		// If the windows is in state Drawing, draw the graph of the entity. 
 		if(this.links.getDrawing()){
 			this.links.constructDraw(links.getDisplayedGraph().getSnapCol().getEntity(id,links.getCurrentSnapNumber()),null,100,true);
 			//this.links.isDraw();
 		}
+		
+		// If we are not in state Moving, create an AgentVizFrame of the Entity.
 		if(!this.links.getMoving()){
 			AgentVizFrame f = new AgentVizFrame(links.getDisplayedGraph().getSnapCol().getEntity(id,links.getCurrentSnapNumber()),links.getSnapCol(),links);
 			links.registerObserver(f);

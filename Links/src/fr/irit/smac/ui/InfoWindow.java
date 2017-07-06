@@ -47,6 +47,9 @@ public class InfoWindow extends JFrame {
 		this.setVisible(true);
 	}
 
+	/**
+	 * Write the informations of the experience.
+	 */
 	public void buildText() {
 		Graph g = links.getDisplayedGraph().getGraph();
 		String s = "";

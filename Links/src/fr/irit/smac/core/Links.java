@@ -65,6 +65,11 @@ import fr.irit.smac.ui.XpChooser;
 public class Links implements Serializable{
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8051187441385020519L;
+
+	/**
 	 * Name of the MongoDB data base used by the application.
 	 */
 	public static final String dataBaseName = "LinksDataBase";
@@ -408,6 +413,9 @@ public class Links implements Serializable{
 		}
 	}
 
+	/**
+	 * Connect Links to the MongoDB server.
+	 */
 	private void initMongoConnection(){
 		checkMongo();
 		try{
@@ -421,6 +429,12 @@ public class Links implements Serializable{
 
 	}
 
+	/**
+	 * Connect Links to the MongoDB server.
+	 * 
+	 * @param addr
+	 * 			The address of the server.
+	 */
 	private void initMongoConnection(ServerAddress addr) {
 		checkMongo();
 		try{
@@ -434,7 +448,8 @@ public class Links implements Serializable{
 	}
 
 	/**
-	 * Check the OS to know how to execute mongoDB
+	 * Check the OS to know how to execute mongoDB.
+	 * A file will be created to save the path and the configuration.
 	 */
 	private void checkMongo(){
 		String osName = System.getProperty("os.name").toLowerCase();

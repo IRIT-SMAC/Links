@@ -24,6 +24,11 @@ import fr.irit.smac.model.Attribute.AttributeStyle;
 import fr.irit.smac.model.Attribute.AttributeType;
 import fr.irit.smac.ui.LinksWindows;
 
+/**
+ * 
+ * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
+ *
+ */
 public class SnapshotsCollection implements Serializable {
 
 	/**
@@ -41,6 +46,12 @@ public class SnapshotsCollection implements Serializable {
 		this.links = links;
 	}
 
+	/**
+	 * Create the collection
+	 * 
+	 * @param links
+	 * 			The LinksWindows
+	 */
 	public SnapshotsCollection(LinksWindows links) {
 		this.links = links;
 		collection = Links.database.getCollection(links.getXpName());
@@ -53,6 +64,12 @@ public class SnapshotsCollection implements Serializable {
 		}
 	}
 
+	/**
+	 * Add a Snapshot to the collection
+	 *
+	 * @param s
+	 * 			The Snapshot
+	 */
 	public void addSnapshot(Snapshot s) {
 
 		collection.deleteMany(Filters.eq("snapNum", maxNum));
@@ -103,6 +120,12 @@ public class SnapshotsCollection implements Serializable {
 
 	}
 
+	/**
+	 * Return the Snapshot with the given number
+	 * @param s
+	 * 			The number of the snapshot
+	 * @return snap
+	 */
 	public Snapshot getSnaptshot(long s) {
 		/* recreate snapshot */
 		Snapshot snap = new Snapshot();
@@ -126,6 +149,13 @@ public class SnapshotsCollection implements Serializable {
 		return snap;
 	}
 
+	/**
+	 * Add a Document to a Snapshot
+	 * @param snap
+	 * 			The Snapshot
+	 * @param d
+	 * 			The Document
+	 */
 	private void addToSnap(Snapshot snap, Document d) {
 		Iterator<Entry<String, Object>> it = d.entrySet().iterator();
 		String type = (String) it.next().getValue();
@@ -191,6 +221,13 @@ public class SnapshotsCollection implements Serializable {
 		}
 	}
 
+	/**
+	 * TODO
+	 * @param caracName
+	 * @param typeToDraw
+	 * @param toString
+	 * @return
+	 */
 	private Attribute buildAttribute(String caracName, String typeToDraw, String toString) {
 		Attribute t = null;
 		if (toString.contains("Double")) {
@@ -223,22 +260,46 @@ public class SnapshotsCollection implements Serializable {
 		return t;
 	}
 
-	public boolean containsSnap(long number) {
-		return false;
-	}
-
+	/**
+	 * Return the Entity who correspond to the id
+	 * @param id
+	 * 			The id
+	 * @param snap
+	 * 			The snapshot
+	 * @return getSnaptshot(snap).getEntity(id)
+	 */
 	public Entity getEntity(String id, long snap) {
 		return getSnaptshot(snap).getEntity(id);
 	}
 
+	/**
+	 * Return the relation who correspond to the id
+	 * @param id
+	 * 			The id
+	 * @param snap
+	 * 			The snapshot
+	 * @return getSnaptshot(snap).getRelation(id)
+	 */
 	public Relation getRelation(String id, long snap) {
 		return getSnaptshot(snap).getRelation(id);
 	}
 
+	/**
+	 * Return the maxNum
+	 * @return maxNum
+	 */
 	public long getMaxNum() {
 		return maxNum;
 	}
 
+	/**
+	 * Return a list of all relations
+	 * @param aname
+	 * 			The name of the relation
+	 * @param num
+	 * 			The number of the snapshot
+	 * @return relations
+	 */
 	public ArrayList<Relation> getRelations(String aname, long num) {
 		Snapshot s = this.getSnaptshot(num);
 		ArrayList<Relation> relations = new ArrayList<Relation>();
@@ -250,6 +311,9 @@ public class SnapshotsCollection implements Serializable {
 		return relations;
 	}
 
+	/**
+	 * Set maxNum to 1
+	 */
 	public void resetNumber() {
 		maxNum=1;
 	}
