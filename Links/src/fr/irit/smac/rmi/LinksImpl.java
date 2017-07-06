@@ -10,6 +10,12 @@ import fr.irit.smac.core.Links;
 import fr.irit.smac.model.Snapshot;
 import fr.irit.smac.ui.LinksWindows;
 
+/**
+ * 
+ * @author Marcillaud Guilhem
+ * Class who implements LinksRemote
+ *
+ */
 public class LinksImpl extends UnicastRemoteObject implements LinksRemote, Serializable{
 
 	/**

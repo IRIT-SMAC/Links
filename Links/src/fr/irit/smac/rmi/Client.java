@@ -13,7 +13,13 @@ import fr.irit.smac.model.Entity;
 import fr.irit.smac.model.Snapshot;
 import fr.irit.smac.model.Attribute.AttributeStyle;
 
-
+/**
+ * 
+ * @author Marcillaud Guilhem
+ * 
+ * Class who gets the remote object from the server
+ *
+ */
 public class Client {
 
 	private Remote remote;

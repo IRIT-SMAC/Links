@@ -286,7 +286,7 @@ public class LinksWindows implements Serializable {
 		/**
 		 * Thread use to load the graph
 		 */
-		Thread loadGraphThread = new Thread(){
+		/*Thread loadGraphThread = new Thread(){
 			public void run(){
 				while(true){
 					try {
@@ -306,7 +306,7 @@ public class LinksWindows implements Serializable {
 			}
 		};
 
-		loadGraphThread.start();
+		loadGraphThread.start();*/
 
 		/**
 		 * Thread used to understand the user's input
@@ -928,9 +928,9 @@ public class LinksWindows implements Serializable {
 			number = 1;
 		//TODO
 		numberQueue.offer(number);
-		/*boolean res = graph.loadGraph(number);
+		boolean res = graph.loadGraph(number);
 		if(!res)
-			this.viewer.disableAutoLayout();*/
+			this.viewer.disableAutoLayout();
 		setSnapNumber(number);
 		notifyJump(number);
 		updateCharts(number);
