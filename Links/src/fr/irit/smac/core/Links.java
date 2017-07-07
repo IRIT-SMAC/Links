@@ -736,6 +736,11 @@ public class Links implements Serializable{
 		return it.next().getValue().toString();
 	}
 
+	/**
+	 * Return the mongoPath
+	 * 
+	 * @return mongoPath
+	 */
 	public String getMongoPath(){
 		return mongoPath;
 	}

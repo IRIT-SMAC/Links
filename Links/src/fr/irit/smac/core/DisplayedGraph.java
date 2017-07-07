@@ -305,6 +305,9 @@ public class DisplayedGraph implements Serializable {
 		}
 	}
 
+	/**
+	 * Refresh the color and the size of each node
+	 */
 	private synchronized void refreshColor(){
 		SortedSet<Double> set = new TreeSet<Double>();
 		set.addAll(this.mapValues.values());

@@ -2,6 +2,13 @@ package fr.irit.smac.attributes;
 
 import fr.irit.smac.model.Attribute;
 
+/**
+ * 
+ * @author Nicolas Verstaevel
+ *
+ *Class who define for an attribute how it will be draw
+ *
+ */
 public class DrawableAttribute {
 
 	public enum Type {
@@ -23,18 +30,34 @@ public class DrawableAttribute {
 		this.t = t;
 	}
 
+	/**
+	 * 
+	 * @return type
+	 */
 	public Type getType() {
 		return type;
 	}
 
+	/**
+	 * 
+	 * @return name
+	 */
 	public String getName() {
 		return name;
 	}
 	
+	/**
+	 * 
+	 * @return caracList
+	 */
 	public String getCaracList(){
 		return caracList;
 	}
 
+	/**
+	 * 
+	 * @return t
+	 */
 	public Attribute getAttribute() {
 		return t;
 	}

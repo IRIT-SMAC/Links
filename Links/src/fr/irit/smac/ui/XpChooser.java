@@ -294,6 +294,7 @@ public class XpChooser extends JFrame {
 		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
 		collection2.deleteMany(Filters.eq("xpName", xpName));
 		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+		this.redrawList();
 	}
 
 	/**
@@ -313,6 +314,7 @@ public class XpChooser extends JFrame {
 		MongoCollection<Document> collection2 = Links.database.getCollection(xpName);
 		collection2.deleteMany(Filters.eq("xpName", xpName));
 		collection2.insertOne(new Document("xpName", xpName).append("maxNum", 0));
+		this.redrawList();
 	}
 
 	/**

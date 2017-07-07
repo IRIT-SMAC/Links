@@ -298,7 +298,9 @@ public class LinksWindows implements Serializable {
 						Long numb = numberQueue.poll();
 						if(numb != null){
 							synchronized(graph){
-								graph.loadGraph(numb);
+								boolean res = graph.loadGraph(numb);
+								if(!res)
+									viewer.disableAutoLayout();
 							}
 						}
 					}
@@ -508,7 +510,7 @@ public class LinksWindows implements Serializable {
 		frame.setAutoRequestFocus(false);
 		frame.setBounds(200, 200, 900, 600);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.setTitle("Links : Vizualizing agents' life");
+		frame.setTitle("Links : Vizualizing agents' life "+xpName);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 
 		JPanel panel = new JPanel();
