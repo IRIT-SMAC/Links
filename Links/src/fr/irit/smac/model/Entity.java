@@ -41,6 +41,10 @@ public class Entity implements Serializable {
 	 * The list of attributes.
 	 */
 	private HashMap<String, ArrayList<Attribute>> attributes = new HashMap<String, ArrayList<Attribute>>();
+	
+	private double coorX;
+	
+	private double coorY;
 
 	/**
 	 * Construct un agent.
@@ -56,6 +60,29 @@ public class Entity implements Serializable {
 		this.name = name;
 		this.stype = type;
 		this.ctype = type;
+		coorX = -10000;
+		coorY = -10000;
+	}
+	/**
+	 * Construct un agent.
+	 * 
+	 * @param name
+	 *            Its name.
+	 * @param type
+	 *            Its type.
+	 * @param s
+	 *            The snapshot it belongs to.
+	 * @param x
+	 * 		the coor x
+	 * @param y
+	 * 		the coor y
+	 */
+	protected Entity(String name, String type, double x, double y) {
+		this.name = name;
+		this.stype = type;
+		this.ctype = type;
+		coorX = x;
+		coorY = y;
 	}
 
 	/**
@@ -74,6 +101,24 @@ public class Entity implements Serializable {
 	 */
 	public String getType() {
 		return ctype;
+	}
+	
+	/**
+	 * Get the coorx
+	 * 
+	 * @return coorX
+	 */
+	public double getCoorX(){
+		return this.coorX;
+	}
+	
+	/**
+	 * Get the coory
+	 * 
+	 * @return coorY
+	 */
+	public double getCoorY(){
+		return this.coorY;
 	}
 
 	/**

@@ -45,7 +45,7 @@ public class ClicksPipe extends Thread implements ViewerListener{
 	}
 
 	public void buttonPushed(String id) {
-
+		this.links.setMouseMove(true);
 	}
 
 	public void buttonReleased(String id) {
@@ -57,5 +57,6 @@ public class ClicksPipe extends Thread implements ViewerListener{
 			AgentVizFrame f = new AgentVizFrame(links.getDisplayedGraph().getSnapCol().getEntity(id,links.getCurrentSnapNumber()),links.getSnapCol(),links);
 			links.registerObserver(f);
 		}
+		this.links.setMouseMove(false);
 	}
 }

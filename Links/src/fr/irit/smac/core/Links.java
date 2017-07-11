@@ -104,6 +104,10 @@ public class Links {
 	private LinksWindows linksWindow;
 
 	private XpChooser xpChooser;
+	
+	private String currentXP;
+	
+	private Map<String,LinksWindows> windows = new HashMap<String,LinksWindows>();
 
 
 
@@ -154,6 +158,37 @@ public class Links {
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
 		xpChooser.redrawList();
+		this.currentXP = xpName;
+	}
+	
+	/**
+	 * Creates a new Links instance connection to the localhost and default port
+	 * of MongoDB. This constructor intializes the experiment to the name passed
+	 * in parameter.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment to use. If an experiment with this
+	 *            name already exists, the application restore the previously
+	 *            loaded data.
+	 * 
+	 * @Param pathCss 
+	 * 		  	  The path to the css file
+	 * 
+	 */
+	public Links(String xpName, String pathCss) {
+		setLookAndFeel();
+		lireMongoPath();
+		initMongoConnection();
+
+		xpChooser = new XpChooser(this);
+
+		if (!existsExperiment(xpName)) {
+			createExperiment(xpName,pathCss);
+		}
+
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
+		xpChooser.redrawList();
+		this.currentXP = xpName;
 	}
 
 	/**
@@ -172,7 +207,7 @@ public class Links {
 	public Links(ServerAddress addr, String xpName) {
 		setLookAndFeel();	
 		lireMongoPath();
-		initMongoConnection();
+		initMongoConnection(addr);
 
 		xpChooser = new XpChooser(this);
 
@@ -182,6 +217,38 @@ public class Links {
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
 		xpChooser.redrawList();
+		this.currentXP = xpName;
+	}
+	
+	/**
+	 * Creates a new Links instance connection to the specified address of
+	 * MongoDB. This constructor intialise the experiment to the name passed in
+	 * parameter.
+	 * 
+	 * @param addr
+	 *            The ServerAddress of the MongoDB database.
+	 * @param xpName
+	 *            The name of the experiment to use. If an experiment with this
+	 *            name already exists, the application restore the previously
+	 *            loaded data.
+	 * 
+	 * @Param pathCss
+	 * 		  The path to the css file
+	 */
+	public Links(ServerAddress addr, String xpName, String pathCss) {
+		setLookAndFeel();	
+		lireMongoPath();
+		initMongoConnection(addr);
+
+		xpChooser = new XpChooser(this);
+
+		if (!existsExperiment(xpName)) {
+			createExperiment(xpName,pathCss);
+		}
+
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),true);
+		xpChooser.redrawList();
+		this.currentXP = xpName;
 	}
 
 	/**
@@ -227,6 +294,38 @@ public class Links {
 
 		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),visible);
 		xpChooser.redrawList();
+		this.currentXP = xpName;
+	}
+	
+	/**
+	 * Creates a new Links instance connection to the localhost and default port
+	 * of MongoDB. This constructor intializes the experiment to the name passed
+	 * in parameter.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment to use. If an experiment with this
+	 *            name already exists, the application restore the previously
+	 *            loaded data.
+	 * @param visible
+	 * 			  The visibility of the experience's frame.
+	 * 
+	 * @Param pathCss
+	 * 		  The path to the css file
+	 */
+	public Links(String xpName,boolean visible, String pathCss) {
+		setLookAndFeel();
+		lireMongoPath();
+		initMongoConnection();
+
+		xpChooser = new XpChooser(this);
+
+		if (!existsExperiment(xpName)) {
+			createExperiment(xpName,pathCss);
+		}
+
+		createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName),visible);
+		xpChooser.redrawList();
+		this.currentXP = xpName;
 	}
 	
 	/**
@@ -287,7 +386,8 @@ public class Links {
 	 */
 	public Graph getGraph() {
 		if (linksWindow != null) {
-			return linksWindow.getDisplayedGraph().getGraph();
+			//return linksWindow.getDisplayedGraph().getGraph();
+			return this.windows.get(currentXP).getDisplayedGraph().getGraph();
 		} else {
 			return null;
 		}
@@ -441,6 +541,35 @@ public class Links {
 	 *            The snapshot to add.
 	 */
 	public void addSnapshot(Snapshot s) {
+		linksWindow = this.windows.get(currentXP);
+		if (linksWindow != null && s != null) {
+			try{
+				linksWindow.addSnapshot(s);
+				//this.windows.get(currentXP).addSnapshot(s);
+			}
+			catch(Exception e){
+				linksWindow.addSnapshot(s);
+				//this.windows.get(currentXP).addSnapshot(s);
+			}
+		}
+		try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
+		}
+	}
+	
+	/**
+	 * Add a new Snapshot to the model. The number of this snapshot is
+	 * automatically choose.
+	 * 
+	 * @param s
+	 *            The snapshot to add.
+	 */
+	public void addSnapshot(Snapshot s, String xpName) {
+		if(windows.get(xpName) == null){
+			this.createNewLinksWindows(xpName, Links.getCssFilePathFromXpName(xpName), true);
+		}
+		linksWindow = windows.get(xpName);
 		if (linksWindow != null && s != null) {
 			try{
 				linksWindow.addSnapshot(s);
@@ -463,7 +592,8 @@ public class Links {
 	 */
 	public void viewSnapshot(Snapshot s) {
 		if (linksWindow != null) {
-			linksWindow.getDisplayedGraph().viewSnapshot(s);
+			//linksWindow.getDisplayedGraph().viewSnapshot(s);
+			this.windows.get(currentXP).getDisplayedGraph().viewSnapshot(s);
 		}
 	}
 
@@ -476,6 +606,19 @@ public class Links {
 	 */
 	public void createExperiment(String xpName) {
 		xpChooser.create(xpName);
+	}
+	
+	/**
+	 * Create a new experiment with the given name. Drop if any other experiment
+	 * with the same name already exists.
+	 * 
+	 * @param xpName
+	 *            The name of the experiment
+	 * @Param pathCss
+	 * 			  The path to the css
+	 */
+	public void createExperiment(String xpName, String pathCss) {
+		xpChooser.create(xpName,pathCss);
 	}
 
 	/**
@@ -519,7 +662,9 @@ public class Links {
 	 */
 	public void dropExperiment(String xpName) {
 		xpChooser.drop(xpName);
-		this.linksWindow.getDisplayedGraph().resetSnapNumber();
+		//linksWindow.getDisplayedGraph().resetSnapNumber();
+		if(this.windows.get(xpName) != null)
+		this.windows.get(xpName).getDisplayedGraph().resetSnapNumber();
 	}
 
 	/**
@@ -532,14 +677,17 @@ public class Links {
 	 *            The path to the CSS file.
 	 */
 	public void createNewLinksWindows(String xpName, String linkToCss,boolean visible) {
-		linksWindow = new LinksWindows(xpName, linkToCss, this,visible);
+		this.currentXP = xpName;
+		this.windows.put(xpName,new LinksWindows(xpName, linkToCss, this,visible));
+		//this.linksWindow = new LinksWindows(xpName, linkToCss, this,visible);
 	}
 
 	/**
 	 * Release memory when a vizualisation windows is closed.
 	 */
 	public void informClose() {
-		linksWindow = null;
+		this.windows.remove(currentXP);
+		this.linksWindow = null;
 	}
 
 	/**

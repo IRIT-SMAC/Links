@@ -554,11 +554,9 @@ public class AgentVizFrame extends JFrame {
 					}
 					if (theAttribute.getTypeToDraw().equals(AttributeStyle.BAR)) {
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-								ChartType.BAR).close();
+								ChartType.BAR).add(s+1, 0, (Double) theAttribute.getValue());
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-								ChartType.BAR).add(s, u-2, (Double) theAttribute.getValue());
-						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-								ChartType.BAR).add(s, u-1, (Double) theAttribute.getValue());
+								ChartType.BAR).add(s+2, 1, (Double) theAttribute.getValue());
 					}
 					if (theAttribute.getTypeToDraw().equals(AttributeStyle.AVRT)) {
 						Double tab[] = (Double[]) theAttribute.getValue();
