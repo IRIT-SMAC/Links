@@ -61,6 +61,7 @@ import fr.irit.smac.model.SnapshotsCollection;
 import fr.irit.smac.model.Attribute.AttributeStyle;
 import javax.swing.JSlider;
 import javax.swing.JSeparator;
+import internationalisation.I18nProperties;
 
 /**
  * LinksWindows: This class
@@ -241,6 +242,9 @@ public class LinksWindows implements Serializable {
 	private JSlider slider;
 	private JSeparator separator;
 	private JButton btnLoop;
+
+	/** To fetch the correct local content */
+	private I18nProperties i18nProperties = I18nProperties.getInstance();
 
 	/**
 	 * A queue for the thread which load the graph.
@@ -522,6 +526,7 @@ public class LinksWindows implements Serializable {
 		panel.add(toolBar_1);
 
 		lblPlay = new JLabel("");
+		lblPlay.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_PLAY_TOOLTIP));
 		lblPlay.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent arg0) {
 				if (arg0.getSource().equals(lblPlay))
@@ -530,6 +535,7 @@ public class LinksWindows implements Serializable {
 		});
 
 		lblSynch = new JLabel("");
+		lblSynch.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_SYNC_TOOLTIP));
 		lblSynch.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -543,6 +549,7 @@ public class LinksWindows implements Serializable {
 		});
 
 		lblInfo = new JLabel("");
+		lblInfo.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_INFO_TOOLTIP));
 		LinksWindows myWindow = this;
 		lblInfo.addMouseListener(new MouseAdapter() {
 			@Override
@@ -565,8 +572,7 @@ public class LinksWindows implements Serializable {
 		toolBar_1.addSeparator();
 
 		lblLinks = new JLabel("");
-
-
+		lblLinks.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_LINKS_TOOLTIP));
 		lblLinks.addMouseListener(new MouseAdapter(){
 			@Override
 			public void mouseReleased(MouseEvent e){
@@ -594,11 +600,13 @@ public class LinksWindows implements Serializable {
 		});
 		lblStop.setEnabled(false);
 		lblStop.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/stop.png")));
+		lblStop.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_STOP_TOOLTIP));
 		toolBar_1.add(lblStop);
 		toolBar_1.addSeparator();
 
 		// Go to the previous snapshot if possible
 		JLabel lblPrev = new JLabel("");
+		lblPrev.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_PREV_TOOLTIP));
 		lblPrev.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
@@ -613,6 +621,7 @@ public class LinksWindows implements Serializable {
 
 		// Go to the next snapshot if possible
 		JLabel lblNext = new JLabel("");
+		lblNext.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_NEXT_TOOLTIP));
 		lblNext.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -620,14 +629,14 @@ public class LinksWindows implements Serializable {
 						graph.getSnapCol().getMaxNum() - 1), 1));
 			}
 		});
-		ImageIcon iNext = new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png"));;
+		ImageIcon iNext = new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png"));
 		lblNext.setIcon(iNext);
 		toolBar_1.add(lblNext);
 		toolBar_1.addSeparator();
 
 		// When trigger the user can move a node without open an AgentVizFrame
 		lblMoving = new JLabel("");
-
+		lblMoving.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_MOVING_TOOLTIP));
 		lblMoving.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/moving.png")).getImage().getScaledInstance(iNext.getIconWidth(), iNext.getIconHeight(), Image.SCALE_DEFAULT)));
 		lblMoving.addMouseListener(new MouseAdapter() {
 			@Override
@@ -643,6 +652,7 @@ public class LinksWindows implements Serializable {
 		});
 
 		btnLoop = new JButton("Loop ");
+		btnLoop.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_LOOP_TOOLTIP));
 		btnLoop.setForeground(Color.BLACK);
 		btnLoop.setFont(btnLoop.getFont().deriveFont(Font.BOLD));
 		btnLoop.setBackground(Color.RED);
@@ -668,6 +678,7 @@ public class LinksWindows implements Serializable {
 
 		// When trigger the cursor will change and the users can draw a chart on a click
 		lblDraw = new JLabel("");
+		lblDraw.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_DRAW_TOOLTIP));
 		lblDraw.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/draw.png")));
 		lblDraw.addMouseListener(new MouseAdapter(){
 			@Override
@@ -685,6 +696,7 @@ public class LinksWindows implements Serializable {
 		toolBar_1.addSeparator();
 
 		JButton lblSpeed = new JButton("Speed:");
+		lblSpeed.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_SPEED_TOOLTIP));
 
 		lblSpeed.addMouseListener(new MouseAdapter(){
 			@Override
@@ -695,6 +707,7 @@ public class LinksWindows implements Serializable {
 
 		//Use the method zoomPlus
 		lblZoomPlus = new JLabel("Zoom+ ");
+		lblZoomPlus.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_ZOOMPLUS_TOOLTIP));
 		lblZoomPlus.addMouseListener(new MouseAdapter(){
 			@Override
 			public void mouseReleased(MouseEvent e){
@@ -706,6 +719,7 @@ public class LinksWindows implements Serializable {
 
 		// Use the method zoomMinus
 		lblZoomMinus = new JLabel("Zoom - ");
+		lblZoomMinus.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_ZOOMMINUS_TOOLTIP));
 		lblZoomMinus.addMouseListener(new MouseAdapter(){
 			@Override
 			public void mouseReleased(MouseEvent e){
@@ -717,6 +731,7 @@ public class LinksWindows implements Serializable {
 
 		// Reset the zoom to be on the center and 100%
 		lblResetZoom = new JLabel("ResetZoom");
+		lblResetZoom.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_ZOOMRESET_TOOLTIP));
 		lblResetZoom.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e){
@@ -731,6 +746,7 @@ public class LinksWindows implements Serializable {
 
 		// Set the snapnumber to 1
 		lblResetSnap = new JLabel("ResetSnap");
+		lblResetSnap.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_SNAPRESET_TOOLTIP));
 		lblResetSnap.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e){
@@ -751,6 +767,7 @@ public class LinksWindows implements Serializable {
 		txtSpeed.setColumns(10);
 
 		JButton lblFrameRate = new JButton("Frame Rate:");
+		lblFrameRate.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_FRAMERATE_TOOLTIP));
 
 		lblFrameRate.addMouseListener(new MouseAdapter(){
 			@Override
