@@ -634,13 +634,15 @@ public class LinksWindows implements Serializable {
 		toolBar_1.add(lblNext);
 		toolBar_1.addSeparator();
 		
-		
-		
-		
-		JButton btnAutoLayoutControl = new JButton();
+		JLabel btnAutoLayoutControl = new JLabel();
 		btnAutoLayoutControl.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_AUTOLAYOUT_TOOLTIP));
-		btnAutoLayoutControl.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/moving.png")) //TODO change
-				.getImage().getScaledInstance(iNext.getIconWidth(), iNext.getIconHeight(), Image.SCALE_DEFAULT)));
+		
+		ImageIcon autolayoutEnableIcon = new ImageIcon(LinksWindows.class.getResource("/icons/autolayout_enable.png"));
+		ImageIcon autolayoutDisableIcon = new ImageIcon(LinksWindows.class.getResource("/icons/autolayout_disable.png"));
+		ImageIcon autolayoutEnableNormIcon = new ImageIcon(autolayoutEnableIcon.getImage().getScaledInstance(autolayoutEnableIcon.getIconWidth(), autolayoutEnableIcon.getIconHeight(), Image.SCALE_DEFAULT));
+		ImageIcon autolayoutDisableNormIcon = new ImageIcon(autolayoutDisableIcon.getImage().getScaledInstance(autolayoutDisableIcon.getIconWidth(), autolayoutDisableIcon.getIconHeight(), Image.SCALE_DEFAULT));
+		btnAutoLayoutControl.setIcon(autolayoutEnableNormIcon);
+
 		btnAutoLayoutControl.addMouseListener(new MouseAdapter() {
 			private Boolean autoLayoutEnable = true;
 
@@ -649,14 +651,15 @@ public class LinksWindows implements Serializable {
 				autoLayoutEnable = !autoLayoutEnable;
 				if (autoLayoutEnable) {
 					viewer.enableAutoLayout();
+					btnAutoLayoutControl.setIcon(autolayoutEnableNormIcon);
 				} else {
 					viewer.disableAutoLayout();
+					btnAutoLayoutControl.setIcon(autolayoutDisableNormIcon);
 				}
 			}
 		});
 		
 		
-
 		// When trigger the user can move a node without open an AgentVizFrame
 		lblMoving = new JLabel("");
 		lblMoving.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_MOVING_TOOLTIP));
@@ -696,7 +699,9 @@ public class LinksWindows implements Serializable {
 
 		separator = new JSeparator();
 		toolBar_1.add(separator);
+		toolBar_1.addSeparator();
 		toolBar_1.add(btnAutoLayoutControl);
+		toolBar_1.addSeparator();
 		toolBar_1.add(lblMoving);
 		toolBar_1.addSeparator();
 
@@ -920,6 +925,8 @@ public class LinksWindows implements Serializable {
 
 		});
 	}
+	
+		
 	private class ViewMouseListener extends MouseAdapter{
 		Point3 point = null;
 		@Override
