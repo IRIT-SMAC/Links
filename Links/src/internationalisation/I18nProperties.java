@@ -22,6 +22,7 @@ public class I18nProperties {
 	public static final String BUTTON_ZOOMRESET_TOOLTIP = "button.zoomreset.tooltip";
 	public static final String BUTTON_SNAPRESET_TOOLTIP = "button.snapreset.tooltip";
 	public static final String BUTTON_LINKS_TOOLTIP = "button.links.tooltip";
+	public static final String BUTTON_AUTOLAYOUT_TOOLTIP = "button.autolayout.tooltip";
 
 	private static I18nProperties instance = null;
 	private ResourceBundle res;

@@ -633,6 +633,29 @@ public class LinksWindows implements Serializable {
 		lblNext.setIcon(iNext);
 		toolBar_1.add(lblNext);
 		toolBar_1.addSeparator();
+		
+		
+		
+		
+		JButton btnAutoLayoutControl = new JButton();
+		btnAutoLayoutControl.setToolTipText(i18nProperties.getSafeText(I18nProperties.BUTTON_AUTOLAYOUT_TOOLTIP));
+		btnAutoLayoutControl.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/moving.png")) //TODO change
+				.getImage().getScaledInstance(iNext.getIconWidth(), iNext.getIconHeight(), Image.SCALE_DEFAULT)));
+		btnAutoLayoutControl.addMouseListener(new MouseAdapter() {
+			private Boolean autoLayoutEnable = true;
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				autoLayoutEnable = !autoLayoutEnable;
+				if (autoLayoutEnable) {
+					viewer.enableAutoLayout();
+				} else {
+					viewer.disableAutoLayout();
+				}
+			}
+		});
+		
+		
 
 		// When trigger the user can move a node without open an AgentVizFrame
 		lblMoving = new JLabel("");
@@ -673,6 +696,7 @@ public class LinksWindows implements Serializable {
 
 		separator = new JSeparator();
 		toolBar_1.add(separator);
+		toolBar_1.add(btnAutoLayoutControl);
 		toolBar_1.add(lblMoving);
 		toolBar_1.addSeparator();
 
