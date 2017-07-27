@@ -971,9 +971,7 @@ public class LinksWindows implements Serializable {
 			number = 1;
 		//TODO
 		numberQueue.offer(number);
-		boolean res = graph.loadGraph(number);
-		if(!res)
-			this.viewer.disableAutoLayout();
+		graph.loadGraph(number);
 		setSnapNumber(number);
 		notifyJump(number);
 		updateCharts(number);
