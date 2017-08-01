@@ -1,9 +1,11 @@
 package fr.irit.smac.core;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -85,11 +87,15 @@ public class DisplayedGraph implements Serializable {
 
 			/* Retrait des liens */
 			Iterator<Edge> it2 = graph.getEdgeIterator();
+			List<String> toRemove = new ArrayList<String>();
 			while (it2.hasNext()) {
 				String nodeName = it2.next().getId();
 				if (s.getRelation(nodeName) == null) {
-					graph.removeEdge(nodeName);
+					toRemove.add(nodeName);
 				}
+			}
+			for(String str : toRemove){
+				graph.removeEdge(str);
 			}
 
 			/* Ajout des noeuds */
