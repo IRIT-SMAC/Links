@@ -78,16 +78,20 @@ public class DisplayedGraph implements Serializable {
 		if (s != null) {
 			/* Retrait des noeuds */
 			Iterator<Node> it = graph.getNodeIterator();
+			List<String> toRemove = new ArrayList<String>();
 			while (it.hasNext()) {
 				String nodeName = it.next().getId();
 				if (s.getEntity(nodeName) == null) {
-					graph.removeNode(nodeName);
+					toRemove.add(nodeName);
 				}
+			}
+			for(String str : toRemove){
+				graph.removeNode(str);
 			}
 
 			/* Retrait des liens */
 			Iterator<Edge> it2 = graph.getEdgeIterator();
-			List<String> toRemove = new ArrayList<String>();
+			toRemove = new ArrayList<String>();
 			while (it2.hasNext()) {
 				String nodeName = it2.next().getId();
 				if (s.getRelation(nodeName) == null) {
