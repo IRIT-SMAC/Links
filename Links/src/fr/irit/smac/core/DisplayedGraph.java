@@ -1,8 +1,10 @@
 package fr.irit.smac.core;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -107,6 +109,7 @@ public class DisplayedGraph implements Serializable {
 		}
 	}
 
+
 	private void setNodeAttributes(Entity snapshotEntity, Node gsNode) {
 		
 		for(String str : snapshotEntity.getAttributes().keySet()){
@@ -135,20 +138,28 @@ public class DisplayedGraph implements Serializable {
 	private void removeEntitiesToGraphFromSnapshot(Snapshot s) {
 		/* Retrait des noeuds */
 		Iterator<Node> it = graph.getNodeIterator();
+		List<String> toRemove = new ArrayList<String>();
 		while (it.hasNext()) {
 			String nodeName = it.next().getId();
 			if (s.getEntity(nodeName) == null) {
-				graph.removeNode(nodeName);
+				toRemove.add(nodeName);
 			}
+		}
+		for(String str : toRemove){
+			graph.removeNode(str);
 		}
 
 		/* Retrait des liens */
 		Iterator<Edge> it2 = graph.getEdgeIterator();
+		toRemove = new ArrayList<String>();
 		while (it2.hasNext()) {
 			String nodeName = it2.next().getId();
 			if (s.getRelation(nodeName) == null) {
-				graph.removeEdge(nodeName);
+				toRemove.add(nodeName);
 			}
+		}
+		for(String str : toRemove){
+			graph.removeEdge(str);
 		}
 	}
 
