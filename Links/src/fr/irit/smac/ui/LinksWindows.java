@@ -779,7 +779,7 @@ public class LinksWindows implements Serializable {
 		lblResetSnap.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e){
-				for(int i =0; i < 5;i++)
+				//for(int i =0; i < 5;i++)
 					switchToSnap(0);
 			}
 		});
@@ -873,7 +873,7 @@ public class LinksWindows implements Serializable {
 								graph.getSnapCol().getMaxNum() - 1), 1));
 						break;
 					case KeyEvent.VK_B:
-						switchToSnap(Math.max(1, currentSnap - Integer.valueOf(txtFramerate.getText())));
+						switchToSnap(Math.max(0, currentSnap - Integer.valueOf(txtFramerate.getText())));
 						notifyJump(Math.max(Math.min(currentSnap + Integer.valueOf(txtFramerate.getText()),
 								graph.getSnapCol().getMaxNum() - 1), 1));
 						break;
