@@ -41,3 +41,18 @@ contact : contact@verstaevel.fr
 	
 		7 - Load your snaphot to your application.
 			Links.addSnapshot(s);
+			
+/* Options */
+
+	- You can precise the visibility of links in the constructor with a boolean, by default it is true.
+	
+	- You can precise the coordinates of the entities, if you do so you have to do it for every entities
+	
+	- The colors of nodes can be dynamically change if in your css file you precise :
+		1 - fill-color: color1, color2  (more if you want but at least 2 )
+		2 - fill-mode: dyn-plain
+		
+/* Exportation of an experience */
+
+	- You can export in format .csv an experience with the button save of xpChooser
+	- You can import a .csv file previously exported by links 

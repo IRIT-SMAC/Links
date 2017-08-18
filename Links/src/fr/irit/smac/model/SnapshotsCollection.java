@@ -63,7 +63,8 @@ public class SnapshotsCollection implements Serializable {
 		Document relationCaract;
 
 		for (Entity a : s.getEntityList()) {
-			caract = new Document("Type", "Entity").append("Name", a.getName()).append("Class", a.getType().toString());
+			caract = new Document("Type", "Entity").append("Name", a.getName()).append("Class", a.getType().toString())
+					.append("CoorX", ""+a.getCoorX()).append("CoorY", ""+a.getCoorY());
 
 			for (String atName : a.getAttributes().keySet()) {
 				attributeList = new Document();
@@ -132,7 +133,13 @@ public class SnapshotsCollection implements Serializable {
 		case "Entity":
 			String name = (String) it.next().getValue();
 			String uiClass = (String) it.next().getValue();
-			Entity a = snap.addEntity(name, uiClass);
+			double coorx = Double.parseDouble((String) it.next().getValue());
+			double coory = Double.parseDouble((String) it.next().getValue());
+			Entity a;
+			if(coorx == -10000 && coory == -10000)
+				a = snap.addEntity(name, uiClass);
+			else
+				a = snap.addEntity(name, uiClass, coorx,coory);
 
 			while (it.hasNext()) {
 				/* For any caracteristic list */

@@ -258,7 +258,7 @@ public class Relation implements Serializable {
 	 * @param The
 	 *            type of the relation.
 	 */
-	public void getType(String type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 

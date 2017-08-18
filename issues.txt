@@ -1,0 +1,13 @@
+This file is about some precision about the code of Links.
+
+- An error is still present, it happens when the method loadGraph of displayedGraph is called.
+	The error is in Graphstream, it is an error in the queue of event for the graph.
+	The error has never appered at the same time, it is random but you have less chance to get this error if you create your experience
+	and then you visualize it.
+
+- Links use LxPlot but all the chart are not included in Links
+
+- The code to import and export an xp takes a lot of place in the XpChooser, a class can be created just for it
+	but I don't think it will be used.
+
+contact : guilhem.marcillaud@gmail.com

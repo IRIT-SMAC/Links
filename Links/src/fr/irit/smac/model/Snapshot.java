@@ -74,6 +74,22 @@ public class Snapshot implements Serializable {
 	}
 
 	/**
+	 * Add a new agent to the Snapshot.
+	 * 
+	 * @param name
+	 *            The name of the agent. Must be unique.
+	 * @param type
+	 *            The type of the agent (used to determine its css class).
+	 * @return A reference to the newly created entity.
+	 */
+	public Entity addEntity(String name, String type, double x, double y) {
+		Entity a = new Entity(name, type, x , y);
+		if (!entityList.contains(a)) {
+			entityList.add(a);
+		}
+		return a;
+	}
+	/**
 	 * Test if an agent in the agent list has the name passed in parameter.
 	 * 
 	 * @param name

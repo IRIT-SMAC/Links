@@ -1,28 +1,38 @@
 package fr.irit.smac.core;
 
 import java.io.Serializable;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 
+import fr.irit.smac.model.Attribute;
 import fr.irit.smac.model.Entity;
 import fr.irit.smac.model.Relation;
 import fr.irit.smac.model.Snapshot;
 import fr.irit.smac.model.SnapshotsCollection;
+import javafx.collections.transformation.SortedList;
 /**
  * This class controls the graph vizualisation.
  * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
  *
  */
 public class DisplayedGraph implements Serializable {
-	
+
 	private static final long serialVersionUID = -7697345043271592254L;
 	private Graph graph;
 	private SnapshotsCollection snapColl;
 	private long currentSnapNumber;
+	private boolean autoLayout = true;
+	private Map<Entity,Double> mapValues;
 
 	/**
 	 * Create a new DisplayedGraph.
@@ -38,7 +48,7 @@ public class DisplayedGraph implements Serializable {
 		currentSnapNumber = 0;
 		this.snapColl = snapColl;
 	}
-	
+
 	public void resetSnapNumber(){
 		currentSnapNumber = 0;
 		snapColl.resetNumber();
@@ -56,10 +66,11 @@ public class DisplayedGraph implements Serializable {
 	 * Load a graph from the snapshot number. 
 	 * @param snapNumber The number of the snapshot to be displayed.
 	 */
-	public synchronized void loadGraph(long snapNumber) {
+	public synchronized boolean loadGraph(long snapNumber) {
+		mapValues = new HashMap<Entity,Double>();
 		currentSnapNumber = snapNumber;
 		Snapshot s = snapColl.getSnaptshot(snapNumber);
-
+		boolean ret = true;
 		if (s != null) {
 			/* Retrait des noeuds */
 			Iterator<Node> it = graph.getNodeIterator();
@@ -86,9 +97,54 @@ public class DisplayedGraph implements Serializable {
 					graph.addNode(a.getName());
 					graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
 					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
+					for(String str : a.getAttributes().keySet()){
+						for(Attribute att : a.getAttributes().get(str)){
+							if(att.getValue() instanceof Double){
+								/*if(((Double)att.getValue()) > 100)
+									graph.getNode(a.getName()).addAttribute("ui.color", 1);
+								else
+									graph.getNode(a.getName()).addAttribute("ui.color", ((Double)att.getValue())/100);	*/
+								mapValues.put(a, (Double)att.getValue());
+							}
+						}
+					}
+					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
+						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
+						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
+						ret = false;
+						autoLayout = false;
+					}
+					else{
+						if(!autoLayout){
+							graph.getNode(a.getName()).setAttribute("x", 0);
+							graph.getNode(a.getName()).setAttribute("y", 0);
+						}
+					}
 				} else {
-					if (!n.getAttribute("ui.class").equals(a.getType())) {
-						n.setAttribute("ui.class", a.getType());
+					n.setAttribute("ui.class", a.getType());
+					for(String str : a.getAttributes().keySet()){
+						for(Attribute att : a.getAttributes().get(str)){
+							if(att.getValue() instanceof Double){
+								/*if(((Double)att.getValue()) > 100)
+										graph.getNode(a.getName()).setAttribute("ui.color", 1);
+									else
+										graph.getNode(a.getName()).setAttribute("ui.color", ((Double)att.getValue())/100);	*/
+								mapValues.put(a, (Double)att.getValue());
+							}
+						}
+					}
+
+					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
+						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
+						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
+						ret = false;
+						autoLayout = false;
+					}
+					else{
+						if(!autoLayout){
+							graph.getNode(a.getName()).setAttribute("x", 0);
+							graph.getNode(a.getName()).setAttribute("y", 0);
+						}
 					}
 				}
 			}
@@ -105,9 +161,12 @@ public class DisplayedGraph implements Serializable {
 				}
 			}
 		}
+		refreshColor();
+		return ret;
 	}
-	
-	public void viewSnapshot(Snapshot s){
+
+	public boolean viewSnapshot(Snapshot s){
+		boolean ret = true;
 		if (s != null) {
 			/* Retrait des noeuds */
 			Iterator<Node> it = graph.getNodeIterator();
@@ -134,9 +193,55 @@ public class DisplayedGraph implements Serializable {
 					graph.addNode(a.getName());
 					graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
 					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
+					for(String str : a.getAttributes().keySet()){
+						for(Attribute att : a.getAttributes().get(str)){
+							if(att.getValue() instanceof Double){
+								/*if(((Double)att.getValue()) > 100)
+									graph.getNode(a.getName()).addAttribute("ui.color", 1);
+								else
+									graph.getNode(a.getName()).addAttribute("ui.color", ((Double)att.getValue())/100);	*/
+								mapValues.put(a, (Double)att.getValue());
+							}
+						}
+					}
+					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
+						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
+						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
+						ret = false;
+						autoLayout = false;
+					}
+					else{
+						if(!autoLayout){
+							graph.getNode(a.getName()).setAttribute("x", 0);
+							graph.getNode(a.getName()).setAttribute("y", 0);
+						}
+					}
 				} else {
 					if (!n.getAttribute("ui.class").equals(a.getType())) {
 						n.setAttribute("ui.class", a.getType());
+					}
+					for(String str : a.getAttributes().keySet()){
+						for(Attribute att : a.getAttributes().get(str)){
+							if(att.getValue() instanceof Double){
+								/*if(((Double)att.getValue()) > 100)
+									graph.getNode(a.getName()).setAttribute("ui.color", 1);
+								else
+									graph.getNode(a.getName()).setAttribute("ui.color", ((Double)att.getValue())/100);*/
+								mapValues.put(a, (Double)att.getValue());
+							}
+						}
+					}
+					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
+						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
+						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
+						ret = false;
+						autoLayout = false;
+					}
+					else{
+						if(!autoLayout){
+							graph.getNode(a.getName()).setAttribute("x", 0);
+							graph.getNode(a.getName()).setAttribute("y", 0);
+						}
 					}
 				}
 			}
@@ -153,6 +258,9 @@ public class DisplayedGraph implements Serializable {
 				}
 			}
 		}
+		refreshColor();
+		graph.display();
+		return ret;
 	}
 
 	/**
@@ -194,4 +302,27 @@ public class DisplayedGraph implements Serializable {
 			}
 		}
 	}
+
+	private void refreshColor(){
+		SortedSet<Double> set = new TreeSet<Double>();
+		set.addAll(this.mapValues.values());
+		if(set.size() > 0){
+			double quo = 100/set.size();
+			double size = 30/set.size()+5;
+			for(Entity a : this.mapValues.keySet()){
+				double ind = 0;
+				boolean found = false;
+				for(Double d : set){
+					if(this.mapValues.get(a) == d && !found){
+						graph.getNode(a.getName()).setAttribute("ui.color", ind*quo/100.0);
+						graph.getNode(a.getName()).setAttribute("ui.size", ind*size);
+						found = true;
+					}
+					else
+						ind++;
+				}
+			}
+		}
+	}
+
 }

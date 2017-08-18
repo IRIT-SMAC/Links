@@ -16,6 +16,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
@@ -40,12 +43,19 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.graphstream.graph.Graph;
+import org.graphstream.ui.geom.Point3;
+import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants;
+import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants.Units;
+import org.graphstream.ui.graphicGraph.stylesheet.Value;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
 import fr.irit.smac.attributes.AVTAttribute;
+import fr.irit.smac.attributes.DoubleAttribute;
 import fr.irit.smac.attributes.DrawableAttribute;
 import fr.irit.smac.attributes.DrawableAttribute.Type;
 import fr.irit.smac.attributes.StringAttribute;
@@ -61,6 +71,8 @@ import fr.irit.smac.model.Entity;
 import fr.irit.smac.model.Snapshot;
 import fr.irit.smac.model.SnapshotsCollection;
 import fr.irit.smac.model.Attribute.AttributeStyle;
+import javax.swing.JSlider;
+import javax.swing.JSeparator;
 
 /**
  * LinksWindows: This class
@@ -106,17 +118,24 @@ public class LinksWindows implements Serializable {
 
 	private boolean isInfoWindowsOpened = false;
 
+	private boolean mouseMove = false;
+	
+	private boolean loop = false;
+
 	private final AutoPlayThread autoPlayThread;
 
 	private boolean moving;
 
 	private boolean drawing = false;
 
+	private Double zoomFocus = 1.0;
+
+	private RelationsVizFrame relationsWindow;
+
 	private JLabel lblStop;
 	private JTextField txtSpeed;
 	private JTextField txtFramerate;
 	private Links linksRef;
-	private JFileChooser fc = new JFileChooser();
 	private JLabel lblInfo;
 
 	private InfoWindow info;
@@ -126,9 +145,18 @@ public class LinksWindows implements Serializable {
 	private long lastSnapNumDrawn = 0;
 	private JLabel lblDraw;
 
-	private Map<DrawableAttribute,ILxPlotChart> listLxPlot;
+	private Map<String,ILxPlotChart> listLxPlot;
 
-
+	private List<DrawableAttribute> tolook;
+	private JLabel lblLinks;
+	private JLabel lblZoomPlus;
+	private JLabel lblZoomMinus;
+	private JLabel lblResetZoom;
+	private JLabel lblResetSnap;
+	private JSlider slider;
+	private JSeparator separator;
+	private JButton btnLoop;
+	
 	/**
 	 * Creates a new JFrame and start to display the experiment in parameter.
 	 * 
@@ -139,10 +167,10 @@ public class LinksWindows implements Serializable {
 	 * @param links
 	 *            A reference to the main application.
 	 */
-	public LinksWindows(String xpName, String linkToCss, Links links) {
+	public LinksWindows(String xpName, String linkToCss, Links links, boolean visible) {
 		charts = new ArrayList<Map<Entity,List<String>>>();
 		typeChart = new HashMap<Attribute,AttributeStyle>();
-		this.listLxPlot = new HashMap<DrawableAttribute,ILxPlotChart>();
+		this.listLxPlot = new HashMap<String,ILxPlotChart>();
 		linksRef = links;
 		this.xpName = xpName;
 		this.linkToCss = linkToCss;
@@ -156,14 +184,13 @@ public class LinksWindows implements Serializable {
 		graph = new DisplayedGraph(snapCol, linkToCss);
 
 		initialize();
-		this.frame.setVisible(true);
+		this.frame.setVisible(visible);
 		if (snapCol != null) {
 			if (snapCol.getSnaptshot(1) != null) {
 				switchToSnap(1);
 			}
 		}
 
-		//TODO
 		/**
 		 * Thread used to understand the user's input
 		 */
@@ -172,7 +199,7 @@ public class LinksWindows implements Serializable {
 				System.out.println("Enter : 'NBSNAP for the number of snapshot'");
 				System.out.println("Enter : 'SHOW <nameEntity> <Attribute1> <Attribute2> <AttributeN> <NOSYNCHR> <BAR/LIN/AVRT/AVT> <SIZE=N>' to show the graph (in case of blank put the name between simple quote)");
 				System.out.println("Example : SHOW 'entity 1' attr1 'attr 2' BAR SIZE=300");
-				System.out.println("NOSYNCHR is an option if you don't want that the synchronisation of the chart");
+				System.out.println("NOSYNCHR is an option if you don't want the synchronisation of the chart");
 				System.out.println("DEFAULT : LIN (or the style of the Attribute if it set) and Size=100");
 				Scanner sc = new Scanner(System.in);
 				while(true){
@@ -209,13 +236,17 @@ public class LinksWindows implements Serializable {
 							type = AttributeStyle.AVT;
 							option++;
 						}
+						if(ans.contains("PIE")){
+							type = AttributeStyle.PIE;
+							option++;
+						}
 						if(ans.contains("SIZE")){
 							size = Long.parseLong(spl[spl.length-1].split("=")[1]);
 							option++;
 						}
 						Entity e = getSnapCol().getEntity(spl[1], getCurrentSnapNumber());
 						if(e == null){
-							System.out.println("Snapshot not found");
+							System.out.println("Entity not found");
 						}
 						else{
 							ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
@@ -233,20 +264,23 @@ public class LinksWindows implements Serializable {
 										for (Attribute t : e.getAttributes().get(s)) {
 											AttributeStyle style = null;
 											DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
-											if(type==null)
+											if(type==null){
 												style = t.getTypeToDraw();
-											else
+											}
+											else{
 												style = type;
+												((DoubleAttribute) t).setTypeToDraw(type);
+											}
 											typeChart.put(t, style);
 											atts.add(datt);
-											listLxPlot.put(datt,null);
+											listLxPlot.put(datt.getName()+datt.getAttribute().getName(),null);
 										}
 										if(!ans.contains("NOSYNCHR")){
 											tmpList.add(s);
 										}
 									}
 									if(!ans.contains("NOSYNCHR")){
-										tmpMap.put(e, tmpList);
+										tmpMap.put(getSnapCol().getEntity(spl[1], getCurrentSnapNumber()), tmpList);
 										charts.add(tmpMap);
 									}
 									draw(e,size,atts,type);
@@ -262,7 +296,6 @@ public class LinksWindows implements Serializable {
 
 	}
 
-	//TODO
 	/**
 	 * Method used to draw a charts with a click
 	 * @param e
@@ -368,9 +401,27 @@ public class LinksWindows implements Serializable {
 		});
 		lblInfo.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/question.png")));
 		toolBar_1.add(lblInfo);
+		toolBar_1.addSeparator();
+
+		lblLinks = new JLabel("");
+
+
+		lblLinks.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				if(relationsWindow == null)
+					relationsWindow = new RelationsVizFrame(myWindow);
+					relationsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			}
+		});
+		toolBar_1.add(lblLinks);
+		toolBar_1.addSeparator();
+
 		lblSynch.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/synchronization.png")));
 		toolBar_1.add(lblSynch);
+		toolBar_1.addSeparator();
 		toolBar_1.add(lblPlay);
+		toolBar_1.addSeparator();
 		lblPlay.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/play.png")));
 
 		lblStop = new JLabel("");
@@ -383,6 +434,7 @@ public class LinksWindows implements Serializable {
 		lblStop.setEnabled(false);
 		lblStop.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/stop.png")));
 		toolBar_1.add(lblStop);
+		toolBar_1.addSeparator();
 
 		JLabel lblPrev = new JLabel("");
 		lblPrev.addMouseListener(new MouseAdapter() {
@@ -395,6 +447,7 @@ public class LinksWindows implements Serializable {
 		});
 		lblPrev.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/backL.png")));
 		toolBar_1.add(lblPrev);
+		toolBar_1.addSeparator();
 
 		JLabel lblNext = new JLabel("");
 		lblNext.addMouseListener(new MouseAdapter() {
@@ -407,6 +460,7 @@ public class LinksWindows implements Serializable {
 		ImageIcon iNext = new ImageIcon(LinksWindows.class.getResource("/icons/nextR.png"));;
 		lblNext.setIcon(iNext);
 		toolBar_1.add(lblNext);
+		toolBar_1.addSeparator();
 
 		lblMoving = new JLabel("");
 
@@ -423,7 +477,30 @@ public class LinksWindows implements Serializable {
 					frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}
 		});
+		
+		btnLoop = new JButton("Loop ");
+		btnLoop.setForeground(Color.BLACK);
+		btnLoop.setFont(btnLoop.getFont().deriveFont(Font.BOLD));
+		btnLoop.setBackground(Color.RED);
+		btnLoop.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				loop = !loop;
+				if(loop){
+					btnLoop.setBackground(Color.GREEN);
+				}
+				else
+					btnLoop.setBackground(Color.RED);
+			}
+			
+		});
+		toolBar_1.add(btnLoop);
+		
+		separator = new JSeparator();
+		toolBar_1.add(separator);
 		toolBar_1.add(lblMoving);
+		toolBar_1.addSeparator();
 
 		lblDraw = new JLabel("");
 		lblDraw.setIcon(new ImageIcon(LinksWindows.class.getResource("/icons/draw.png")));
@@ -440,6 +517,7 @@ public class LinksWindows implements Serializable {
 			}
 		});
 		toolBar_1.add(lblDraw);
+		toolBar_1.addSeparator();
 
 		JButton lblSpeed = new JButton("Speed:");
 
@@ -449,6 +527,50 @@ public class LinksWindows implements Serializable {
 				txtSpeed.setEnabled(!txtSpeed.isEnabled());
 			}
 		});
+
+		lblZoomPlus = new JLabel("Zoom+ ");
+		lblZoomPlus.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				zoomPlus();
+			}
+		});
+		toolBar_1.add(lblZoomPlus);
+		toolBar_1.addSeparator();
+
+		lblZoomMinus = new JLabel("Zoom - ");
+		lblZoomMinus.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseReleased(MouseEvent e){
+				zoomMinus();
+			}
+		});
+		toolBar_1.add(lblZoomMinus);
+		toolBar_1.addSeparator();
+
+		lblResetZoom = new JLabel("ResetZoom");
+		lblResetZoom.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e){
+				zoomFocus = 1.0;
+				view.getCamera().setViewPercent(zoomFocus);
+				view.getCamera().setViewCenter(1, 1, 0);
+				slider.setValue(100);
+			}
+		});
+		toolBar_1.add(lblResetZoom);
+		toolBar_1.addSeparator();
+
+		lblResetSnap = new JLabel("ResetSnap");
+		lblResetSnap.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e){
+				for(int i =0; i < 5;i++)
+				switchToSnap(1);
+			}
+		});
+		toolBar_1.add(lblResetSnap);
+		toolBar_1.addSeparator();
 
 		toolBar_1.add(lblSpeed);
 
@@ -469,6 +591,7 @@ public class LinksWindows implements Serializable {
 		});
 
 		toolBar_1.add(lblFrameRate);
+		lblLinks.setIcon(new ImageIcon(new ImageIcon(LinksWindows.class.getResource("/icons/line.png")).getImage().getScaledInstance(iNext.getIconWidth(), iNext.getIconHeight(), Image.SCALE_DEFAULT)));
 
 		txtFramerate = new JTextField();
 		txtFramerate.setText("1");
@@ -481,8 +604,21 @@ public class LinksWindows implements Serializable {
 		setSnapNumber(0);
 
 		graphPanel = new JPanel();
+		graphPanel.addMouseListener(new MouseAdapter() {
+		});
 		frame.getContentPane().add(graphPanel, BorderLayout.CENTER);
 		graphPanel.setLayout(new BorderLayout(0, 0));
+
+		slider = new JSlider();
+		slider.setValue(100);
+		slider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				zoomFocus = slider.getValue()/100.0;
+				view.getCamera().setViewPercent(zoomFocus);
+			}
+		});
+		graphPanel.add(slider, BorderLayout.SOUTH);
 
 		//Give the shortcut
 		KeyboardFocusManager.getCurrentKeyboardFocusManager()
@@ -542,13 +678,55 @@ public class LinksWindows implements Serializable {
 							isInfoWindowsOpened = false;
 						}
 						break;
+					case KeyEvent.VK_L:
+						if(relationsWindow != null)
+							relationsWindow.notifyJump();
+						break;
+					case KeyEvent.VK_Z:
+						zoomPlus();
+						break;
+					case KeyEvent.VK_A:
+						zoomMinus();
+						break;
 					default:
 						break;
 					}
 				}
 				return false;}});
-
 		generateGraph();
+		view.addMouseListener(new ViewMouseListener());
+		graphPanel.addMouseWheelListener(new MouseWheelListener(){
+
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				if(e.getWheelRotation() < 0 ){
+					zoomPlus();
+				}
+				else{
+					zoomMinus();
+				}
+			}
+
+		});
+	}
+	private class ViewMouseListener extends MouseAdapter{
+		Point3 point = null;
+		@Override
+		public void mousePressed(MouseEvent e){
+			point = view.getCamera().transformPxToGu(e.getX(), e.getY());
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e){
+			double ratio = view.getCamera().getMetrics().ratioPx2Gu;
+			Point3 orx = view.getCamera().transformPxToGu(e.getX(), e.getY());
+			if((point.x != orx.x || point.y !=orx.y) && !moving && !mouseMove){
+				double newx =(point.x+orx.x)/2;
+				double newy =(point.y+orx.y)/2;
+				view.getCamera().setViewCenter(newx,newy, 0);
+				zoomPlus();
+			}
+		}
 	}
 
 	/**
@@ -579,11 +757,36 @@ public class LinksWindows implements Serializable {
 	 *            The number of the snapshot to be displayed.
 	 */
 	public void switchToSnap(long number) {
-		graph.loadGraph(number);
+		if(this.currentSnap == this.getMaxSnapNumber()-1 && loop)
+			number = 1;
+		boolean res = graph.loadGraph(number);
+		if(!res)
+			this.viewer.disableAutoLayout();
 		setSnapNumber(number);
 		notifyJump(number);
+		updateCharts(number);
 		notifyDraw();
 		this.currentSnap = number;
+		
+	}
+
+	private void updateCharts(long number) {
+		List<Map<Entity,List<String>>> tmpList = new ArrayList<Map<Entity,List<String>>>();
+		for(Map<Entity,List<String>> h : this.charts){
+			Map<Entity,List<String>> map = new HashMap<Entity,List<String>>();
+			for(Entity e : h.keySet()){
+				for(String s : e.getAttributes().keySet()){
+					for(Attribute t : e.getAttributes().get(s)){
+
+					}
+				}
+				Entity e1 = getSnapCol().getEntity(e.getName(), number);
+				List<String> list = h.get(e);
+				map.put(e1, list);
+			}
+			tmpList.add(map);
+		}
+		this.charts = tmpList;
 	}
 
 	/**
@@ -611,6 +814,15 @@ public class LinksWindows implements Serializable {
 	 */
 	public long getCurrentSnapNumber() {
 		return this.currentSnap;
+	}
+	
+	/**
+	 * Get the value of loop
+	 * 
+	 * @return loop
+	 */
+	public boolean getLoop(){
+		return this.loop;
 	}
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
@@ -688,6 +900,8 @@ public class LinksWindows implements Serializable {
 				info.buildText();
 			}
 		}
+		if(this.relationsWindow != null)
+			this.relationsWindow.notifyJump();
 	}
 
 	/**
@@ -734,7 +948,6 @@ public class LinksWindows implements Serializable {
 					if(e.getName().equals(chart.getName()))
 						alive = true;
 				}
-				//TODO
 				if(!alive){
 					removeList.add(l);
 				}
@@ -745,6 +958,23 @@ public class LinksWindows implements Serializable {
 		graph.getSnapCol().addSnapshot(s);
 	}
 
+	private void removeEntities(Snapshot s){
+		ArrayList<Map<Entity,List<String>>> removeList = new ArrayList<Map<Entity,List<String>>>();
+		for(Map<Entity,List<String>> l : this.charts){
+			for(Entity chart : l.keySet()){
+				boolean alive = false;
+				for(Entity e : s.getEntityList()){
+					if(e.getName().equals(chart.getName()))
+						alive = true;
+				}
+				if(!alive){
+					removeList.add(l);
+				}
+			}
+		}
+		for(Map<Entity,List<String>> l :removeList)
+			this.charts.remove(l);
+	}
 	/**
 	 * Get the highest snapshot num.
 	 * 
@@ -774,6 +1004,10 @@ public class LinksWindows implements Serializable {
 		return viewer;
 	}
 
+	public View getView() {
+		return view;
+	}
+
 	public String getXpName() {
 		return xpName;
 	}
@@ -790,7 +1024,7 @@ public class LinksWindows implements Serializable {
 		if(this.lblPlay.isEnabled())
 			notifyDraw();
 	}
-	
+
 	public void close(){
 		this.frame.dispose();
 	}
@@ -804,7 +1038,7 @@ public class LinksWindows implements Serializable {
 	 * @param atts
 	 * 		All the attribute to represent
 	 */
-	public synchronized void draw(Entity a,long drawSizeLong,  ArrayList<DrawableAttribute> atts,AttributeStyle type) {
+	public synchronized void draw(Entity a,long drawSizeLong,  List<DrawableAttribute> atts,AttributeStyle type) {
 		long max = this.getCurrentSnapNumber();
 		long u;
 		if (this.getFrameSpeed() > 0) {
@@ -823,22 +1057,33 @@ public class LinksWindows implements Serializable {
 					AttributeStyle style = null;
 					String s = t.getAttribute().getName();
 					Attribute theAttribute = t.getAttribute();
-					if(type == null)
+					if(typeChart.get(theAttribute) == null)
+						style = theAttribute.getTypeToDraw();
+					else{
 						style = typeChart.get(theAttribute);
-					else
-						style = type;
+					}
 					if (style == AttributeStyle.LINEAR || style == null) {
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
 								ChartType.LINE).add(s, timei, (Double) theAttribute.getValue());
-						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
+						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
 								ChartType.LINE));
 					}
+					if (style == AttributeStyle.PIE) {
+						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " pie",
+								ChartType.PIE).add(s, timei, (Double) theAttribute.getValue());
+						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " linear",
+								ChartType.PIE));
+					}
 					if (style == AttributeStyle.BAR) {
-						if(theAttribute.getValue().getClass() != String.class)
+						if(theAttribute.getValue().getClass() != String.class){
+							Entity b = this.getSnapshotsCollection().getSnaptshot(this.currentSnap-1).getEntity(a.getName());
 							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-									ChartType.BAR).add(s, timei, (Double) theAttribute.getValue());
-						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
-								ChartType.BAR));
+									ChartType.BAR).add(s+1, 0, (Double) b.getAttributesWithName(theAttribute.getName()).getValue());
+							LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+									ChartType.BAR).add(s+2, 1, (Double) theAttribute.getValue());
+							this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " bar",
+									ChartType.BAR));
+						}
 					}
 					if (style == AttributeStyle.AVRT) {
 						Double tab[] = (Double[]) theAttribute.getValue();
@@ -867,7 +1112,7 @@ public class LinksWindows implements Serializable {
 							LxPlot.getChart(
 									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
 									ChartType.LINE).add(s + "UPPER", timei, tab[5]);
-							this.listLxPlot.put(t,LxPlot.getChart(
+							this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(
 									t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVRT : " + s,
 									ChartType.LINE));
 						}
@@ -877,23 +1122,22 @@ public class LinksWindows implements Serializable {
 								ChartType.LINE).add(s + "Value", timei, (Double) theAttribute.getValue());
 						LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
 								ChartType.LINE).add(s + "Delta", timei, ((AVTAttribute) theAttribute).getDelta());
-						this.listLxPlot.put(t,LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
+						this.listLxPlot.put(t.getName()+t.getAttribute().getName(),LxPlot.getChart(t.getType() + ">" + t.getName() + ":" + t.getCaracList() + ":" + " AVT",
 								ChartType.LINE));
 					}
 				}
 			}
 		}
+		this.lastSnapNumDrawn = this.getCurrentSnapNumber();
 	}
 
-	//TODO
-	//Pourquoi tous le temps en bar
 	/**
-	 * Method use to refresh all chats who are synchr
+	 * Method use to refresh all charts who are synchr
 	 */
 	public void notifyDraw(){
 		for(Map<Entity,List<String>> h : this.charts){
 			for(Entity e : h.keySet()){
-				ArrayList<DrawableAttribute> atts = new ArrayList<DrawableAttribute>();
+				tolook = new ArrayList<DrawableAttribute>();
 				AttributeStyle style = null;
 				for(String s : h.get(e)){
 					ArrayList<Attribute> listTmp = new ArrayList<Attribute>();
@@ -901,15 +1145,11 @@ public class LinksWindows implements Serializable {
 						if(!(t instanceof StringAttribute)){
 							DrawableAttribute datt = new DrawableAttribute(DrawableAttribute.Type.ENTITY, e.getName(), s, t);
 							boolean alive = false;
-							for(DrawableAttribute da : this.listLxPlot.keySet()){
-								if(da.getAttribute().getName().equals(datt.getAttribute().getName()))
-									if(datt.getAttribute().getTypeToDraw() == da.getAttribute().getTypeToDraw())
-										if(listLxPlot.get(da) != null){
-									alive = true;
-								}
+							if(LxPlot.getCharts().containsValue(this.listLxPlot.get(datt.getName()+datt.getAttribute().getName()))){
+								alive = true;
 							}
 							if(alive)
-								atts.add(datt);
+								tolook.add(datt);
 							else
 								listTmp.add(t);
 						}
@@ -917,9 +1157,37 @@ public class LinksWindows implements Serializable {
 					for(Attribute t : listTmp)
 						e.getAttributes().get(s).remove(t);
 				}
-				draw(e,100,atts,style);
+				draw(e,100,tolook,style);
 			}
 		}
+	}
+
+	/**
+	 * Method used to zoom forward
+	 */
+	public void zoomPlus() {
+		if(zoomFocus !=0.1)
+			zoomFocus -= 0.05;
+		view.getCamera().setViewPercent(zoomFocus);
+		Double sl = zoomFocus*100;
+		this.slider.setValue(sl.intValue());
+
+	}
+
+	/**
+	 * Method used to zoom backward
+	 */
+	public void zoomMinus() {
+		if(zoomFocus !=1)
+			zoomFocus += 0.05;
+		view.getCamera().setViewPercent(zoomFocus);
+		Double sl = zoomFocus*100;
+		slider.setValue(sl.intValue());
+
+	}
+	
+	public void setMouseMove(boolean mouseMove){
+		this.mouseMove = mouseMove;
 	}
 
 }
