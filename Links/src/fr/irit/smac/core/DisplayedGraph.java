@@ -2,27 +2,22 @@ package fr.irit.smac.core;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
-
 import fr.irit.smac.model.Attribute;
 import fr.irit.smac.model.Entity;
 import fr.irit.smac.model.Relation;
 import fr.irit.smac.model.Snapshot;
 import fr.irit.smac.model.SnapshotsCollection;
-import javafx.collections.transformation.SortedList;
+
 /**
  * This class controls the graph vizualisation.
  * @author Nicolas Verstaevel - nicolas.verstaevel@irit.fr
@@ -34,14 +29,13 @@ public class DisplayedGraph implements Serializable {
 	private Graph graph;
 	private SnapshotsCollection snapColl;
 	private long currentSnapNumber;
-	private boolean autoLayout = true;
 	private Map<Entity,Double> mapValues;
-	private ReentrantLock lock = new ReentrantLock();
 
 	/**
 	 * Create a new DisplayedGraph.
 	 * @param snapColl The reference to the snapshot collection. 
 	 * @param linkToCss The link to the graphstream css file.
+	 * @param layout 
 	 */
 	public DisplayedGraph(SnapshotsCollection snapColl, String linkToCss) {
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
@@ -70,191 +64,124 @@ public class DisplayedGraph implements Serializable {
 	 * Load a graph from the snapshot number. 
 	 * @param snapNumber The number of the snapshot to be displayed.
 	 */
-	public synchronized boolean loadGraph(long snapNumber) {
+	public synchronized void loadGraph(long snapNumber) {
 		mapValues = new HashMap<Entity,Double>();
 		currentSnapNumber = snapNumber;
 		Snapshot s = snapColl.getSnaptshot(snapNumber);
-		boolean ret = true;
+		
 		if (s != null) {
-			/* Retrait des noeuds */
-			Iterator<Node> it = graph.getNodeIterator();
-			List<String> toRemove = new ArrayList<String>();
-			while (it.hasNext()) {
-				String nodeName = it.next().getId();
-				if (s.getEntity(nodeName) == null) {
-					toRemove.add(nodeName);
-				}
-			}
-			for(String str : toRemove){
-				graph.removeNode(str);
-			}
+			removeEntitiesToGraphFromSnapshot(s);
+			addEntitiesToGraphView(s);
+		}
+		refreshColor();
+	}
 
-			/* Retrait des liens */
-			Iterator<Edge> it2 = graph.getEdgeIterator();
-			toRemove = new ArrayList<String>();
-			while (it2.hasNext()) {
-				String nodeName = it2.next().getId();
-				if (s.getRelation(nodeName) == null) {
-					toRemove.add(nodeName);
-				}
+	/**
+	 * All entities exiting in snapshot but not found in graph  are created.
+	 * */
+	private void addEntitiesToGraphView(Snapshot s) {
+		/* Ajout des noeuds */
+		for (Entity snapshotEntity : s.getEntityList()) {
+			Node gsNode = graph.getNode(snapshotEntity.getName());
+			//new node in graph
+			if (gsNode == null) {
+				gsNode = graph.addNode(snapshotEntity.getName());
+				gsNode.addAttribute("ui.label", snapshotEntity.getName());
+				gsNode.addAttribute("ui.class", snapshotEntity.getType());
+				setNodeAttributes(snapshotEntity, gsNode);
+			} else {
+				//attributes update
+				gsNode.addAttribute("ui.class", snapshotEntity.getType());
+				setNodeAttributes(snapshotEntity, gsNode);
 			}
-			for(String str : toRemove){
-				graph.removeEdge(str);
-			}
+		}
 
-			/* Ajout des noeuds */
-			for (Entity a : s.getEntityList()) {
-				Node n = graph.getNode(a.getName());
-				if (n == null) {
-					Node na = graph.addNode(a.getName());
-					na.addAttribute("ui.class", a.getType());
-					na.addAttribute("ui.label", a.getName());
-					for(String str : a.getAttributes().keySet()){
-						for(Attribute att : a.getAttributes().get(str)){
-							if(att.getValue() instanceof Double){
-								/*if(((Double)att.getValue()) > 100)
-									graph.getNode(a.getName()).addAttribute("ui.color", 1);
-								else
-									graph.getNode(a.getName()).addAttribute("ui.color", ((Double)att.getValue())/100);	*/
-								mapValues.put(a, (Double)att.getValue());
-							}
-						}
-					}
-					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
-						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
-						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
-						ret = false;
-						autoLayout = false;
-					}
-					else{
-						if(!autoLayout){
-							graph.getNode(a.getName()).setAttribute("x", 0);
-							graph.getNode(a.getName()).setAttribute("y", 0);
-						}
-					}
-				} else {
-					n.setAttribute("ui.class", a.getType());
-					for(String str : a.getAttributes().keySet()){
-						for(Attribute att : a.getAttributes().get(str)){
-							if(att.getValue() instanceof Double){
-								/*if(((Double)att.getValue()) > 100)
-										graph.getNode(a.getName()).setAttribute("ui.color", 1);
-									else
-										graph.getNode(a.getName()).setAttribute("ui.color", ((Double)att.getValue())/100);	*/
-								mapValues.put(a, (Double)att.getValue());
-							}
-						}
-					}
-
-					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
-						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
-						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
-						ret = false;
-						autoLayout = false;
-					}
-					else{
-						if(!autoLayout){
-							graph.getNode(a.getName()).setAttribute("x", 0);
-							graph.getNode(a.getName()).setAttribute("y", 0);
-						}
-					}
-				}
-			}
-
-			/* Ajout des liens */
-			for (Relation r : s.getRelations()) {
-				if (graph.getEdge(r.getName()) == null) {
-					graph.addEdge(r.getName(), r.getA().getName(), r.getB().getName(), r.isDirectional());
-					graph.getEdge(r.getName()).addAttribute("ui.class", r.getType());
-				} else {
-					if (!graph.getEdge(r.getName()).getAttribute("ui.class").equals(r.getType())) {
-						graph.getEdge(r.getName()).setAttribute("ui.class", r.getType());
-					}
+		/* Ajout des liens */
+		for (Relation r : s.getRelations()) {
+			if (graph.getEdge(r.getName()) == null) {
+				graph.addEdge(r.getName(), r.getA().getName(), r.getB().getName(), r.isDirectional());
+				graph.getEdge(r.getName()).addAttribute("ui.class", r.getType());
+			} else {
+				if (!graph.getEdge(r.getName()).getAttribute("ui.class").equals(r.getType())) {
+					graph.getEdge(r.getName()).setAttribute("ui.class", r.getType());
 				}
 			}
 		}
-		refreshColor();
-		return ret;
+	}
+
+
+	private void setNodeAttributes(Entity snapshotEntity, Node gsNode) {
+		
+		for(String str : snapshotEntity.getAttributes().keySet()){
+			for(Attribute att : snapshotEntity.getAttributes().get(str)){
+				if(att.getValue() instanceof Double){
+					/*if(((Double)att.getValue()) > 100)
+						graph.getNode(a.getName()).addAttribute("ui.color", 1);
+					else
+						graph.getNode(a.getName()).addAttribute("ui.color", ((Double)att.getValue())/100);	*/
+					mapValues.put(snapshotEntity, (Double)att.getValue());
+				}
+			}
+		}
+		
+		//if the entity position isn't the default value => it's the user position ! => the auto layout not move it ! 
+		if(snapshotEntity.getCoorX() != -10000.0 && snapshotEntity.getCoorY() != -10000.0){
+			gsNode.addAttribute("layout.frozen");
+			gsNode.setAttribute("x", snapshotEntity.getCoorX());
+			gsNode.setAttribute("y", snapshotEntity.getCoorY());
+		}
+	}
+
+	/**
+	 * All entities exiting in graph but not found in snapshot are removed.
+	 * */
+	private void removeEntitiesToGraphFromSnapshot(Snapshot s) {
+		/* Retrait des noeuds */
+		Iterator<Node> it = graph.getNodeIterator();
+		List<String> toRemove = new ArrayList<String>();
+		while (it.hasNext()) {
+			String nodeName = it.next().getId();
+			if (s.getEntity(nodeName) == null) {
+				toRemove.add(nodeName);
+			}
+		}
+		for(String str : toRemove){
+			graph.removeNode(str);
+		}
+
+		/* Retrait des liens */
+		Iterator<Edge> it2 = graph.getEdgeIterator();
+		toRemove = new ArrayList<String>();
+		while (it2.hasNext()) {
+			String nodeName = it2.next().getId();
+			if (s.getRelation(nodeName) == null) {
+				toRemove.add(nodeName);
+			}
+		}
+		for(String str : toRemove){
+			graph.removeEdge(str);
+		}
 	}
 
 	public boolean viewSnapshot(Snapshot s){
 		boolean ret = true;
 		if (s != null) {
-			/* Retrait des noeuds */
-			Iterator<Node> it = graph.getNodeIterator();
-			while (it.hasNext()) {
-				String nodeName = it.next().getId();
-				if (s.getEntity(nodeName) == null) {
-					graph.removeNode(nodeName);
-				}
-			}
-
-			/* Retrait des liens */
-			Iterator<Edge> it2 = graph.getEdgeIterator();
-			while (it2.hasNext()) {
-				String nodeName = it2.next().getId();
-				if (s.getRelation(nodeName) == null) {
-					graph.removeEdge(nodeName);
-				}
-			}
+			removeEntitiesToGraphFromSnapshot(s);
 
 			/* Ajout des noeuds */
-			for (Entity a : s.getEntityList()) {
-				Node n = graph.getNode(a.getName());
-				if (n == null) {
-					graph.addNode(a.getName());
-					graph.getNode(a.getName()).addAttribute("ui.class", a.getType());
-					graph.getNode(a.getName()).addAttribute("ui.label", a.getName());
-					for(String str : a.getAttributes().keySet()){
-						for(Attribute att : a.getAttributes().get(str)){
-							if(att.getValue() instanceof Double){
-								/*if(((Double)att.getValue()) > 100)
-									graph.getNode(a.getName()).addAttribute("ui.color", 1);
-								else
-									graph.getNode(a.getName()).addAttribute("ui.color", ((Double)att.getValue())/100);	*/
-								mapValues.put(a, (Double)att.getValue());
-							}
-						}
-					}
-					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
-						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
-						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
-						ret = false;
-						autoLayout = false;
-					}
-					else{
-						if(!autoLayout){
-							graph.getNode(a.getName()).setAttribute("x", 0);
-							graph.getNode(a.getName()).setAttribute("y", 0);
-						}
-					}
+			for (Entity snapshotEntity : s.getEntityList()) {
+				Node gsNode = graph.getNode(snapshotEntity.getName());
+				if (gsNode == null) {
+					gsNode = graph.addNode(snapshotEntity.getName());
+					gsNode.addAttribute("ui.label", snapshotEntity.getName());
+					gsNode.addAttribute("ui.class", snapshotEntity.getType());
+					setNodeAttributes(snapshotEntity, gsNode);
+		
 				} else {
-					if (!n.getAttribute("ui.class").equals(a.getType())) {
-						n.setAttribute("ui.class", a.getType());
+					if (!gsNode.getAttribute("ui.class").equals(snapshotEntity.getType())) {
+						gsNode.setAttribute("ui.class", snapshotEntity.getType());
 					}
-					for(String str : a.getAttributes().keySet()){
-						for(Attribute att : a.getAttributes().get(str)){
-							if(att.getValue() instanceof Double){
-								/*if(((Double)att.getValue()) > 100)
-									graph.getNode(a.getName()).setAttribute("ui.color", 1);
-								else
-									graph.getNode(a.getName()).setAttribute("ui.color", ((Double)att.getValue())/100);*/
-								mapValues.put(a, (Double)att.getValue());
-							}
-						}
-					}
-					if(a.getCoorX() != -10000.0 && a.getCoorY() != -10000.0){
-						graph.getNode(a.getName()).setAttribute("x", a.getCoorX());
-						graph.getNode(a.getName()).setAttribute("y", a.getCoorY());
-						ret = false;
-						autoLayout = false;
-					}
-					else{
-						if(!autoLayout){
-							graph.getNode(a.getName()).setAttribute("x", 0);
-							graph.getNode(a.getName()).setAttribute("y", 0);
-						}
-					}
+					setNodeAttributes(snapshotEntity, gsNode);
 				}
 			}
 

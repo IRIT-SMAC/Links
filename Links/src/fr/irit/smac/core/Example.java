@@ -59,6 +59,10 @@ public class Example {
 		// a.addOneAttribute("Domain", new AVRT("VRange1", new AVT("Up", 1, 0),
 		// new AVT("Down", 1, -5), 10, -10));
 
+		s2.addEntity("entityPost1", "Positioned", 10, 10);
+		s2.addEntity("entityPost2", "Positioned", 10, 15);
+		s2.addEntity("entityPost3", "Positioned", 15, 15);
+		s2.addEntity("entityPost4", "Positioned", 15, 10);
 		b = s2.addEntity("Rufus", "Dog");
 		s2.addRelation("Toto", "Rufus", "TotoPossedeRufus", false, "possede");
 
